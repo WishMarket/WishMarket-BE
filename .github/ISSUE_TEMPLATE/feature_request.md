@@ -7,22 +7,22 @@ assignees: ''
 
 ---
 
-##  Description
+##  이슈 내용
 > 이슈 내용 작성
 
 <br>
 
-##  To-do
+##  작업 사항
 - [ ] 해당 이슈의 작업사항
 
 <br>
 
-##  Related Issues
-- #ISSUE_NUMBER
+##  관련 이슈
+- #이슈 번호
 
 <br>
 
-## ETC
-- 기타사항
+## 기타사항
+
 
 <br>
