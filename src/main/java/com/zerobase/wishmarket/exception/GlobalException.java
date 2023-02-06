@@ -3,13 +3,12 @@ package com.zerobase.wishmarket.exception;
 import lombok.Getter;
 
 @Getter
-public class GlobalException extends RuntimeException {
+public class GlobalException extends RuntimeException{
 
-    private final GlobalErrorCode errorCode;
+    private final ErrorCode errorCode;
 
-    public GlobalException(GlobalErrorCode errorCode) {
-        super(errorCode.getDetail());
-        this.errorCode = errorCode;
+    protected GlobalException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCode=errorCode;
     }
-
 }
