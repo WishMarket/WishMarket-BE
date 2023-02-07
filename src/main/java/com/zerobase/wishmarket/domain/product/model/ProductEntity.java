@@ -5,23 +5,20 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.envers.AuditOverride;
-import org.hibernate.envers.Audited;
 
-@Entity
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
-@Audited
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
-public class Product extends BaseEntity {
+@Entity
+public class ProductEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
