@@ -1,0 +1,79 @@
+package com.zerobase.wishmarket.domain.user.components;
+
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.CANNOT_FIND_MAIL_TEMPLATE;
+
+import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
+import com.zerobase.wishmarket.domain.user.exception.UserException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class MailComponents {
+
+    @Value(value = "${spring.mail.username}")
+    private String fromEmail;
+
+    @Value(value = "${server.host}")
+    private String serverHost;
+
+    private final JavaMailSender mailSender;
+    private final ResourceLoader resourceLoader;
+
+    private void sendMail(String address, String subject, String message) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setSubject(subject);
+            helper.setText(message, true);
+            helper.setFrom(fromEmail);
+            helper.setTo(address);
+            mailSender.send(mimeMessage);
+
+        } catch (Exception ex) {
+            throw new UserException(UserErrorCode.MAIL_SEND_FAIL);
+        }
+    }
+
+
+    public void sendAuthCodeMail(String email, String authCode) {
+        ClassPathResource resource = (ClassPathResource) resourceLoader
+            .getResource("classpath:static/mailTemplate/AuthCodeMail.html");
+
+        try {
+            File file = resource.getFile();
+            FileReader reader = new FileReader(file, StandardCharsets.UTF_8);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String line = "";
+            StringBuilder html = new StringBuilder();
+            while ((line = bufferedReader.readLine()) != null) {
+                html.append(line);
+            }
+
+            bufferedReader.close();
+            reader.close();
+
+            html = new StringBuilder(
+                html.toString().replace("${authcode}", authCode));
+
+            this.sendMail(email, "회원 인증 메일", html.toString());
+        } catch (IOException ex) {
+            throw new UserException(CANNOT_FIND_MAIL_TEMPLATE);
+        }
+    }
+
+}
