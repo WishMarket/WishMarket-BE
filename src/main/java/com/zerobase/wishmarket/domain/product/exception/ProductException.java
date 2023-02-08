@@ -8,7 +8,7 @@ public class ProductException extends GlobalException {
 
     private final ProductErrorCode productErrorCode;
 
-    protected ProductException(ProductErrorCode errorCode) {
+    public ProductException(ProductErrorCode errorCode) {
         super(errorCode);
         this.productErrorCode = errorCode;
     }

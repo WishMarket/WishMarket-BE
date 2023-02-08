@@ -12,7 +12,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GlobalException.class)
     public ResponseEntity<ErrorResponse> handleServiceException(GlobalException e) {
-        ErrorResponse response = new ErrorResponse(e.getErrorCode().getCode(), e.getMessage());
+        ErrorResponse response = new ErrorResponse(e.getErrorCode().getErrorCode(), e.getMessage());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
