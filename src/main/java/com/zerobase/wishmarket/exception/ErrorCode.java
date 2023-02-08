@@ -1,8 +1,10 @@
 package com.zerobase.wishmarket.exception;
 
+import org.springframework.http.HttpStatus;
+
 public interface ErrorCode {
 
-    String getCode();
+    HttpStatus getErrorCode();
     
     String getMessage();
 
