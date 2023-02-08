@@ -1,10 +1,9 @@
 package com.zerobase.wishmarket.domain.user.model.entity;
 
+import com.zerobase.wishmarket.domain.user.model.type.UserRegistration;
 import com.zerobase.wishmarket.domain.user.model.type.UserRoles;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatus;
 import com.zerobase.wishmarket.entity.BaseEntity;
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,8 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,11 +43,12 @@ public class UserEntity extends BaseEntity {
 
     private Long pointPrice;
 
-    private String address;
-
     private String phone;
 
     private String profileImage; // 프로필 이미지 경로
+
+    @Enumerated(EnumType.STRING)
+    private UserRegistration userRegistration;
 
     @Enumerated(EnumType.STRING)
     private UserRoles userRole;
@@ -57,9 +56,9 @@ public class UserEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
-    // 1 : N Mapping
+    // 1 : 1 Mapping
 
     // 주소
-    @OneToMany(mappedBy = "userEntity", fetch = FetchType.LAZY)
-    private List<DeliveryAddress> addressList = new ArrayList<>();
+    @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
+    private DeliveryAddress deliveryAddress;
 }

@@ -8,16 +8,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.envers.AuditOverride;
 
 @Getter
 @Builder
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
@@ -32,9 +34,8 @@ public class DeliveryAddress extends BaseEntity {
 
     private String address;
 
-    // N : 1 Mapping relationship with user
-    @ManyToOne(fetch = FetchType.LAZY)
+    // 1 : 1 Mapping relationship with user
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
-
 }
