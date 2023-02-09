@@ -1,18 +1,17 @@
-package com.zerobase.wishmarket.domain.user.components;
+package com.zerobase.wishmarket.domain.auth.components;
 
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.CANNOT_FIND_MAIL_TEMPLATE;
+import static com.zerobase.wishmarket.domain.auth.exception.AuthErrorCode.CANNOT_FIND_MAIL_TEMPLATE;
 
-import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
-import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.auth.exception.AuthErrorCode;
+import com.zerobase.wishmarket.domain.auth.exception.AuthException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.ResourceLoader;
@@ -22,13 +21,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class MailComponents {
 
     @Value(value = "${spring.mail.username}")
     private String fromEmail;
-
-    @Value(value = "${server.host}")
-    private String serverHost;
 
     private final JavaMailSender mailSender;
     private final ResourceLoader resourceLoader;
@@ -44,7 +41,8 @@ public class MailComponents {
             mailSender.send(mimeMessage);
 
         } catch (Exception ex) {
-            throw new UserException(UserErrorCode.MAIL_SEND_FAIL);
+            log.error(ex.getMessage());
+            throw new AuthException(AuthErrorCode.MAIL_SEND_FAIL);
         }
     }
 
@@ -67,12 +65,11 @@ public class MailComponents {
             bufferedReader.close();
             reader.close();
 
-            html = new StringBuilder(
-                html.toString().replace("${authcode}", authCode));
+            html = new StringBuilder(html.toString().replace("${authcode}", authCode));
 
             this.sendMail(email, "회원 인증 메일", html.toString());
         } catch (IOException ex) {
-            throw new UserException(CANNOT_FIND_MAIL_TEMPLATE);
+            throw new AuthException(CANNOT_FIND_MAIL_TEMPLATE);
         }
     }
 

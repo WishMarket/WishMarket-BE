@@ -1,7 +1,4 @@
-package com.zerobase.wishmarket.domain.user.exception;
-
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
+package com.zerobase.wishmarket.domain.auth.exception;
 
 import com.zerobase.wishmarket.exception.ErrorCode;
 import lombok.Getter;
@@ -10,10 +7,11 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum UserErrorCode implements ErrorCode {
+public enum AuthErrorCode implements ErrorCode {
 
     /* 400 BAD_REQUEST : 잘못된 요청 */
 
+    INVALID_AUTH_CODE(HttpStatus.BAD_REQUEST, "잘못된 인증코드를 입력하였습니다."),
     /* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
 
     /* 404 NOT_FOUND : Resource 를 찾을 수 없음 */

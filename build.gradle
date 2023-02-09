@@ -38,6 +38,8 @@ dependencies {
     implementation 'org.springframework.data:spring-data-envers'
     implementation 'io.springfox:springfox-swagger-ui:3.0.0'
 
+    implementation 'org.apache.commons:commons-lang3'
+
 
     compileOnly 'org.projectlombok:lombok'
 
