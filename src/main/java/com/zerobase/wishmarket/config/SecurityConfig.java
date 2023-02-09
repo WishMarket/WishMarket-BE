@@ -21,7 +21,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .headers().frameOptions().disable()
                 .and()
                     .authorizeRequests()
-                    .antMatchers("/api/**").hasRole("USER")
+                    .antMatchers("/api/**").permitAll()
                 .and()
                     // logout 요청시 홈으로 이동 - 기본 logout url = "/logout"
                     .logout().logoutSuccessUrl("/")
