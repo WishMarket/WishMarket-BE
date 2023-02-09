@@ -19,14 +19,14 @@ import lombok.Setter;
 public class ProductLike {
 
     @Id
-    @Column(name = "prodcutId")
+    @Column(name = "productId")
     private Long productId;
 
     private int likes;
 
     @OneToOne
     @JoinColumn(name = "productId")
-    private ProductEntity productEntity;
+    private Product productEntity;
 
 
 

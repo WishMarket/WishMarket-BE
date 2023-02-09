@@ -9,6 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -23,10 +24,10 @@ import org.hibernate.envers.AuditOverride;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class ProductEntity extends BaseEntity  {
+public class Product extends BaseEntity  {
 
     @Id
-    @Column(name = "id")
+    @Column(name = "product_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
 
@@ -43,7 +44,8 @@ public class ProductEntity extends BaseEntity  {
 
     private Boolean isBest;
 
-    @OneToOne(mappedBy = "productEntity")
+    @OneToOne
+    @JoinColumn(name = "productLike_id")
     private ProductLike productLike;
 
 
