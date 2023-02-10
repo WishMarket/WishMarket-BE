@@ -1,8 +1,8 @@
 package com.zerobase.wishmarket.domain.user.model.entity;
 
-import com.zerobase.wishmarket.domain.user.model.type.UserRegistration;
-import com.zerobase.wishmarket.domain.user.model.type.UserRoles;
-import com.zerobase.wishmarket.domain.user.model.type.UserStatus;
+import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
+import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
+import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.entity.BaseEntity;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,6 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.AuditOverride;
 
 @Getter
@@ -25,6 +26,7 @@ import org.hibernate.envers.AuditOverride;
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@DynamicUpdate
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
 public class UserEntity extends BaseEntity {
@@ -48,13 +50,13 @@ public class UserEntity extends BaseEntity {
     private String profileImage; // 프로필 이미지 경로
 
     @Enumerated(EnumType.STRING)
-    private UserRegistration userRegistration;
+    private UserRegistrationType userRegistrationType;
 
     @Enumerated(EnumType.STRING)
-    private UserRoles userRole;
+    private UserRolesType userRole;
 
     @Enumerated(EnumType.STRING)
-    private UserStatus userStatus;
+    private UserStatusType userStatusType;
 
     // 1 : 1 Mapping
     // 주소
@@ -64,6 +66,11 @@ public class UserEntity extends BaseEntity {
     public UserEntity update(String name, String profileImage) {
         this.name = name;
         this.profileImage = profileImage;
+        return this;
+    }
+
+    public UserEntity changeStatus(UserStatusType status) {
+        this.userStatusType = status;
         return this;
     }
 }

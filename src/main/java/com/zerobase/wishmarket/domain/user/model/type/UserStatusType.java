@@ -1,5 +1,5 @@
 package com.zerobase.wishmarket.domain.user.model.type;
 
-public enum UserStatus {
+public enum UserStatusType {
     ACTIVE, INACTIVE, WITHDRAWAL
 }
