@@ -42,11 +42,13 @@ public class Product extends BaseEntity  {
 
     private String description;
 
-    private Boolean isBest;
 
     @OneToOne
-    @JoinColumn(name = "productLike_id")
-    private ProductLike productLike;
+    @JoinColumn(name = "product_id")
+    private ProductLikes productLikes;
 
+    public int getLikes() {
+        return productLikes.getLikes();
+    }
 
 }
