@@ -1,0 +1,74 @@
+name: WishMarket CI with Gradle
+
+on:
+  push:
+    branches: [ "deploy-ci-cd" ]
+
+# 설정 값
+# 리전, 버킷 이름, CodeDeploy 앱 이름, CodeDeploy 배포 그룹 이름
+env:
+  AWS_REGION : ap-northeast-2
+  S3_BUCKET_NAME: wishmarket
+  RESOURCE_PATH: ./src/main/resources/application.yaml
+  CODE_DEPLOY_APPLICATION_NAME: wishmarket-code-deploy
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: wishmarket-server
+
+jobs:
+  build:
+
+    runs-on: ubuntu.20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+        # [1]
+      - name: Set yaml file
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: ${{ env.RESOURCE_PATH }}
+        env:
+          override.value: ${{ secrets.DI_FROM_SECRET }}
+          # override.value: 'from deploy.yaml' <-- 이렇게 사용해도 주입이 된다.
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+        shell: bash
+
+        # Gradle로 빌드를 하기 위한 Step
+      - name: Build with Gradle
+        run: ./gradlew build
+        shell: bash
+
+        # Make zip file
+        # $GITHUB_SHA는 Git Action에서 제공해주는 환경 변수
+      - name: Make zip file
+        run: zip -r ./$GITHUB_SHA.zip .
+        shell: bash
+
+        # AWS 인증 - IAM 사용자 Access Key, Secret Key
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+        # 빌드 결과물 S3 버킷에 업로드
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
+
+        # [6]
+      - name: Code Deploy
+        run: |
+          aws deploy create-deployment \
+          --deployment-config-name CodeDeployDefault.AllAtOnce \
+          --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+          --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$GITHUB_SHA.zip
