@@ -1,5 +1,6 @@
 package com.zerobase.wishmarket.domain.product.model.entity;
 
+import com.zerobase.wishmarket.entity.BaseEntity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -8,15 +9,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.hibernate.envers.AuditOverride;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class Review {
+public class Review extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +29,6 @@ public class Review {
 
     private boolean isRecommend;
 
-    private Long ProductId;
+    private Long productId;
 
 }
