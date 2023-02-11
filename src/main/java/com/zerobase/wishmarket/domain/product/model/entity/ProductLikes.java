@@ -3,20 +3,20 @@ package com.zerobase.wishmarket.domain.product.model.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Builder
 @Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProductLike {
+public class ProductLikes {
 
     @Id
     @Column(name = "productId")
@@ -24,9 +24,6 @@ public class ProductLike {
 
     private int likes;
 
-    @OneToOne
-    @JoinColumn(name = "productId")
-    private Product productEntity;
 
 
 
