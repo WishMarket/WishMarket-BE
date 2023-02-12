@@ -17,7 +17,8 @@ import org.hibernate.envers.AuditOverride;
 @Builder
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class Review extends BaseEntity {
+
+public class Review extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
