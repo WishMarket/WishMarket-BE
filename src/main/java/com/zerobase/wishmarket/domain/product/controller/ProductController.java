@@ -40,5 +40,4 @@ public class ProductController {
         return ResponseEntity.ok().body(productService.getBestProducts());
     }
 
-
 }
