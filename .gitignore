@@ -39,3 +39,6 @@ out/
 *.log
 .logs/
 
+###application-oauth.properties###
+application-oauth.properties
+
