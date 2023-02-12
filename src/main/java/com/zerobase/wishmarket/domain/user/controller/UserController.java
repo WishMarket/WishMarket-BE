@@ -16,7 +16,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/social-sign-in")
+    @GetMapping("/sign-in/social")
     // 기존 : httpSession.getAttribute 로 가져오던 세션 정보
     // 수정 : 어느 컨트롤러에서든 @LoginUserInfo 를 사용하여 세션 정보 활용 가능
     public String oauthLoginInfo(Model model, @LoginUserInfo OAuthUserInfo user) {
@@ -29,7 +29,9 @@ public class UserController {
     }
 
     @PostMapping("/withdrawal")
-    public boolean userWithdrawal(@LoginUserInfo OAuthUserInfo user, @RequestBody String email) {
-        return userService.userWithdrawal(user, email);
+    public String userWithdrawal(@LoginUserInfo OAuthUserInfo user, @RequestBody String email) {
+        userService.userWithdrawal(user, email);
+        return "/logout";
     }
+
 }
