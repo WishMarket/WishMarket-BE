@@ -75,13 +75,12 @@ jobs:
         if: contains(github.ref, 'deploy-ci-cd')
         with:
           host: ${{ secrets.HOST_PROD }}
-          username: ec2-user
-          key: ${{ secrets.PRIVATE_KEY }}
-          envs: GITHUB_SHA
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: 22
           script: |
-            sudo docker rm -f $(docker ps -qa)
-            sudo docker pull ${{ secrets.DOCKER_REPO }}/wishmarket-prod
-            sudo docker run -p 8080:8080 ${{ secrets.DOCKER_REPO }}/wishmarket-prod
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/wishmarket-prod
+            sudo docker run -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/wishmarket-prod
 #            docker-compose up -d
 #            docker image prune -f
 
