@@ -1,7 +1,7 @@
 package com.zerobase.wishmarket.domain.user.controller;
 
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
-import com.zerobase.wishmarket.domain.user.model.dto.UserDto;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailDto;
 import com.zerobase.wishmarket.domain.user.service.UserSignUpService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class UserController {
     private final UserSignUpService userSignUpService;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<UserDto> signUpEmail(@RequestBody @Valid SignUpForm form) {
+    public ResponseEntity<SignUpEmailDto> signUpEmail(@RequestBody @Valid SignUpForm form) {
         return ResponseEntity.ok(userSignUpService.signUp(form));
     }
 

@@ -1,7 +1,7 @@
 package com.zerobase.wishmarket.domain.user.model.entity;
 
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
-import com.zerobase.wishmarket.domain.user.model.dto.UserDto;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailDto;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
@@ -71,21 +71,6 @@ public class UserEntity extends BaseEntity {
             .nickName(form.getNickName())
             .password(form.getPassword())
             .userRegistrationType(userRegistrationType)
-            .build();
-    }
-
-    public UserDto toUserDto(){
-        return UserDto.builder()
-            .id(this.userId)
-            .name(this.name)
-            .email(this.email)
-            .nickName(this.nickName)
-            .phone(this.phone)
-            .profileImage(this.profileImage)
-            .userRegistrationType(this.userRegistrationType)
-            .userStatusType(this.userStatusType)
-            .createdAt(this.getCreatedAt())
-            .modifiedAt(this.getModifiedAt())
             .build();
     }
 
