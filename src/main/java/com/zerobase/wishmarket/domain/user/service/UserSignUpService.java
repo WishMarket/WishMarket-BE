@@ -6,7 +6,7 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALI
 
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
-import com.zerobase.wishmarket.domain.user.model.dto.UserDto;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailDto;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
@@ -28,7 +28,7 @@ public class UserSignUpService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public UserDto signUp(SignUpForm form) {
+    public SignUpEmailDto signUp(SignUpForm form) {
         if (checkInvalidEmail(form.getEmail())) {
             throw new UserException(INVALID_EMAIL_FORMAT);
         }
@@ -49,7 +49,7 @@ public class UserSignUpService {
             if (userEntity.getUserStatusType() == UserStatusType.WITHDRAWAL) {
                 userEntity.setUserStatusType(UserStatusType.ACTIVE);
 
-                return userRepository.save(userEntity).toUserDto();
+                return SignUpEmailDto.from(userRepository.save(userEntity));
             }
 
         }
@@ -60,8 +60,10 @@ public class UserSignUpService {
 
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
 
-        return userRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL))
-            .toUserDto();
+        return SignUpEmailDto.from(
+            userRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL))
+        );
+
     }
 
 
@@ -77,7 +79,7 @@ public class UserSignUpService {
     }
 
     private boolean checkInvalidPassword(String password) {
-        return !Pattern.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$",password);
+        return !Pattern.matches("^.{8,}$", password);
     }
 
 
