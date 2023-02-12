@@ -57,8 +57,13 @@ public class UserEntity extends BaseEntity {
     private UserStatus userStatus;
 
     // 1 : 1 Mapping
-
     // 주소
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
+
+    public UserEntity update(String name, String profileImage) {
+        this.name = name;
+        this.profileImage = profileImage;
+        return this;
+    }
 }
