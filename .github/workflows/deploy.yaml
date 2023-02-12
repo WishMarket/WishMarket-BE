@@ -7,18 +7,22 @@ on:
 # 설정 값
 # 리전, 버킷 이름, CodeDeploy 앱 이름, CodeDeploy 배포 그룹 이름
 env:
-  AWS_REGION : ap-northeast-2
+  AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: wishmarket
   RESOURCE_PATH: ./src/main/resources/application.yaml
   CODE_DEPLOY_APPLICATION_NAME: wishmarket-code-deploy
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: wishmarket-server
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
-    runs-on: ubuntu.20.04
+    runs-on: ubuntu-latest
 
     steps:
+      # jdk setting
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -28,29 +32,55 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-        # [1]
-      - name: Set yaml file
-        uses: microsoft/variable-substitution@v1
+      ## gradle caching
+      - name: Gradle Caching
+        uses: actions/cache@v3
         with:
-          files: ${{ env.RESOURCE_PATH }}
-        env:
-          override.value: ${{ secrets.DI_FROM_SECRET }}
-          # override.value: 'from deploy.yaml' <-- 이렇게 사용해도 주입이 된다.
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      ## create application-prod.properties
+      - name: make application-prod.properties
+        if: contains(github.ref, 'main') # branch가 main 일 때
+        run: |
+          cd ./src/main/resources  
+          touch ./application-prod.properties
+          echo "${{ secrets.PROPERTIES_PROD }}" > ./application-prod.properties
         shell: bash
 
-        # Gradle로 빌드를 하기 위한 Step
+      ## gradle build
       - name: Build with Gradle
-        run: ./gradlew build
-        shell: bash
+        run: ./gradlew build -x test -x ktlintCheck -x ktlintTestSourceSetCheck -x ktlintMainSourceSetCheck -x ktlintKotlinScriptCheck
 
-        # Make zip file
-        # $GITHUB_SHA는 Git Action에서 제공해주는 환경 변수
-      - name: Make zip file
-        run: zip -r ./$GITHUB_SHA.zip .
-        shell: bash
+      ## docker build & push to production
+      - name: Docker build & push to prod
+        if: contains(github.ref, 'main')
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -f Dockerfile-prod -t ${{ secrets.DOCKER_REPO }}/wishmarket-prod .
+          docker push ${{ secrets.DOCKER_REPO }}/wishmarket-prod
+          
+      ## deploy to production
+      - name: Deploy to prod
+        uses: appleboy/ssh-action@master
+        id: deploy-prod
+        if: contains(github.ref, 'main')
+        with:
+          host: ${{ secrets.HOST_PROD }}
+          username: ec2-user
+          key: ${{ secrets.PRIVATE_KEY }}
+          envs: GITHUB_SHA
+          script: |
+            sudo docker rm -f $(docker ps -qa)
+            sudo docker pull ${{ secrets.DOCKER_REPO }}/wishmarket-prod
+            sudo docker run -p 8080:8080 ${{ secrets.DOCKER_REPO }}/wishmarket-prod
+#            docker-compose up -d
+#            docker image prune -f
+
 
         # AWS 인증 - IAM 사용자 Access Key, Secret Key
       - name: Configure AWS credentials
@@ -60,15 +90,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-        # 빌드 결과물 S3 버킷에 업로드
-      - name: Upload to S3
-        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
-
-        # [6]
-      - name: Code Deploy
-        run: |
-          aws deploy create-deployment \
-          --deployment-config-name CodeDeployDefault.AllAtOnce \
-          --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
-          --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$GITHUB_SHA.zip
+#        # 빌드 결과물 S3 버킷에 업로드
+#      - name: Upload to S3
+#        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
+#
+#        # [6]
+#      - name: Code Deploy
+#        run: |
+#          aws deploy create-deployment \
+#          --deployment-config-name CodeDeployDefault.AllAtOnce \
+#          --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+#          --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+#          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$GITHUB_SHA.zip
