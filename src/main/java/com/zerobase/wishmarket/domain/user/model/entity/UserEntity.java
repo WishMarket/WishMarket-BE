@@ -1,8 +1,10 @@
 package com.zerobase.wishmarket.domain.user.model.entity;
 
-import com.zerobase.wishmarket.domain.user.model.type.UserRegistration;
-import com.zerobase.wishmarket.domain.user.model.type.UserRoles;
-import com.zerobase.wishmarket.domain.user.model.type.UserStatus;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailDto;
+import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
+import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
+import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.entity.BaseEntity;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -48,22 +50,36 @@ public class UserEntity extends BaseEntity {
     private String profileImage; // 프로필 이미지 경로
 
     @Enumerated(EnumType.STRING)
-    private UserRegistration userRegistration;
+    private UserRegistrationType userRegistrationType;
 
     @Enumerated(EnumType.STRING)
-    private UserRoles userRole;
+    private UserRolesType userRoleType;
 
     @Enumerated(EnumType.STRING)
-    private UserStatus userStatus;
+    private UserStatusType userStatusType;
 
     // 1 : 1 Mapping
     // 주소
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
 
+    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType){
+        return UserEntity.builder()
+            .name(form.getName())
+            .email(form.getEmail())
+            .nickName(form.getNickName())
+            .password(form.getPassword())
+            .userRegistrationType(userRegistrationType)
+            .build();
+    }
+
+    public void setUserStatusType(UserStatusType userStatusType){
+        this.userStatusType = userStatusType;
+
     public UserEntity update(String name, String profileImage) {
         this.name = name;
         this.profileImage = profileImage;
         return this;
+
     }
 }
