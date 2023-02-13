@@ -106,9 +106,9 @@ public class ProductService {
     }
 
     //카테고리별 상품 조회
-    public Page<List<Product>> getProductByCategory(ProductCategory category,
+    public Page<Product> getProductByCategory(ProductCategory category,
         PageRequest pageRequest) {
-        Page<List<Product>> productList = productRepository.findAllByCategory(category,
+        Page<Product> productList = productRepository.findAllByCategory(category,
             pageRequest);
         return productList;
     }

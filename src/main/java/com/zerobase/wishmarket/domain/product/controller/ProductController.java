@@ -23,14 +23,14 @@ public class ProductController {
 
     //카테고리별 상품 조회
     @GetMapping("/category")
-    public Page<List<Product>> getProductListByCategory(
+    public Page<Product> getProductListByCategory(
         @RequestParam ProductCategory categories,
         @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         return ResponseEntity.ok()
-            .body(productService.getProductByCategory(categories, pageRequest))
-            .getBody();
+            .body(productService.getProductByCategory(categories, pageRequest)).getBody();
+
     }
 
 

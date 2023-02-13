@@ -39,7 +39,7 @@ class ProductServiceTest {
         PageRequest pageRequest = PageRequest.of(1, 12);
 
         for(ProductCategory category : ProductCategory.values()){
-            Page<List<Product>> productList = productRepository.findAllByCategory(category,
+            Page<Product> productList = productRepository.findAllByCategory(category,
                 pageRequest);
 
             if(productList.isEmpty()){
