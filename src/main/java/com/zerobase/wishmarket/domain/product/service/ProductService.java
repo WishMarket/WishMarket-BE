@@ -37,7 +37,7 @@ public class ProductService {
     //임시로 제품 정보 넣기, Batch로 서버 시작시 데이터 저장, 추후 변경
     public void addProduct() {
         for (ProductCategory category : ProductCategory.values()) {
-            for (int i = 0; i < 20; i++) {
+            for (int i = 1; i < 21; i++) {
                 Product product = Product.builder()
                     .name("제품" + i)
                     .productImage("제품" + i + "파일 경로")
@@ -54,21 +54,54 @@ public class ProductService {
                 productLikesRepository.save(productLikes);
             }
         }
+
+        //베스트 상품 등록을 위해 likes 수 몇개만 변경
+        for (Long i = 1L; i < 13L; i++) {
+            ProductLikes productLikes = productLikesRepository.findById(i).orElseThrow(()->new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+            productLikes.setLikes(10);
+        }
     }
 
     //베스트 상품 12개 업데이트
     public boolean updateBestProducts() {
 
-        //남아있던 정보 삭제
-        redisTemplate.delete(KEY_BEST_PRODUCTS);
-        List<ProductLikes> bestProductLikes = productLikesRepository.findTop12ByOrderByLikesDesc();
-
         setOperations = redisTemplate.opsForSet();
+
+        //베스트 상품을 삭제하기 전에, 상품 데이터에 isBest가 true인 데이터들을 false로 초기화
+        List<Product> products = productRepository.findAll();
+        for(Product product : products){
+            if(product.isBest() == true ){
+                product.setIsBestFalse();
+            }
+        }
+
+        //redis에 남아있던 베스트 상품 정보 삭제
+        redisTemplate.delete(KEY_BEST_PRODUCTS);
+
+
+        //Redis에 새로 저장할 베스트 상품 id 목록 업데이트
+        List<ProductLikes> bestProductLikes = productLikesRepository.findTop12ByOrderByLikesDesc();
 
         for (int i = 0; i < bestProductLikes.size(); i++) {
             setOperations.add(KEY_BEST_PRODUCTS,
                 Long.toString(bestProductLikes.get(i).getProductId()));
         }
+
+        Set<String> bestSets = setOperations.members(KEY_BEST_PRODUCTS);
+        Set<Long> bestListToLong = new HashSet<>();
+
+        //Long 타입으로 전환
+        for (String s : bestSets) {
+            bestListToLong.add(Long.valueOf(s));
+        }
+
+        //Redis에 저장된 베스트 상품id에 따라, 상품 데이터의 isBest = true로 변경
+        for (Long productId : bestListToLong) {
+            Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+            product.setIsBestTrue();
+        }
+
         return true;
     }
 
@@ -85,8 +118,8 @@ public class ProductService {
     public List<Product> getBestProducts() {
 
         //Redis에 저장되어있는 Best 상품에 대한 ID들을 가져옴
-        Set<String> bestSets= setOperations.members(KEY_BEST_PRODUCTS);
-        if(bestSets.isEmpty()){
+        Set<String> bestSets = setOperations.members(KEY_BEST_PRODUCTS);
+        if (bestSets.isEmpty()) {
             throw new ProductException(ProductErrorCode.BEST_PRODUCT_NOT_FOUND);
         }
 

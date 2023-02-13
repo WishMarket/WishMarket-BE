@@ -24,7 +24,7 @@ import org.hibernate.envers.AuditOverride;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class Product extends BaseEntity  {
+public class Product extends BaseEntity {
 
     @Id
     @Column(name = "product_id")
@@ -42,6 +42,8 @@ public class Product extends BaseEntity  {
 
     private String description;
 
+    private boolean isBest;
+
 
     @OneToOne
     @JoinColumn(name = "product_id")
@@ -50,5 +52,14 @@ public class Product extends BaseEntity  {
     public int getLikes() {
         return productLikes.getLikes();
     }
+
+    public void setIsBestFalse() {
+        this.isBest = false;
+    }
+
+    public void setIsBestTrue() {
+        this.isBest = true;
+    }
+
 
 }
