@@ -1,5 +1,5 @@
 package com.zerobase.wishmarket.domain.user.model.type;
 
-public enum UserRoles {
-    USER, ADMIN
+public enum UserStatusType {
+    ACTIVE, WITHDRAWAL
 }

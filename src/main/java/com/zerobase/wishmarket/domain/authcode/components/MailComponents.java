@@ -1,9 +1,9 @@
-package com.zerobase.wishmarket.domain.auth.components;
+package com.zerobase.wishmarket.domain.authcode.components;
 
-import static com.zerobase.wishmarket.domain.auth.exception.AuthErrorCode.CANNOT_FIND_MAIL_TEMPLATE;
+import static com.zerobase.wishmarket.domain.authcode.exception.AuthErrorCode.CANNOT_FIND_MAIL_TEMPLATE;
 
-import com.zerobase.wishmarket.domain.auth.exception.AuthErrorCode;
-import com.zerobase.wishmarket.domain.auth.exception.AuthException;
+import com.zerobase.wishmarket.domain.authcode.exception.AuthErrorCode;
+import com.zerobase.wishmarket.domain.authcode.exception.AuthException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
