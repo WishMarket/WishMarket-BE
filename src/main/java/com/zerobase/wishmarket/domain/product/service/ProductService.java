@@ -20,7 +20,6 @@ public class ProductService {
         if (!optionalProduct.isPresent()) {
             throw new ProductNotFoundException();
         }
-        Product product = optionalProduct.get();
-        return ProductDetailDto.of(product);
+        return ProductDetailDto.of(optionalProduct.get());
     }
 }
