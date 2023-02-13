@@ -23,6 +23,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // 인증되지 않은 사용자 접근에 대한 handler
 //    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    private final OAuthService oAuthService;
+    
     @Bean
     public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -38,6 +40,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .cors().disable() // cors 방지
             .formLogin().disable(); // 기본 로그인 페이지 없애기
 
+         http
+                .headers().frameOptions().disable()
+                .and()
+                    .authorizeRequests()
+                    .antMatchers("/api/**").permitAll()
+                .and()
+                    // logout 요청시 홈으로 이동 - 기본 logout url = "/logout"
+                    .logout().logoutSuccessUrl("/")
+                .and()
+                    // OAuth2 로그인 설정 시작점
+                    .oauth2Login()
+                    // OAuth2 로그인 성공 이후 사용자 정보를 가져올 때 설정 담당
+                    .userInfoEndpoint()
+                    // OAuth2 로그인 성공 시, 작업을 진행할 MemberService
+                    .userService(oAuthService);
         // Spring Security에서 session을 생성하거나 사용하지 않도록 설정
 //            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 

@@ -59,7 +59,6 @@ public class UserEntity extends BaseEntity {
     private UserStatusType userStatusType;
 
     // 1 : 1 Mapping
-
     // 주소
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
@@ -76,5 +75,11 @@ public class UserEntity extends BaseEntity {
 
     public void setUserStatusType(UserStatusType userStatusType){
         this.userStatusType = userStatusType;
+
+    public UserEntity update(String name, String profileImage) {
+        this.name = name;
+        this.profileImage = profileImage;
+        return this;
+
     }
 }

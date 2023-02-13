@@ -1,10 +1,16 @@
-package com.zerobase.wishmarket.domain.product.model;
+package com.zerobase.wishmarket.domain.product.model.entity;
 
+import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.entity.BaseEntity;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,9 +24,10 @@ import org.hibernate.envers.AuditOverride;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class ProductEntity extends BaseEntity {
+public class Product extends BaseEntity  {
 
     @Id
+    @Column(name = "product_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
 
@@ -28,11 +35,20 @@ public class ProductEntity extends BaseEntity {
 
     private String productImage;
 
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private ProductCategory category;
 
     private int price;
 
     private String description;
 
+
+    @OneToOne
+    @JoinColumn(name = "product_id")
+    private ProductLikes productLikes;
+
+    public int getLikes() {
+        return productLikes.getLikes();
+    }
 
 }
