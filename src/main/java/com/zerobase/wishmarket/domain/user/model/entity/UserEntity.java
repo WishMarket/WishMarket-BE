@@ -63,7 +63,7 @@ public class UserEntity extends BaseEntity {
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
 
-    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType){
+    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType) {
         return UserEntity.builder()
             .name(form.getName())
             .email(form.getEmail())
@@ -73,8 +73,9 @@ public class UserEntity extends BaseEntity {
             .build();
     }
 
-    public void setUserStatusType(UserStatusType userStatusType){
+    public void setUserStatusType(UserStatusType userStatusType) {
         this.userStatusType = userStatusType;
+    }
 
     public UserEntity update(String name, String profileImage) {
         this.name = name;

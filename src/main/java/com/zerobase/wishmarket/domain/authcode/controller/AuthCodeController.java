@@ -1,8 +1,8 @@
-package com.zerobase.wishmarket.domain.auth.controller;
+package com.zerobase.wishmarket.domain.authcode.controller;
 
-import com.zerobase.wishmarket.domain.auth.model.dto.AuthCodeMailForm;
-import com.zerobase.wishmarket.domain.auth.model.dto.AuthCodeVerifyForm;
-import com.zerobase.wishmarket.domain.auth.service.AuthService;
+import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeMailForm;
+import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeVerifyForm;
+import com.zerobase.wishmarket.domain.authcode.service.AuthCodeService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,19 +14,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth/email-auth")
-public class AuthController {
+public class AuthCodeController {
 
-    private final AuthService authService;
+    private final AuthCodeService authCodeService;
 
     @PostMapping
     public ResponseEntity<Void> authCodeMailSend(@RequestBody @Valid AuthCodeMailForm form){
-        authService.sendAuthCode(form);
+        authCodeService.sendAuthCode(form);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/code")
     public ResponseEntity<Void> authCodeVerify(@RequestBody @Valid AuthCodeVerifyForm form){
-        authService.authCodeVerify(form);
+        authCodeService.authCodeVerify(form);
         return ResponseEntity.ok().build();
     }
 }

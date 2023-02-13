@@ -2,8 +2,8 @@ package com.zerobase.wishmarket.domain.user.service;
 
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
-import com.zerobase.wishmarket.domain.user.model.type.OAuthAttributes;
-import com.zerobase.wishmarket.domain.user.repository.UserRepository;
+import com.zerobase.wishmarket.domain.user.model.dto.OAuthAttributes;
+import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -20,7 +20,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @Service
 public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
-    private final UserRepository userRepository;
+    private final UserAuthRepository userAuthRepository;
     private final HttpSession httpSession;
 
     @Override
@@ -48,10 +48,10 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
     }
 
     private UserEntity saveOrUpdate(OAuthAttributes attributes) {
-        UserEntity userEntity = userRepository.findByEmail(attributes.getEmail())
+        UserEntity userEntity = userAuthRepository.findByEmail(attributes.getEmail())
                 .map(entity -> entity.update(attributes.getName(), attributes.getProfileImage()))
                 .orElse(attributes.toEntity());
 
-        return userRepository.save(userEntity);
+        return userAuthRepository.save(userEntity);
     }
 }

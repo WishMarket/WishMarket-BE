@@ -1,13 +1,16 @@
-package com.zerobase.wishmarket.domain.auth.service;
+package com.zerobase.wishmarket.domain.authcode.service;
 
-import static com.zerobase.wishmarket.domain.auth.exception.AuthErrorCode.INVALID_AUTH_CODE;
+import static com.zerobase.wishmarket.domain.authcode.exception.AuthErrorCode.INVALID_AUTH_CODE;
+import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.AUTH_CODE_LENGTH;
+import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.KEY_PREFIX;
+import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.REDIS_AUTH_CODE_EXPIRE_TIME;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_KEY;
 
-import com.zerobase.wishmarket.client.RedisClient;
-import com.zerobase.wishmarket.domain.auth.components.MailComponents;
-import com.zerobase.wishmarket.domain.auth.exception.AuthException;
-import com.zerobase.wishmarket.domain.auth.model.dto.AuthCodeMailForm;
-import com.zerobase.wishmarket.domain.auth.model.dto.AuthCodeVerifyForm;
+import com.zerobase.wishmarket.common.redis.RedisClient;
+import com.zerobase.wishmarket.domain.authcode.components.MailComponents;
+import com.zerobase.wishmarket.domain.authcode.exception.AuthException;
+import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeMailForm;
+import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeVerifyForm;
 import com.zerobase.wishmarket.exception.GlobalException;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +19,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthCodeService {
 
-    private static final long REDIS_AUTH_CODE_EXPIRE_TIME = 1000 * 60 * 3; // 3분
-    private static final int AUTH_CODE_LENGTH = 6;
-    private static final String KEY_PREFIX = "auth_key:";
+
 
     private final MailComponents mailComponents;
     private final RedisClient redisClient;

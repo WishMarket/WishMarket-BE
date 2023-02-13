@@ -1,4 +1,4 @@
-package com.zerobase.wishmarket.domain.auth.exception;
+package com.zerobase.wishmarket.domain.authcode.exception;
 
 import com.zerobase.wishmarket.exception.ErrorCode;
 import lombok.Getter;

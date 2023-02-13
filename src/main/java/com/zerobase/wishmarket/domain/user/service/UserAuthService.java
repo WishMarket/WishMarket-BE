@@ -10,7 +10,7 @@ import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailDto;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
-import com.zerobase.wishmarket.domain.user.repository.UserRepository;
+import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class UserSignUpService {
+public class UserAuthService {
 
-    private final UserRepository userRepository;
+    private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -39,7 +39,7 @@ public class UserSignUpService {
 
         // 한번 탈퇴했던 회원이라면
         // UserStatus : withdrawal -> active
-        Optional<UserEntity> optionalUser = userRepository.findByEmailAndUserRegistrationType(form.getEmail(),
+        Optional<UserEntity> optionalUser = userAuthRepository.findByEmailAndUserRegistrationType(form.getEmail(),
             UserRegistrationType.EMAIL);
 
         if (optionalUser.isPresent()) {
@@ -49,7 +49,7 @@ public class UserSignUpService {
             if (userEntity.getUserStatusType() == UserStatusType.WITHDRAWAL) {
                 userEntity.setUserStatusType(UserStatusType.ACTIVE);
 
-                return SignUpEmailDto.from(userRepository.save(userEntity));
+                return SignUpEmailDto.from(userAuthRepository.save(userEntity));
             }
 
         }
@@ -61,7 +61,7 @@ public class UserSignUpService {
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
 
         return SignUpEmailDto.from(
-            userRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL))
+            userAuthRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL))
         );
 
     }
@@ -69,7 +69,7 @@ public class UserSignUpService {
 
     // 유저 Email + 가입 방식을 기반으로 중복 확인
     private boolean isEmailExist(String email) {
-        return userRepository.existsByEmailAndUserRegistrationType(
+        return userAuthRepository.existsByEmailAndUserRegistrationType(
             email,
             UserRegistrationType.EMAIL);
     }

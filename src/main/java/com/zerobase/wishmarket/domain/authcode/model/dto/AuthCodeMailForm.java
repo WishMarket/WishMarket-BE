@@ -1,4 +1,4 @@
-package com.zerobase.wishmarket.domain.auth.model.dto;
+package com.zerobase.wishmarket.domain.authcode.model.dto;
 
 import javax.validation.constraints.Email;
 import lombok.AllArgsConstructor;
