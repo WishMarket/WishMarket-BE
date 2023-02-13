@@ -1,12 +1,19 @@
 package com.zerobase.wishmarket.domain.user.service;
 
+import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_PREFIX;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWORD_DO_NOT_MATCH;
 
+import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
+import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
+import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
-import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailDto;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
@@ -26,9 +33,10 @@ public class UserAuthService {
 
     private final UserAuthRepository userAuthRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtAuthenticationProvider jwtProvider;
 
     @Transactional
-    public SignUpEmailDto signUp(SignUpForm form) {
+    public SignUpEmailResponse signUp(SignUpForm form) {
         if (checkInvalidEmail(form.getEmail())) {
             throw new UserException(INVALID_EMAIL_FORMAT);
         }
@@ -49,7 +57,7 @@ public class UserAuthService {
             if (userEntity.getUserStatusType() == UserStatusType.WITHDRAWAL) {
                 userEntity.setUserStatusType(UserStatusType.ACTIVE);
 
-                return SignUpEmailDto.from(userAuthRepository.save(userEntity));
+                return SignUpEmailResponse.from(userAuthRepository.save(userEntity));
             }
 
         }
@@ -60,12 +68,36 @@ public class UserAuthService {
 
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
 
-        return SignUpEmailDto.from(
+        return SignUpEmailResponse.from(
             userAuthRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL))
         );
 
     }
 
+    @Transactional
+    public SignInResponse signIn(SignInForm form) {
+        UserEntity user = userAuthRepository.findByEmailAndUserRegistrationType(
+                form.getEmail(),
+                UserRegistrationType.EMAIL
+            )
+            .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
+
+        validationPassword(form.getPassword(), user);
+        TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(user.getUserId());
+
+        return SignInResponse.builder()
+            .email(user.getEmail())
+            .name(user.getName())
+            .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+            .refreshToken(tokenSetDto.getRefreshToken())
+            .build();
+    }
+
+    private void validationPassword(String password, UserEntity user) {
+        if (!this.passwordEncoder.matches(password, user.getPassword())) {
+            throw new UserException(PASSWORD_DO_NOT_MATCH);
+        }
+    }
 
     // 유저 Email + 가입 방식을 기반으로 중복 확인
     private boolean isEmailExist(String email) {
