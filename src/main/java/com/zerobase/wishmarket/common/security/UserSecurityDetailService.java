@@ -7,6 +7,7 @@ import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,6 +25,11 @@ public class UserSecurityDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity user = this.userAuthRepository.findByEmailAndUserRegistrationType(email, UserRegistrationType.EMAIL)
             .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
-        return new SecurityUser(user);
+
+        return UserDetailsImpl.builder()
+            .userId(user.getUserId())
+            .password(user.getPassword())
+            .authorities(AuthorityUtils.createAuthorityList("ROLE_USER"))
+            .build();
     }
 }

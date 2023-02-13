@@ -2,8 +2,13 @@ package com.zerobase.wishmarket.common.jwt;
 
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_HEADER;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_PREFIX;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_ACCESS_TOKEN;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.INVALID_TOKEN;
 
 import com.zerobase.wishmarket.domain.user.service.UserAuthService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,14 +36,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = this.resolveTokenFromRequest(request);
 
-        if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token)) {
-            // 토큰 유효성 검증
-            Authentication auth = this.jwtProvider.getAuthentication(token);
+        try {
+            if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token)) {
+                // 토큰 유효성 검증
+                Authentication auth = this.jwtProvider.getAuthentication(token);
 
-            // Security Context 에 인증 정보 넣기
-            SecurityContextHolder.getContext().setAuthentication(auth);
+                // Security Context 에 인증 정보 넣기
+                SecurityContextHolder.getContext().setAuthentication(auth);
 
-            log.info(String.format("[%s] -> %s", this.jwtProvider.getUserId(token), request.getRequestURI()));
+                log.info(String.format("[%s] -> %s", this.jwtProvider.getUserId(token), request.getRequestURI()));
+            }
+        }catch (ExpiredJwtException e){
+            log.error("JWT token is expired: {}", e.getMessage());
+            request.setAttribute(TOKEN_HEADER, EXPIRED_ACCESS_TOKEN);
+        }catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e){
+            request.setAttribute(TOKEN_HEADER, INVALID_TOKEN);
         }
 
         filterChain.doFilter(request, response);
