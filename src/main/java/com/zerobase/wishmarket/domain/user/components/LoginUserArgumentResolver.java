@@ -1,5 +1,6 @@
-package com.zerobase.wishmarket.domain.user.config;
+package com.zerobase.wishmarket.domain.user.components;
 
+import com.zerobase.wishmarket.domain.user.annotation.LoginUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;

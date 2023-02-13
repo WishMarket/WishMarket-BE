@@ -13,7 +13,7 @@ import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailDto;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
-import com.zerobase.wishmarket.domain.user.repository.UserRepository;
+import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,13 +27,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 class UserSignUpServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserAuthRepository userAuthRepository;
 
     @Spy
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private UserSignUpService userSignUpService;
+    private UserAuthService userSignUpService;
 
 
     @Test
@@ -48,13 +48,13 @@ class UserSignUpServiceTest {
 
         String encryptedPw = this.passwordEncoder.encode(form.getPassword());
 
-        given(userRepository.findByEmailAndUserRegistrationType(anyString(), any()))
+        given(userAuthRepository.findByEmailAndUserRegistrationType(anyString(), any()))
             .willReturn(Optional.empty());
 
-        given(userRepository.existsByEmailAndUserRegistrationType(anyString(), any()))
+        given(userAuthRepository.existsByEmailAndUserRegistrationType(anyString(), any()))
             .willReturn(false);
 
-        given(userRepository.save(any()))
+        given(userAuthRepository.save(any()))
             .willReturn(UserEntity.builder()
                 .userId(1L)
                 .email("test@naver.com")
@@ -83,7 +83,7 @@ class UserSignUpServiceTest {
             .password("won9975744!")
             .build();
 
-        given(userRepository.existsByEmailAndUserRegistrationType(anyString(), any()))
+        given(userAuthRepository.existsByEmailAndUserRegistrationType(anyString(), any()))
             .willReturn(true);
 
         //when

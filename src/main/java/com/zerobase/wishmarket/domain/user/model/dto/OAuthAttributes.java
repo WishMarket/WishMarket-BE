@@ -1,6 +1,8 @@
-package com.zerobase.wishmarket.domain.user.model.type;
+package com.zerobase.wishmarket.domain.user.model.dto;
 
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
+import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
+import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -41,7 +43,7 @@ public class OAuthAttributes {
                 .name((String) attributes.get("name"))
                 .email((String) attributes.get("email"))
                 .profileImage((String) attributes.get("picture"))
-                .userRegistration(String.valueOf(UserRegistration.GOOGLE))
+                .userRegistration(String.valueOf(UserRegistrationType.GOOGLE))
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .build();
@@ -54,7 +56,7 @@ public class OAuthAttributes {
                 .name((String) response.get("name"))
                 .email((String) response.get("email"))
                 .profileImage((String) response.get("picture"))
-                .userRegistration(String.valueOf(UserRegistration.NAVER))
+                .userRegistration(String.valueOf(UserRegistrationType.NAVER))
                 .attributes(response)
                 .nameAttributeKey(userNameAttributeName)
                 .build();
@@ -67,7 +69,7 @@ public class OAuthAttributes {
                 .name(name)
                 .email(email)
                 .profileImage(profileImage)
-                .userRole(UserRoles.USER)
+                .userRoleType(UserRolesType.USER)
                 .build();
     }
 }

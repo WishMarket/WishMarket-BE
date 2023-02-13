@@ -1,4 +1,4 @@
-package com.zerobase.wishmarket.client;
+package com.zerobase.wishmarket.common.redis;
 
 import static com.zerobase.wishmarket.exception.CommonErrorCode.REDIS_PUT_EMPTY_KEY;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.REDIS_PUT_FAIL;

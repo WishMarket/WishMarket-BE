@@ -1,4 +1,4 @@
-package com.zerobase.wishmarket.domain.user.config;
+package com.zerobase.wishmarket.domain.user.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
