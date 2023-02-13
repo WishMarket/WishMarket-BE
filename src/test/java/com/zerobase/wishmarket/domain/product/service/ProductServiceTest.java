@@ -1,6 +1,7 @@
 package com.zerobase.wishmarket.domain.product.service;
 
-import com.zerobase.wishmarket.domain.product.exception.ProductNotFoundException;
+import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
+import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,9 +27,6 @@ class ProductServiceTest {
 
     @InjectMocks
     private ProductService productService;
-
-    private Product product;
-    private ProductLikes productLikes;
 
     @Test
     void detail_ProductFound() {
@@ -64,12 +63,14 @@ class ProductServiceTest {
 
     @Test
     public void detail_ThrowProductNotFoundException() {
-        //given
-        Long productId = 500L;
-        given(productRepository.findById(productId)).willReturn(Optional.empty());
-        //then
-        assertThrows(ProductNotFoundException.class, () -> {
-            productService.detail(productId);
-        });
+        // given
+        Long productId = 1L;
+        given(productRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        // when
+        ProductException exception = assertThrows(ProductException.class, () -> productService.detail(productId));
+
+        // then
+        assertEquals(ProductErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());
     }
 }
