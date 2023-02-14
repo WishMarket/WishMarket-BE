@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
@@ -75,10 +74,10 @@ public class ProductService {
     public boolean updateBestProducts() {
 
         //기존의 베스트 상품의 isBest값을 false로 바꾸기
-        List<Product> oldBestproducts = productRepository.findAllByLikesIsTrue();
+        /*List<Product> oldBestproducts = productRepository.findAllByBestIsTrue();
         for(Product p : oldBestproducts){
             p.setIsBestFalse();
-        }
+        }*/
 
         //베스트 상품 삭제
         redisBestRepository.deleteAll();

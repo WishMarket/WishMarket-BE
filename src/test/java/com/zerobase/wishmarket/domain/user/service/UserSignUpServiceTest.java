@@ -5,12 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
-import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailDto;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
@@ -65,13 +64,12 @@ class UserSignUpServiceTest {
         // save에서 저장되는 실제 계좌는 captor 안으로 들어감.
 
         //when
-        SignUpEmailDto userDto = userSignUpService.signUp(form);
-
+        SignUpEmailResponse signUpEmailResponse = userSignUpService.signUp(form);
 
         //then
-        assertEquals(1L, userDto.getId());
-        assertEquals("test@naver.com", userDto.getEmail());
-        assertEquals("test", userDto.getName());
+        assertEquals(1L, signUpEmailResponse.getId());
+        assertEquals("test@naver.com", signUpEmailResponse.getEmail());
+        assertEquals("test", signUpEmailResponse.getName());
     }
 
     @Test
