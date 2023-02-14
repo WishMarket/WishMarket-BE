@@ -4,7 +4,6 @@ import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.AC
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_VALID_TIME;
 
 import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
-import com.zerobase.wishmarket.common.util.Aes256Util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -46,7 +45,7 @@ public class JwtAuthenticationProvider {
 
         Date accessTokenExpiredAt = new Date(now.getTime() + ACCESS_TOKEN_VALID_TIME);
         String accessToken = Jwts.builder()
-            .setSubject(Aes256Util.encrypt(String.valueOf(id)))
+            .setSubject(String.valueOf(id))
             .setIssuedAt(now)
             .setExpiration(accessTokenExpiredAt)
             .signWith(SignatureAlgorithm.HS512, secretKey)
@@ -64,7 +63,7 @@ public class JwtAuthenticationProvider {
 
         Date refreshTokenExpiredAt = new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME);
         String refreshToken = Jwts.builder()
-            .setSubject(Aes256Util.encrypt(String.valueOf(id)))
+            .setSubject(String.valueOf(id))
             .setIssuedAt(now)
             .setExpiration(refreshTokenExpiredAt)
             .signWith(SignatureAlgorithm.HS512, secretKey)
@@ -142,7 +141,7 @@ public class JwtAuthenticationProvider {
 
         // Spring에서 지원해주는 형태의 토큰으로 바꿔주기
         // userDetails와 권한 정보 넣어주기
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(Long.parseLong(this.getUserId(jwt)), "", userDetails.getAuthorities());
     }
 
 

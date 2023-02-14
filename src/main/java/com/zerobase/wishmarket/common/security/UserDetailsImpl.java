@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class UserDetailsImpl implements UserDetails {
 
     private Long userId;
-    private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
 
@@ -25,7 +24,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.password;
+        return null;
     }
 
     @Override

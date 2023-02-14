@@ -27,7 +27,6 @@ public class UserSecurityDetailService implements UserDetailsService {
 
         return UserDetailsImpl.builder()
             .userId(user.getUserId())
-            .password(user.getPassword())
             .authorities(AuthorityUtils.createAuthorityList("ROLE_USER"))
             .build();
     }
