@@ -1,7 +1,6 @@
 package com.zerobase.wishmarket.domain.user.model.entity;
 
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
-import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailDto;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
@@ -83,4 +82,6 @@ public class UserEntity extends BaseEntity {
         return this;
 
     }
+
+
 }
