@@ -3,7 +3,6 @@ package com.zerobase.wishmarket.domain.product.repository;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import java.util.List;
-import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,8 +13,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findAllByCategory(ProductCategory category, Pageable pageable);
 
+    List<Product> findAllByProductIdIn(List<Long> ids);
 
-    List<Product> findAllByProductIdIn(Set<Long> ids);
+    //List<Product> findAllByBestIsTrue();
 }
 
 
