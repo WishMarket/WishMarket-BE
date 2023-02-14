@@ -31,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     // 인증되지 않은 사용자 접근에 대한 handler
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
@@ -46,12 +46,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .csrf().disable() // csrf 방지
             .cors().configurationSource(this.corsConfigurationSource())
             .and()
-                // Spring Security에서 session을 생성하거나 사용하지 않도록 설정
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            // Spring Security에서 session을 생성하거나 사용하지 않도록 설정
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http
             .authorizeRequests()
-            .antMatchers("/api/**").permitAll()
+            .antMatchers("/api/auth/sign-up", "/api/auth/sign-in").permitAll()
+            .anyRequest().authenticated()
             .and()
             // logout 요청시 홈으로 이동 - 기본 logout url = "/logout"
             .logout().logoutSuccessUrl("/")
@@ -70,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // exception 처리
         http
             .exceptionHandling()
-            .authenticationEntryPoint(new JwtAuthenticationEntryPoint()); // 인증되지 않은 사용자 접근 시
+            .authenticationEntryPoint(jwtAuthenticationEntryPoint); // 인증되지 않은 사용자 접근 시
     }
 
     @Bean

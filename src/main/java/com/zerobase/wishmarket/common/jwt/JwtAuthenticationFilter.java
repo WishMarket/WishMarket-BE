@@ -5,7 +5,6 @@ import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TO
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_ACCESS_TOKEN;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.INVALID_TOKEN;
 
-import com.zerobase.wishmarket.domain.user.service.UserAuthService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -33,11 +32,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
-
-        String token = this.resolveTokenFromRequest(request);
-
         try {
-            if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token)) {
+            String token = this.resolveTokenFromRequest(request);
+
+            if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token, request)) {
                 // 토큰 유효성 검증
                 Authentication auth = this.jwtProvider.getAuthentication(token);
 
@@ -46,11 +44,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 log.info(String.format("[%s] -> %s", this.jwtProvider.getUserId(token), request.getRequestURI()));
             }
-        }catch (ExpiredJwtException e){
+        } catch (ExpiredJwtException e) {
             log.error("JWT token is expired: {}", e.getMessage());
-            request.setAttribute(TOKEN_HEADER, EXPIRED_ACCESS_TOKEN);
-        }catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e){
-            request.setAttribute(TOKEN_HEADER, INVALID_TOKEN);
+            request.setAttribute("exception", EXPIRED_ACCESS_TOKEN.getMessage());
+        } catch (SecurityException | MalformedJwtException e) {
+            log.info("Invalid JWT Token {}", e.getMessage());
+            request.setAttribute("exception", INVALID_TOKEN.getMessage());
+        } catch (UnsupportedJwtException e) {
+            log.info("Unsupported JWT Token {}", e.getMessage());
+            request.setAttribute("exception", INVALID_TOKEN.getMessage());
+        } catch (IllegalArgumentException e) {
+            log.info("Illegal Argument Exception {}", e.getMessage());
+            request.setAttribute("exception", INVALID_TOKEN.getMessage());
         }
 
         filterChain.doFilter(request, response);

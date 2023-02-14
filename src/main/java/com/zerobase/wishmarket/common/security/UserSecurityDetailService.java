@@ -1,10 +1,9 @@
 package com.zerobase.wishmarket.common.security;
 
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
-import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -22,9 +21,9 @@ public class UserSecurityDetailService implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        UserEntity user = this.userAuthRepository.findByEmailAndUserRegistrationType(email, UserRegistrationType.EMAIL)
-            .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
+    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
+        UserEntity user = this.userAuthRepository.findById(Long.valueOf(userId))
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
         return UserDetailsImpl.builder()
             .userId(user.getUserId())

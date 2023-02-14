@@ -8,8 +8,13 @@ import com.zerobase.wishmarket.common.util.Aes256Util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
+import java.util.Base64;
 import java.util.Date;
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,28 +34,45 @@ public class JwtAuthenticationProvider {
 
     private final UserDetailsService userDetailsService;
 
+    @PostConstruct
+    protected void init() {
+        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        log.info("비밀 키 : " + secretKey);
+    }
+
     // JWT AccessToken 생성
-    public String generateAccessToken(Long id) {
+    public TokenSetDto generateAccessToken(Long id) {
         Date now = new Date();
 
-        return Jwts.builder()
+        Date accessTokenExpiredAt = new Date(now.getTime() + ACCESS_TOKEN_VALID_TIME);
+        String accessToken = Jwts.builder()
             .setSubject(Aes256Util.encrypt(String.valueOf(id)))
             .setIssuedAt(now)
-            .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_VALID_TIME))
+            .setExpiration(accessTokenExpiredAt)
             .signWith(SignatureAlgorithm.HS512, secretKey)
             .compact();
+
+        return TokenSetDto.builder()
+            .accessToken(accessToken)
+            .accessTokenExpiredAt(accessTokenExpiredAt)
+            .build();
     }
 
     // JWT RefreshToken 생성
-    public String generateRefreshToken(Long id) {
+    public TokenSetDto generateRefreshToken(Long id) {
         Date now = new Date();
 
-        return Jwts.builder()
+        Date refreshTokenExpiredAt = new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME);
+        String refreshToken = Jwts.builder()
             .setSubject(Aes256Util.encrypt(String.valueOf(id)))
             .setIssuedAt(now)
-            .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME))
+            .setExpiration(refreshTokenExpiredAt)
             .signWith(SignatureAlgorithm.HS512, secretKey)
             .compact();
+        return TokenSetDto.builder()
+            .refreshToken(refreshToken)
+            .refreshTokenExpiredAt(refreshTokenExpiredAt)
+            .build();
     }
 
 
@@ -58,46 +80,60 @@ public class JwtAuthenticationProvider {
     public TokenSetDto generateTokenSet(Long id) {
         Date now = new Date();
 
+        log.info("현재 시간 : " + now);
+        log.info("Access Token 만료 시간 : " + new Date(now.getTime() + ACCESS_TOKEN_VALID_TIME));
+        Date accessTokenExpiredAt = new Date(now.getTime() + ACCESS_TOKEN_VALID_TIME);
         String accessToken = Jwts.builder()
-            .setSubject(Aes256Util.encrypt(String.valueOf(id)))
+            .setSubject(String.valueOf(id))
             .setIssuedAt(now)
-            .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_VALID_TIME))
+            .setExpiration(accessTokenExpiredAt)
             .signWith(SignatureAlgorithm.HS512, secretKey)
             .compact();
 
+        Date refreshTokenExpiredAt = new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME);
         String refreshToken = Jwts.builder()
-            .setSubject(Aes256Util.encrypt(String.valueOf(id)))
+            .setSubject(String.valueOf(id))
             .setIssuedAt(now)
-            .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME))
+            .setExpiration(refreshTokenExpiredAt)
             .signWith(SignatureAlgorithm.HS512, secretKey)
             .compact();
 
         return TokenSetDto.builder()
             .accessToken(accessToken)
+            .accessTokenExpiredAt(accessTokenExpiredAt)
             .refreshToken(refreshToken)
+            .refreshTokenExpiredAt(refreshTokenExpiredAt)
             .build();
     }
 
-    public boolean isValidationToken(String token) {
-        Claims claims = parseClaims(token);
-
-        // 만료 시간이 현재 시간보다 적을 때만 유효함.
-        return !claims.getExpiration().before(new Date());
+    public boolean isValidationToken(String token, HttpServletRequest request) {
+        try {
+            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            return true;
+        } catch(SecurityException | MalformedJwtException e) {
+            log.error("Invalid JWT signature");
+            return false;
+        } catch(UnsupportedJwtException e) {
+            log.error("Unsupported JWT token");
+            return false;
+        } catch(IllegalArgumentException e) {
+            log.error("JWT token is invalid");
+            return false;
+        }
     }
 
     // Jwt 토큰에서 회원 Id 얻기
     public String getUserId(String accessToken) {
         Claims claims = this.parseClaims(accessToken);
 
-        return Aes256Util.decrypt(claims.getSubject());
+        return claims.getSubject();
     }
 
     // Jwt 토큰 만료 기간 얻기
     public Date getExpiredDate(String token) {
-        Claims claims = this.parseClaims(token);
-
-        return claims.getExpiration();
+        return this.parseClaims(token).getExpiration();
     }
+
 
     // jwt토큰으로부터 인증 정보 가져오기
     public Authentication getAuthentication(String jwt) {
