@@ -15,8 +15,7 @@ public class ReviewController {
 
     @GetMapping("/api/reviews")
     public Page<Review> reviews(@RequestParam Long productId,
-                                @RequestParam("page") Integer page,
-                                @RequestParam("size") Integer size) {
-        return reviewService.reviews(productId, page, size);
+                                @RequestParam("page") Integer page) {
+        return reviewService.reviews(productId, page);
     }
 }

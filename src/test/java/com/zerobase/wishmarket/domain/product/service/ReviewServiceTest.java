@@ -51,13 +51,13 @@ public class ReviewServiceTest {
         reviewRepository.save(review3);
 
         // When
-        Page<Review> result = reviewService.reviews(1L, 1, 2);
+        Page<Review> result = reviewService.reviews(1L, 1);
 
         // Then
-        assertEquals(2, result.getSize());
+        assertEquals(12, result.getSize());
         assertEquals(0, result.getNumber());
         assertEquals(3, result.getTotalElements());
-        assertEquals(2, result.getTotalPages());
+        assertEquals(1, result.getTotalPages());
 
         List<Review> reviewList = result.getContent();
         assertEquals(1L, reviewList.get(0).getUserId().longValue());
