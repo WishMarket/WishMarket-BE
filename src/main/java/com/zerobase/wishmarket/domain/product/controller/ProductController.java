@@ -1,5 +1,6 @@
 package com.zerobase.wishmarket.domain.product.controller;
 
+import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.domain.product.service.ProductService;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,5 +42,15 @@ public class ProductController {
     public ResponseEntity<List<Product>> getBestProductList() {
         return ResponseEntity.ok().body(productService.getBestProducts());
     }
+
+    //상품 데이터 넣기
+    @PostMapping("/api/product/add")
+    public ResponseEntity addProduct(@ModelAttribute ProductInputForm productInputForm) {
+        productService.addProductData(productInputForm);
+        return ResponseEntity.ok().body("상품 정보가 정상적으로 업로드 되었습니다.");
+    }
+
+
+
 
 }
