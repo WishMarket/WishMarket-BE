@@ -37,6 +37,7 @@ public class ProductService {
 
     private final RedisBestRepository redisBestRepository;
 
+    private static final String KEY_BEST = "BEST_PRODUCTS";
     private static final Long KEY_BEST_PRODUCTS = 1L;
 
 
@@ -73,7 +74,13 @@ public class ProductService {
     //베스트 상품 N개 업데이트
     public boolean updateBestProducts() {
 
-        //베스트 상품
+        //기존의 베스트 상품의 isBest값을 false로 바꾸기
+        List<Product> oldBestproducts = productRepository.findAllByLikesIsTrue();
+        for(Product p : oldBestproducts){
+            p.setIsBestFalse();
+        }
+
+        //베스트 상품 삭제
         redisBestRepository.deleteAll();
 
         //문제의 정렬 부분
@@ -84,11 +91,17 @@ public class ProductService {
             ids.add(bestProductLikes.get(i).getProductId());
         }
 
+
+        //새로운 베스트 상품의 isBest값을 true로 바꾸기
+        List<Product> newBestproducts = productRepository.findAllByProductIdIn(ids);
+        for(Product product : newBestproducts){
+            product.setIsBestTrue();
+        }
+
         //redis repository에 넣기
-        List<Product> productList = productRepository.findAllByProductIdIn(ids);
         redisBestRepository.save(RedisBestProducts.builder()
             .id(KEY_BEST_PRODUCTS)
-            .products(productList)
+            .products(newBestproducts)
             .build());
 
         return true;
