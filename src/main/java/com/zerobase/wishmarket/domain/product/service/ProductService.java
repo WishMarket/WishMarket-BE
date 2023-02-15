@@ -75,7 +75,7 @@ public class ProductService {
     public boolean updateBestProducts() {
 
         //기존의 베스트 상품의 isBest값을 false로 바꾸기
-        List<Product> oldBestproducts = productRepository.findAllByLikesIsTrue();
+        List<Product> oldBestproducts = productRepository.findAllByIsBestIsTrue();
         for(Product p : oldBestproducts){
             p.setIsBestFalse();
         }

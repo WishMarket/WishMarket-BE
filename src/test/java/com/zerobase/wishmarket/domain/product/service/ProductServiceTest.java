@@ -82,7 +82,7 @@ class ProductServiceTest {
             e.printStackTrace();
         }
 
-        //베스트 상품이 변할수 있도록 Id가 30인 상품 Likes 값 조정
+        //베스트 상품이 변할수 있도록 특정 상품의 Likes 값 조정
         Optional<ProductLikes> optionalProductLikes = productLikesRepository.findByProductId(30L);
         if(optionalProductLikes.isEmpty()){
             throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);

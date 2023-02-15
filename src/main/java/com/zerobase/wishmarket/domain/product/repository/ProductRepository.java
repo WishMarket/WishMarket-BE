@@ -15,7 +15,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findAllByCategory(ProductCategory category, Pageable pageable);
 
 
-    List<Product> findAllByProductIdIn(Set<Long> ids);
+    List<Product> findAllByProductIdIn(List<Long> ids);
+
+
+    List<Product> findAllByIsBestIsTrue();
+
 }
 
 
