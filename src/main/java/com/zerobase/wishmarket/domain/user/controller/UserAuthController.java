@@ -24,7 +24,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class UserAuthController {
 
     private final UserAuthService userAuthService;
-    private final RedirectView redirectView;
+//    private final RedirectView redirectView;
 
     @PostMapping("/sign-up")
     public ResponseEntity<SignUpEmailResponse> signUpEmail(@RequestBody @Valid SignUpForm form) {
@@ -38,13 +38,13 @@ public class UserAuthController {
 
     @PostMapping("/sign-in/google")
     public ResponseEntity<?> signInGoogle(@LoginUserInfo OAuthUserInfo userInfo) {
-        redirectView.setUrl("/oauth2/authorization/google");
+//        redirectView.setUrl("/oauth2/authorization/google");
         return ResponseEntity.ok(userAuthService.signInSocial(userInfo));
     }
 
     @PostMapping("/sign-in/naver")
     public ResponseEntity<?> signInNaver(@LoginUserInfo OAuthUserInfo userInfo) {
-        redirectView.setUrl("/oauth2/authorization/naver");
+//        redirectView.setUrl("/oauth2/authorization/naver");
         return ResponseEntity.ok(userAuthService.signInSocial(userInfo));
     }
 }

@@ -2,11 +2,7 @@ package com.zerobase.wishmarket.domain.user.service;
 
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_PREFIX;
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWORD_DO_NOT_MATCH;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.*;
 
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
@@ -112,7 +108,7 @@ public class UserAuthService {
     public SignInResponse signInSocial(OAuthUserInfo userInfo) {
 
         UserEntity user = userAuthRepository.findByEmail(userInfo.getEmail())
-                .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
+                .orElseThrow(() -> new UserException(USER_NOT_FOUND));
         TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(userInfo.getUserId());
 
         // 작성된 날짜에서 현재 날짜를 빼고 밀리초로 나누면 지나간 시간(초)이 계산
