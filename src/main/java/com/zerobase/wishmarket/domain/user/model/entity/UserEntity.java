@@ -1,10 +1,14 @@
 package com.zerobase.wishmarket.domain.user.model.entity;
 
+import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.entity.BaseEntity;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,6 +16,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -62,6 +67,12 @@ public class UserEntity extends BaseEntity {
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
 
+    @OneToMany(mappedBy = "follower",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Follow> followerList = new ArrayList<>(); //내가 팔로우를 하는 유저들의 리스트
+
+    @OneToMany(mappedBy = "followee",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Follow> followeeList = new ArrayList<>(); //나를 팔로우 하는 유저들의 리스트
+
     public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType) {
         return UserEntity.builder()
             .name(form.getName())
@@ -71,6 +82,7 @@ public class UserEntity extends BaseEntity {
             .userRegistrationType(userRegistrationType)
             .build();
     }
+
 
     public void setUserStatusType(UserStatusType userStatusType) {
         this.userStatusType = userStatusType;
