@@ -67,6 +67,8 @@ public class UserEntity extends BaseEntity {
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
 
+    // 회원 가입 시 가입 정보 입력
+    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType, UserStatusType userStatusType) {
     @OneToMany(mappedBy = "follower",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Follow> followerList = new ArrayList<>(); //내가 팔로우를 하는 유저들의 리스트
 
@@ -80,6 +82,7 @@ public class UserEntity extends BaseEntity {
             .nickName(form.getNickName())
             .password(form.getPassword())
             .userRegistrationType(userRegistrationType)
+            .userStatusType(userStatusType)
             .build();
     }
 
