@@ -29,7 +29,7 @@ public class FollowService {
         // followId : follow를 받는 사람 (follower)
 
         // 자기 자신은 팔로우 불가
-        if(Objects.equals(userId, followId)){
+        if (Objects.equals(userId, followId)) {
             throw new FollowException(CANNOT_FOLLOW_YOURSELF);
         }
 
@@ -52,6 +52,9 @@ public class FollowService {
             .follower(hunterUser)
             .followee(preyUser)
             .build());
+
+        hunterUser.hasFollowing();
+        preyUser.hasFollowed();
 
         return true;
     }

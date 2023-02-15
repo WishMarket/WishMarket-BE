@@ -1,6 +1,7 @@
 package com.zerobase.wishmarket.domain.user.model.entity;
 
 import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
+import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
@@ -16,6 +17,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import lombok.AccessLevel;
@@ -67,15 +69,19 @@ public class UserEntity extends BaseEntity {
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
 
-    // 회원 가입 시 가입 정보 입력
-    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType, UserStatusType userStatusType) {
-    @OneToMany(mappedBy = "follower",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(nullable = true)
+    private FollowInfo followInfo;
+
+    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Follow> followerList = new ArrayList<>(); //내가 팔로우를 하는 유저들의 리스트
 
-    @OneToMany(mappedBy = "followee",fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Follow> followeeList = new ArrayList<>(); //나를 팔로우 하는 유저들의 리스트
 
-    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType) {
+    // 회원 가입 시 가입 정보 입력
+    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType,
+        UserStatusType userStatusType, FollowInfo followInfo) {
         return UserEntity.builder()
             .name(form.getName())
             .email(form.getEmail())
@@ -83,6 +89,7 @@ public class UserEntity extends BaseEntity {
             .password(form.getPassword())
             .userRegistrationType(userRegistrationType)
             .userStatusType(userStatusType)
+            .followInfo(followInfo)
             .build();
     }
 
@@ -95,7 +102,22 @@ public class UserEntity extends BaseEntity {
         this.name = name;
         this.profileImage = profileImage;
         return this;
+    }
 
+    public void hasFollowed() {
+        this.followInfo.followerCountPlus();
+    }
+
+    public void hasUnFollowed() {
+        this.followInfo.followerCountMinus();
+    }
+
+    public void hasFollowing() {
+        this.followInfo.followCountPlus();
+    }
+
+    public void hasUnFollowing() {
+        this.followInfo.followCountMinus();
     }
 
 

@@ -11,6 +11,8 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWO
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
 import com.zerobase.wishmarket.common.redis.RedisClient;
+import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
+import com.zerobase.wishmarket.domain.follow.repository.FollowInfoRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
@@ -36,6 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserAuthService {
 
     private final UserAuthRepository userAuthRepository;
+    private final FollowInfoRepository followInfoRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationProvider jwtProvider;
     private final RedisClient redisClient;
@@ -73,8 +77,16 @@ public class UserAuthService {
 
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
 
+        FollowInfo empthFollowInfo = FollowInfo.builder()
+            .followerCount(0L)
+            .followCount(0L)
+            .build();
+
+        followInfoRepository.save(empthFollowInfo);
+
         return SignUpEmailResponse.from(
-            userAuthRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL, UserStatusType.ACTIVE))
+            userAuthRepository.save(
+                UserEntity.of(form, UserRegistrationType.EMAIL, UserStatusType.ACTIVE, empthFollowInfo))
         );
 
     }
