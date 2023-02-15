@@ -126,8 +126,6 @@ public class UserAuthService {
                 .name(user.getName())
                 .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
                 .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
-                .refreshToken(tokenSetDto.getRefreshToken())
-                .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
                 .build();
     }
 
