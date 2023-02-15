@@ -2,7 +2,6 @@ package com.zerobase.wishmarket.domain.follow.controller;
 
 import com.zerobase.wishmarket.domain.follow.service.FollowService;
 import io.swagger.annotations.ApiOperation;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,17 +20,17 @@ public class FollowController {
 
     @ApiOperation("팔로우 누름")
     @PostMapping("/{followId}")
-    public Boolean followUser(@AuthenticationPrincipal Long userId, @PathVariable Long followId){
+    public Boolean followUser(@AuthenticationPrincipal Long userId, @PathVariable Long followId) {
         return followService.followUser(userId, followId);
     }
 
     @DeleteMapping("/{followId}")
-    public void deleteFollow(){
-
+    public Boolean unFollowUser(@AuthenticationPrincipal Long userId, @PathVariable Long followId) {
+        return followService.unFollowUser(userId, followId);
     }
 
     @GetMapping("/{followId}")
-    public void userFollowList(){
+    public void userFollowList() {
 
     }
 }
