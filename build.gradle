@@ -43,6 +43,8 @@ dependencies {
         exclude group: "org.slf4j", module: "slf4j-simple"
     }
 
+    // mariaDB
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.9'
 
     implementation 'org.springframework.data:spring-data-envers'
     implementation 'io.springfox:springfox-swagger-ui:3.0.0'
