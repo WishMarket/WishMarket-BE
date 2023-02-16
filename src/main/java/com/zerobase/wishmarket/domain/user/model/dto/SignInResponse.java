@@ -17,6 +17,4 @@ public class SignInResponse {
     private String name;
     private String accessToken;
     private String accessTokenExpiredAt;
-    private String refreshToken;
-    private String refreshTokenExpiredAt;
 }
