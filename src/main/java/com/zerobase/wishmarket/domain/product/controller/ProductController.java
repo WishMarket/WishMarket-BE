@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -44,13 +44,13 @@ public class ProductController {
     }
 
     //상품 데이터 넣기
-    @PostMapping("/api/product/add")
+    @PostMapping("/add")
     public ResponseEntity addProduct(@ModelAttribute ProductInputForm productInputForm) {
         productService.addProductData(productInputForm);
         return ResponseEntity.ok().body("상품 정보가 정상적으로 업로드 되었습니다.");
     }
 
-    @GetMapping("/api/product/{productId}/detail")
+    @GetMapping("/{productId}/detail")
     public ResponseEntity<?> productDetail(@PathVariable Long productId) {
         ProductDetailDto responseDto = productService.detail(productId);
         return ResponseEntity.ok().body(responseDto);
