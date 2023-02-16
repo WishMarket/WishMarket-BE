@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.domain.product.service;
 import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
 import com.zerobase.wishmarket.domain.product.model.entity.RedisBestProducts;
@@ -32,6 +33,7 @@ import org.springframework.util.FileCopyUtils;
 public class ProductService {
 
     private final ProductRepository productRepository;
+
     private final ProductLikesRepository productLikesRepository;
 
     private final RedisBestRepository redisBestRepository;
@@ -90,10 +92,9 @@ public class ProductService {
             ids.add(bestProductLikes.get(i).getProductId());
         }
 
-
         //새로운 베스트 상품의 isBest값을 true로 바꾸기
         List<Product> newBestproducts = productRepository.findAllByProductIdIn(ids);
-        for(Product product : newBestproducts){
+        for (Product product : newBestproducts) {
             product.setIsBestTrue();
         }
 
@@ -133,7 +134,8 @@ public class ProductService {
 
             String originalFilename = productInputForm.getImage().getOriginalFilename();
             String baseLocalPath = "src/main/java/com/zerobase/wishmarket/domain/product/Images";
-            saveFilename = getNewSaveFile(baseLocalPath, originalFilename, productInputForm.getCategoryCode());
+            saveFilename = getNewSaveFile(baseLocalPath, originalFilename,
+                productInputForm.getCategoryCode());
 
             try {
                 File newFile = new File(saveFilename);
@@ -187,6 +189,11 @@ public class ProductService {
 
         }
         return newFilename;
+    }
+
+    public ProductDetailDto detail(Long productId) {
+        return ProductDetailDto.of(productRepository.findById(productId).
+            orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND)));
     }
 
 }
