@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ProductErrorCode implements ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.BAD_REQUEST,"해당하는 상품이 존재하지 않습니다."),
+    BEST_PRODUCT_NOT_FOUND(HttpStatus.BAD_REQUEST, "베스트 상품을 불러오는데 실패하였습니다."),
+
 
     ;
 
