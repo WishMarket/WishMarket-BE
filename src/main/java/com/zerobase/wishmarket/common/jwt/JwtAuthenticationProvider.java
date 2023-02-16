@@ -36,7 +36,6 @@ public class JwtAuthenticationProvider {
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        log.info("비밀 키 : " + secretKey);
     }
 
     // JWT AccessToken 생성
