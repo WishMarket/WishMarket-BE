@@ -2,13 +2,22 @@ package com.zerobase.wishmarket.domain.user.service;
 
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_PREFIX;
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.*;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWORD_DO_NOT_MATCH;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
 import com.zerobase.wishmarket.common.redis.RedisClient;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
-import com.zerobase.wishmarket.domain.user.model.dto.*;
+import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
+import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
+import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
@@ -99,8 +108,6 @@ public class UserAuthService {
             .name(user.getName())
             .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
             .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
-            .refreshToken(tokenSetDto.getRefreshToken())
-            .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
             .build();
     }
 
@@ -108,7 +115,7 @@ public class UserAuthService {
     public SignInResponse signInSocial(OAuthUserInfo userInfo) {
 
         UserEntity user = userAuthRepository.findByEmail(userInfo.getEmail())
-                .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
         TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(userInfo.getUserId());
 
         // 작성된 날짜에서 현재 날짜를 빼고 밀리초로 나누면 지나간 시간(초)이 계산
@@ -116,17 +123,17 @@ public class UserAuthService {
 
         // redis에 refresh토큰 저장
         redisClient.put(
-                REFRESH_TOKEN_PREFIX + user.getUserId(),
-                tokenSetDto.getRefreshToken(),
-                TimeUnit.SECONDS,
-                expirationSeconds);
+            REFRESH_TOKEN_PREFIX + user.getUserId(),
+            tokenSetDto.getRefreshToken(),
+            TimeUnit.SECONDS,
+            expirationSeconds);
 
         return SignInResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
-                .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
-                .build();
+            .email(user.getEmail())
+            .name(user.getName())
+            .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+            .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
+            .build();
     }
 
 
