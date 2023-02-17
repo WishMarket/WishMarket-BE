@@ -37,10 +37,10 @@ public class AuthCodeService {
             redisClient.del(key);
         }
 
-        mailComponents.sendAuthCodeMail(form.getEmail(), authCode);
-
         // 메일 전송 성공 시 redis에 키 저장
         redisClient.put(key, authCode, TimeUnit.MILLISECONDS, REDIS_AUTH_CODE_EXPIRE_TIME);
+
+        mailComponents.sendAuthCodeMail(form.getEmail(), authCode);
     }
 
     public void authCodeVerify(AuthCodeVerifyForm form) {
