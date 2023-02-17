@@ -2,9 +2,14 @@ package com.zerobase.wishmarket.domain.wishList.service;
 
 import com.zerobase.wishmarket.domain.wishList.exception.WishListErrorCode;
 import com.zerobase.wishmarket.domain.wishList.exception.WishListException;
+import com.zerobase.wishmarket.domain.wishList.model.entity.RedisUserWishList;
 import com.zerobase.wishmarket.domain.wishList.model.entity.WishList;
+import com.zerobase.wishmarket.domain.wishList.repository.RedisUserWishListRepository;
 import com.zerobase.wishmarket.domain.wishList.repository.WishListRepository;
+
 import java.util.List;
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,39 +18,40 @@ import org.springframework.stereotype.Service;
 public class WishListService {
 
     private final WishListRepository wishListRepository;
+    private final RedisUserWishListRepository redisUserWishListRepository;
 
 
     public WishList addWishList(Long userId, Long productId) {
 
-        //사용자의 찜목록이 존재하는 경우, 이미 추가한 상품인지 확인
-        List<WishList> wishLists = wishListRepository.findAllByUserId(userId);
+        //사용자의 찜목록에 이미 추가한 상품인지 확인
+        List<WishList> userWishList = wishListRepository.findAllByUserId(userId);
 
-        if (wishLists.isEmpty()) {
-            for (WishList ws : wishLists) {
+        if (!userWishList.isEmpty()) {
+            for (WishList ws : userWishList) {
                 if (productId == ws.getProductId()) {
                     throw new WishListException(WishListErrorCode.ALREADY_PUT_WISHLIST_PRODUCT);
                 }
             }
         }
 
-        return wishListRepository.save(WishList.builder()
-            .userId(userId)
-            .productId(productId)
-            .build());
-    }
+        //추가할 위시리스트 저장
+        WishList wishList = wishListRepository.save(WishList.builder()
+                .userId(userId)
+                .productId(productId)
+                .build());
 
-    //페이징 처리 여부 필요
-    //redis 활용 고려
-    public List<WishList> getWishList(Long userId) {
-        return wishListRepository.findAllByUserId(userId);
-    }
+        userWishList.add(wishList);
 
 
-    public boolean deleteWishList(Long wishListId) {
-        WishList wishList = wishListRepository.findByWishListId(wishListId)
-            .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
-        wishListRepository.delete(wishList);
-        return true;
+        //레디스 업데이트
+        redisUserWishListRepository.save(RedisUserWishList.builder()
+                .id(userId)
+                .wishLists(userWishList)
+                .build());
+
+        return wishList;
     }
+
+
 
 }
