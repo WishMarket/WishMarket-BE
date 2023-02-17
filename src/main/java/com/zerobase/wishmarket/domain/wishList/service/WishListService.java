@@ -52,6 +52,15 @@ public class WishListService {
         return wishList;
     }
 
+    public List<WishList> getWishList(Long userId) {
+        Optional<RedisUserWishList> redisUserWishList = redisUserWishListRepository.findById(userId);
 
+        //해당 찜목록이 없다면 (사용자의 찜목록에 추가한 상품이 없다면)
+        if (redisUserWishList.isEmpty()) {
+            return null;
+        }
+
+        return redisUserWishList.get().getWishLists();
+    }
 
 }

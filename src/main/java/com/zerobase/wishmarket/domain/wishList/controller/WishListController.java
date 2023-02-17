@@ -35,6 +35,10 @@ public class WishListController {
                 .body(wishListService.addWishList(userId, productId));
     }
 
-
+    //위시리스트 조회
+    @GetMapping
+    public ResponseEntity<List<WishList>> getWishList(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok().body(wishListService.getWishList(userId));
+    }
 
 }
