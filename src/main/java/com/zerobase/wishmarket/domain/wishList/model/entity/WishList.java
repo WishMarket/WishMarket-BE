@@ -5,15 +5,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 import org.hibernate.envers.AuditOverride;
 import org.springframework.lang.Nullable;
 
 @Builder
 @AllArgsConstructor
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
@@ -30,9 +29,5 @@ public class WishList extends BaseEntity {
 
     private Long productId;
 
-
-    public Long getProductId(){
-        return this.productId;
-    }
 
 }
