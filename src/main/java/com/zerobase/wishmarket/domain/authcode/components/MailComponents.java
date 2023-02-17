@@ -49,7 +49,7 @@ public class MailComponents {
 
     public void sendAuthCodeMail(String email, String authCode) {
         ClassPathResource resource = (ClassPathResource) resourceLoader
-            .getResource("classpath:static/mailTemplate/AuthCodeMail.html");
+            .getResource("classpath:static/AuthCodeMail.html");
 
         try {
             File file = resource.getFile();
