@@ -3,19 +3,12 @@ package com.zerobase.wishmarket.domain.wishList.controller;
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.domain.wishList.model.entity.WishList;
 import com.zerobase.wishmarket.domain.wishList.service.WishListService;
-
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/wishlist")
@@ -39,6 +32,15 @@ public class WishListController {
     @GetMapping
     public ResponseEntity<List<WishList>> getWishList(@AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(wishListService.getWishList(userId));
+    }
+
+    //위시리스트 삭제
+    @DeleteMapping
+    public ResponseEntity<Boolean> deleteWishList(@AuthenticationPrincipal Long userId,
+                                                  @RequestParam Long wishListId) {
+        return ResponseEntity.ok()
+                .body(wishListService.deleteWishList(userId, wishListId));
+
     }
 
 }

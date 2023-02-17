@@ -6,12 +6,11 @@ import com.zerobase.wishmarket.domain.wishList.model.entity.RedisUserWishList;
 import com.zerobase.wishmarket.domain.wishList.model.entity.WishList;
 import com.zerobase.wishmarket.domain.wishList.repository.RedisUserWishListRepository;
 import com.zerobase.wishmarket.domain.wishList.repository.WishListRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
@@ -61,6 +60,25 @@ public class WishListService {
         }
 
         return redisUserWishList.get().getWishLists();
+    }
+
+    public boolean deleteWishList(Long userId, Long wishListId) {
+        WishList wishList = wishListRepository.findByWishListId(wishListId)
+                .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
+
+        RedisUserWishList redisUserWishList = redisUserWishListRepository.findById(userId)
+                .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
+
+        wishListRepository.delete(wishList);
+
+        //레디스도 업데이트
+        List<WishList> updatedUserWishList = wishListRepository.findAllByUserId(userId);
+        redisUserWishListRepository.save(RedisUserWishList.builder()
+                .id(userId)
+                .wishLists(updatedUserWishList)
+                .build());
+
+        return true;
     }
 
 }

@@ -38,7 +38,7 @@ class WishListServiceTest {
         if (wishList.isEmpty()) {
             throw new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND);
         }
-        
+
         //조회한 찜목록의 제품Id가 10인지 확인
         Assertions.assertEquals(10L, wishList.get().getProductId());
 
@@ -63,6 +63,24 @@ class WishListServiceTest {
 
         //redis에 저장된 제품 번호가 10이 맞는지 확인
         Assertions.assertEquals(10L, redisUserWishList.getWishLists().get(0).getProductId());
+    }
+
+    //찜목록 삭제 테스트
+    @Test
+    void deleteWishListTest() {
+        //제품을 찜목록에 추가
+        wishListService.addWishList(1L, 1L);
+        wishListService.addWishList(1L, 2L);
+        wishListService.addWishList(1L, 3L);
+
+        //찜목록Id가 1인 찜목록 삭제, 제품Id가 1인 제품이 삭제됨
+        wishListService.deleteWishList(1L, 1L);
+
+        RedisUserWishList redisUserWishList = redisUserWishListRepository.findById(1L)
+                .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
+
+        Assertions.assertNotEquals(1L,redisUserWishList.getWishLists().get(0).getProductId());
+
     }
 
 }
