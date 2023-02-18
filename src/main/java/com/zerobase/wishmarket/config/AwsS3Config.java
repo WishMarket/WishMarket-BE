@@ -1,4 +1,4 @@
-package com.zerobase.withmarket.config;
+package com.zerobase.wishmarket.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

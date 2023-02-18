@@ -9,8 +9,6 @@ import com.zerobase.wishmarket.domain.user.service.UserAuthService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,27 +21,27 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAuthController {
 
     private final UserAuthService userAuthService;
+//    private final RedirectView redirectView;
 
     @PostMapping("/sign-up")
     public ResponseEntity<SignUpEmailResponse> signUpEmail(@RequestBody @Valid SignUpForm form) {
         return ResponseEntity.ok(userAuthService.signUp(form));
     }
 
-    @PostMapping("/sign-in")
+    @PostMapping("/sign-in/email")
     public ResponseEntity<?> signInEmail(@RequestBody @Valid SignInForm form) {
-        return ResponseEntity.ok(userAuthService.signIn(form));
+        return ResponseEntity.ok(userAuthService.signInEmail(form));
     }
 
-    // UserAuthContoller
-    @GetMapping("/social-sign-in")
-    // 기존 : httpSession.getAttribute 로 가져오던 세션 정보
-    // 수정 : 어느 컨트롤러에서든 @LoginUserInfo 를 사용하여 세션 정보 활용 가능
-    public String oauthLoginInfo(Model model, @LoginUserInfo OAuthUserInfo user) {
+    @PostMapping("/sign-in/google")
+    public ResponseEntity<?> signInGoogle(@LoginUserInfo OAuthUserInfo userInfo) {
+//        redirectView.setUrl("/oauth2/authorization/google");
+        return ResponseEntity.ok(userAuthService.signInSocial(userInfo));
+    }
 
-        if (user != null) {
-            model.addAttribute("userName", user.getName());
-        }
-
-        return "oauthLoginInfo";
+    @PostMapping("/sign-in/naver")
+    public ResponseEntity<?> signInNaver(@LoginUserInfo OAuthUserInfo userInfo) {
+//        redirectView.setUrl("/oauth2/authorization/naver");
+        return ResponseEntity.ok(userAuthService.signInSocial(userInfo));
     }
 }

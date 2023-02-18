@@ -7,6 +7,7 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWORD_DO_NOT_MATCH;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
@@ -14,6 +15,7 @@ import com.zerobase.wishmarket.common.redis.RedisClient;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.follow.repository.FollowInfoRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
@@ -92,7 +94,7 @@ public class UserAuthService {
     }
 
     @Transactional
-    public SignInResponse signIn(SignInForm form) {
+    public SignInResponse signInEmail(SignInForm form) {
         UserEntity user = userAuthRepository.findByEmailAndUserRegistrationType(
                 form.getEmail(),
                 UserRegistrationType.EMAIL
@@ -108,7 +110,7 @@ public class UserAuthService {
 
         // redis에 refresh토큰 저장
         redisClient.put(
-            REFRESH_TOKEN_PREFIX + String.valueOf(user.getUserId()),
+            REFRESH_TOKEN_PREFIX + user.getUserId(),
             tokenSetDto.getRefreshToken(),
             TimeUnit.SECONDS,
             expirationSeconds);
@@ -118,8 +120,31 @@ public class UserAuthService {
             .name(user.getName())
             .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
             .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
-            .refreshToken(tokenSetDto.getRefreshToken())
-            .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
+            .build();
+    }
+
+    @Transactional
+    public SignInResponse signInSocial(OAuthUserInfo userInfo) {
+
+        UserEntity user = userAuthRepository.findByEmail(userInfo.getEmail())
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+        TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(userInfo.getUserId());
+
+        // 작성된 날짜에서 현재 날짜를 빼고 밀리초로 나누면 지나간 시간(초)이 계산
+        long expirationSeconds = (tokenSetDto.getRefreshTokenExpiredAt().getTime() - new Date().getTime()) / 1000;
+
+        // redis에 refresh토큰 저장
+        redisClient.put(
+            REFRESH_TOKEN_PREFIX + user.getUserId(),
+            tokenSetDto.getRefreshToken(),
+            TimeUnit.SECONDS,
+            expirationSeconds);
+
+        return SignInResponse.builder()
+            .email(user.getEmail())
+            .name(user.getName())
+            .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+            .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
             .build();
     }
 
