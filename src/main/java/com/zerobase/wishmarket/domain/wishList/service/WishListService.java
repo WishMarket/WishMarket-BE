@@ -6,11 +6,10 @@ import com.zerobase.wishmarket.domain.wishList.model.entity.RedisUserWishList;
 import com.zerobase.wishmarket.domain.wishList.model.entity.WishList;
 import com.zerobase.wishmarket.domain.wishList.repository.RedisUserWishListRepository;
 import com.zerobase.wishmarket.domain.wishList.repository.WishListRepository;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
@@ -51,16 +50,19 @@ public class WishListService {
         return wishList;
     }
 
+
     public List<WishList> getWishList(Long userId) {
         Optional<RedisUserWishList> redisUserWishList = redisUserWishListRepository.findById(userId);
 
-        //해당 찜목록이 없다면 (사용자의 찜목록에 추가한 상품이 없다면)
+        //아직 생성된 캐쉬가 없는 경우
         if (redisUserWishList.isEmpty()) {
-            return null;
+            return wishListRepository.findAllByUserId(userId);
         }
 
+        //캐쉬가 있는 경우
         return redisUserWishList.get().getWishLists();
     }
+
 
     public boolean deleteWishList(Long userId, Long wishListId) {
         WishList wishList = wishListRepository.findByWishListId(wishListId)
