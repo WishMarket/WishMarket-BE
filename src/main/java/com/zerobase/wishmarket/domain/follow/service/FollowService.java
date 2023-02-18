@@ -13,6 +13,7 @@ import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -107,28 +108,38 @@ public class FollowService {
 
     // 이름, 닉네임이 한글일 경우
     // 이름, 닉네임이 영어일 경우 => 대소문자 무시
-    public List<UserSearchResponse> searchUser(String email, String name, String nickName, Integer page) {
+    public List<UserSearchResponse> searchUser(Long userId, String email, String name, String nickName, Integer page) {
         Pageable limit = PageRequest.of(page, 12);
+        UserEntity loginUser = userAuthRepository.findById(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        // 내가 팔로우한 유저 ID
+        List<Long> myFriendList = loginUser.getFollowerList().stream()
+            .map(follow -> follow.getFollowee().getUserId())
+            .collect(Collectors.toList());
 
         if (!email.isEmpty()) {
             log.info("이메일 검색 : " + email);
 
             return userAuthRepository.findByEmailContainsIgnoreCase(email, limit)
-                .stream().map(UserSearchResponse::from)
+                .stream()
+                .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
                 .collect(Collectors.toList());
 
         } else if (!name.isEmpty()) {
             log.info("이름 검색 : " + name);
 
-            return userAuthRepository.findByNameContainsIgnoreCase(name, limit)
-                .stream().map(UserSearchResponse::from)
+            return userAuthRepository.findByEmailContainsIgnoreCase(name, limit)
+                .stream()
+                .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
                 .collect(Collectors.toList());
 
         } else if (!nickName.isEmpty()) {
             log.info("닉네임 검색 : " + nickName);
 
-            return userAuthRepository.findByNickNameContainsIgnoreCase(nickName, limit)
-                .stream().map(UserSearchResponse::from)
+            return userAuthRepository.findByEmailContainsIgnoreCase(nickName, limit)
+                .stream()
+                .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
                 .collect(Collectors.toList());
 
         }

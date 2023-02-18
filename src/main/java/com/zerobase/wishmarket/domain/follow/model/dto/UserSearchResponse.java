@@ -17,15 +17,17 @@ public class UserSearchResponse {
     private String nickName;
     private String email;
     private String profileImageUrl;
+    private Boolean isFriend;
     // 위시 리스트 추가?
 
-    public static UserSearchResponse from(UserEntity userEntity){
+    public static UserSearchResponse of(UserEntity userEntity, boolean isFriend){
         return UserSearchResponse.builder()
             .userId(userEntity.getUserId())
             .email(userEntity.getEmail())
             .name(userEntity.getName())
             .nickName(userEntity.getNickName())
             .profileImageUrl(userEntity.getProfileImage())
+            .isFriend(isFriend)
             .build();
     }
 
