@@ -1,15 +1,21 @@
 package com.zerobase.wishmarket.domain.follow.controller;
 
+import com.zerobase.wishmarket.domain.follow.model.dto.UserSearchResponse;
 import com.zerobase.wishmarket.domain.follow.service.FollowService;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 
 @RequiredArgsConstructor
 @RequestMapping("/api/follow")
@@ -29,8 +35,18 @@ public class FollowController {
         return followService.unFollowUser(userId, followId);
     }
 
+    @GetMapping
+    public ResponseEntity<List<UserSearchResponse>> getSearchUser(
+        @RequestParam @Nullable String email,
+        @RequestParam @Nullable String name,
+        @RequestParam @Nullable String nickName,
+        @RequestParam Integer page
+    ) {
+        return ResponseEntity.ok(followService.searchUser(email, name, nickName, page));
+    }
+
     @GetMapping("/{followId}")
-    public void userFollowList() {
+    public void followerList(@AuthenticationPrincipal Long userId) {
 
     }
 }
