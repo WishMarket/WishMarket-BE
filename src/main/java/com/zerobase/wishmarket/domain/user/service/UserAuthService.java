@@ -135,14 +135,14 @@ public class UserAuthService {
     }
 
     @Transactional
-    public void logout(TokenSetDto tokenSetDto){
+    public void logout(SignInResponse signInResponse){
         // 로그아웃 하고 싶은 토큰이 유효한 지 먼저 검증하기
-        if (!jwtProvider.isValidationToken(tokenSetDto.getAccessToken())){
+        if (!jwtProvider.isValidationToken(signInResponse.getAccessToken())){
             throw new IllegalArgumentException("로그아웃 : 유효하지 않은 토큰입니다.");
         }
 
         // Access Token에서 User email을 가져온다
-        Authentication authentication = jwtProvider.getAuthentication(tokenSetDto.getAccessToken());
+        Authentication authentication = jwtProvider.getAuthentication(signInResponse.getAccessToken());
 
         // Redis에서 해당 User email로 저장된 Refresh Token 이 있는지 여부를 확인 후에 있을 경우 삭제를 한다.
         if (redisTemplate.opsForValue().get("RT:"+authentication.getName())!=null){
@@ -151,8 +151,8 @@ public class UserAuthService {
         }
 
         // 해당 Access Token 유효시간을 가지고 와서 BlackList에 저장하기
-        Long expiration = jwtProvider.getExpiredDate(String.valueOf(tokenSetDto.getAccessTokenExpiredAt().getTime())).getTime();
-        redisTemplate.opsForValue().set(tokenSetDto.getAccessToken(),"logout",expiration,TimeUnit.MILLISECONDS);
+        Long expiration = jwtProvider.getExpiredDate(String.valueOf(signInResponse.getAccessTokenExpiredAt())).getTime();
+        redisTemplate.opsForValue().set(signInResponse.getAccessToken(),"logout",expiration,TimeUnit.MILLISECONDS);
 
     }
 

@@ -1,10 +1,7 @@
 package com.zerobase.wishmarket.domain.user.controller;
 
 import com.zerobase.wishmarket.domain.user.annotation.LoginUserInfo;
-import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
-import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
-import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
-import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
+import com.zerobase.wishmarket.domain.user.model.dto.*;
 import com.zerobase.wishmarket.domain.user.service.UserAuthService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,5 +37,10 @@ public class UserAuthController {
     @PostMapping("/sign-in/naver")
     public ResponseEntity<?> signInNaver(@LoginUserInfo OAuthUserInfo userInfo) {
         return ResponseEntity.ok(userAuthService.signInSocial(userInfo));
+    }
+
+    @PostMapping("/logout")
+    public void logout(SignInResponse signInResponse) {
+        userAuthService.logout(signInResponse);
     }
 }
