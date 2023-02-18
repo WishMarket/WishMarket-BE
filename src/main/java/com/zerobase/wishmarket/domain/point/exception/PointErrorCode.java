@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum PointErrorCode implements ErrorCode {
 
-    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "잘못된 이메일 형식입니다."),
+    NOT_ENOUGH_POINT(HttpStatus.BAD_REQUEST, "포인트가 부족합니다."),
 
     ;
 
