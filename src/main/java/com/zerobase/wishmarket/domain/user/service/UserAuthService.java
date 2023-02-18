@@ -76,7 +76,7 @@ public class UserAuthService {
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
 
         return SignUpEmailResponse.from(
-            userAuthRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL))
+            userAuthRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL, UserStatusType.ACTIVE))
         );
 
     }
