@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -27,12 +27,14 @@ public class ProductController {
     //카테고리별 상품 조회
     @GetMapping("/category")
     public Page<Product> getProductListByCategory(
-        @RequestParam ProductCategory categories,
+        @RequestParam int categoryCode,
         @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, size);
+        ProductCategory[] categories = ProductCategory.values();
+
         return ResponseEntity.ok()
-            .body(productService.getProductByCategory(categories, pageRequest)).getBody();
+            .body(productService.getProductByCategory(categories[categoryCode], pageRequest)).getBody();
 
     }
 

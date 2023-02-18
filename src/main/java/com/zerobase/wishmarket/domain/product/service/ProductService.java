@@ -80,10 +80,11 @@ public class ProductService {
             p.setIsBestFalse();
         }
 
-        //베스트 상품 삭제
-        redisBestRepository.deleteAll();
 
-        //문제의 정렬 부분
+        //지금은 정렬하여 50개의 상품을 가져오는 로직으로 마무리
+        //베스트 상품의 기준이 현재는 좋아요 수로 판별하지만
+        //실제 서비스에서는 사용자들의 클릭 수, 관심도, 좋아요 등
+        //다양한 판별기준으로 베스트 알고리즘을 짜는 방법이 있다.
         List<ProductLikes> bestProductLikes = productLikesRepository.findTop50ByOrderByLikesDesc();
 
         List<Long> ids = new ArrayList<>();
@@ -99,6 +100,7 @@ public class ProductService {
         }
 
         //redis repository에 넣기
+        //기존에 레디스값에 Set하기 때문에 기존의 레디스를 삭제할 필요가 없음
         redisBestRepository.save(RedisBestProducts.builder()
             .id(KEY_BEST_PRODUCTS)
             .products(newBestproducts)
