@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAuthController {
 
     private final UserAuthService userAuthService;
-//    private final RedirectView redirectView;
 
     @PostMapping("/sign-up")
     public ResponseEntity<SignUpEmailResponse> signUpEmail(@RequestBody @Valid SignUpForm form) {
@@ -35,13 +34,11 @@ public class UserAuthController {
 
     @PostMapping("/sign-in/google")
     public ResponseEntity<?> signInGoogle(@LoginUserInfo OAuthUserInfo userInfo) {
-//        redirectView.setUrl("/oauth2/authorization/google");
         return ResponseEntity.ok(userAuthService.signInSocial(userInfo));
     }
 
     @PostMapping("/sign-in/naver")
     public ResponseEntity<?> signInNaver(@LoginUserInfo OAuthUserInfo userInfo) {
-//        redirectView.setUrl("/oauth2/authorization/naver");
         return ResponseEntity.ok(userAuthService.signInSocial(userInfo));
     }
 }
