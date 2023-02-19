@@ -4,6 +4,7 @@ import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
+
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
 import com.zerobase.wishmarket.domain.product.model.entity.RedisBestProducts;
@@ -36,6 +37,7 @@ import org.springframework.util.FileCopyUtils;
 public class ProductService {
 
     private final ProductRepository productRepository;
+
     private final ProductLikesRepository productLikesRepository;
 
     private final RedisBestRepository redisBestRepository;
@@ -94,7 +96,6 @@ public class ProductService {
             ids.add(bestProductLikes.get(i).getProductId());
         }
 
-
         //새로운 베스트 상품의 isBest값을 true로 바꾸기
         List<Product> newBestproducts = productRepository.findAllByProductIdIn(ids);
         for (Product product : newBestproducts) {
@@ -137,7 +138,8 @@ public class ProductService {
 
             String originalFilename = productInputForm.getImage().getOriginalFilename();
             String baseLocalPath = "src/main/java/com/zerobase/wishmarket/domain/product/Images";
-            saveFilename = getNewSaveFile(baseLocalPath, originalFilename, productInputForm.getCategoryCode());
+            saveFilename = getNewSaveFile(baseLocalPath, originalFilename,
+                productInputForm.getCategoryCode());
 
             try {
                 File newFile = new File(saveFilename);
@@ -193,6 +195,7 @@ public class ProductService {
         return newFilename;
     }
 
+
     public Page<ProductSearchDto> search(String keyword,
                                          PageRequest pageRequest) {
         Page<Product> pagingProduct = productRepository.findAllByNameContains(keyword, pageRequest);
@@ -203,6 +206,11 @@ public class ProductService {
             productSearchDtoList.add(productSearchDto);
         }
         return new PageImpl<>(productSearchDtoList, pageRequest, pagingProduct.getTotalElements());
+
+    public ProductDetailDto detail(Long productId) {
+        return ProductDetailDto.of(productRepository.findById(productId).
+            orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND)));
+
     }
 
 }

@@ -19,9 +19,9 @@ public class AuthCodeController {
     private final AuthCodeService authCodeService;
 
     @PostMapping
-    public ResponseEntity<Void> authCodeMailSend(@RequestBody @Valid AuthCodeMailForm form){
+    public ResponseEntity<String> authCodeMailSend(@RequestBody @Valid AuthCodeMailForm form){
         authCodeService.sendAuthCode(form);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("메일 전송에 성공하였습니다.");
     }
 
     @PostMapping("/code")
