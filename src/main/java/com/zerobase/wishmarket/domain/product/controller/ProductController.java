@@ -1,11 +1,14 @@
 package com.zerobase.wishmarket.domain.product.controller;
 
 import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
-import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
+
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.domain.product.service.ProductService;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,12 +31,12 @@ public class ProductController {
     //카테고리별 상품 조회
     @GetMapping("/category")
     public Page<Product> getProductListByCategory(
-        @RequestParam ProductCategory categories,
-        @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+            @RequestParam ProductCategory categories,
+            @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         return ResponseEntity.ok()
-            .body(productService.getProductByCategory(categories, pageRequest)).getBody();
+                .body(productService.getProductByCategory(categories, pageRequest)).getBody();
 
     }
 
@@ -50,10 +53,18 @@ public class ProductController {
         return ResponseEntity.ok().body("상품 정보가 정상적으로 업로드 되었습니다.");
     }
 
+
+    @GetMapping("/search")
+    public Page<ProductSearchDto> search(@RequestParam("keyword") String keyword,
+                                         @RequestParam("page") Integer page) {
+        PageRequest pageRequest = PageRequest.of(page - 1, 12);
+        return ResponseEntity.ok().body(productService.search(keyword, pageRequest)).getBody();
+
     @GetMapping("/{productId}/detail")
     public ResponseEntity<?> productDetail(@PathVariable Long productId) {
         ProductDetailDto responseDto = productService.detail(productId);
         return ResponseEntity.ok().body(responseDto);
+
     }
 
 
