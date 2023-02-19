@@ -17,16 +17,6 @@ public class PointService {
 
     private final UserAuthRepository userAuthRepository;
 
-    public PointResponseDto getMyPoint(Long userId) {
-        UserEntity user = userAuthRepository.findById(userId)
-            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-
-        return PointResponseDto.builder()
-            .Id(userId)
-            .pointPrice(user.getPointPrice())
-            .build();
-    }
-
     public PointResponseDto chargePoint(Long userId) {
         UserEntity user = userAuthRepository.findById(userId)
             .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));

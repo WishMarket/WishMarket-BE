@@ -1,6 +1,7 @@
 package com.zerobase.wishmarket.domain.point.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 import com.zerobase.wishmarket.domain.point.exception.PointErrorCode;
@@ -27,25 +28,7 @@ public class PointServiceTest {
     private PointService pointService;
 
     @Test
-    public void getMyPointTest() {
-        // given
-        Long userId = 1L;
-        UserEntity userEntity = UserEntity.builder()
-            .pointPrice(10000L)
-            .build();
-
-        given(userAuthRepository.findById(userId)).willReturn(Optional.of(userEntity));
-
-        // when
-        PointResponseDto pointResponseDto = pointService.getMyPoint(userId);
-
-        // then
-        assertEquals(userId, pointResponseDto.getId());
-        assertEquals(userEntity.getPointPrice(), pointResponseDto.getPointPrice());
-    }
-
-    @Test
-    void addPointTest(){
+    void addPointTest() {
         //given
         Long userId = 1L;
         UserEntity userEntity = UserEntity.builder()
@@ -55,8 +38,7 @@ public class PointServiceTest {
         given(userAuthRepository.findById(userId)).willReturn(Optional.of(userEntity));
 
         //when
-        pointService.chargePoint(userId);
-        PointResponseDto result = pointService.getMyPoint(userId);
+        PointResponseDto result = pointService.chargePoint(userId);
 
         //then
         assertEquals(20000L, result.getPointPrice());
@@ -64,7 +46,7 @@ public class PointServiceTest {
     }
 
     @Test
-    void usePointTest(){
+    void usePointTest() {
         //given
         Long userId = 1L;
         UserEntity userEntity = UserEntity.builder()
@@ -77,15 +59,15 @@ public class PointServiceTest {
         //when
         pointService.usePoint(userId, inputPoint);
 
-        PointResponseDto result = pointService.getMyPoint(userId);
+        UserEntity user = userAuthRepository.findById(userId).get();
 
         //then
-        assertEquals(5000L,result.getPointPrice());
+        assertEquals(5000L, user.getPointPrice());
 
     }
 
     @Test
-    void PointExceptionTest_NOT_ENOUGH_POINT(){
+    void PointExceptionTest_NOT_ENOUGH_POINT() {
         //given
         Long userId = 1L;
         UserEntity userEntity = UserEntity.builder()
@@ -96,7 +78,8 @@ public class PointServiceTest {
         given(userAuthRepository.findById(userId)).willReturn(Optional.of(userEntity));
 
         //when
-        PointException exception = assertThrows(PointException.class, () -> pointService.usePoint(userId,inputPoint));
+        PointException exception = assertThrows(PointException.class,
+            () -> pointService.usePoint(userId, inputPoint));
 
         //then
         assertEquals(PointErrorCode.NOT_ENOUGH_POINT, exception.getErrorCode());
@@ -112,7 +95,8 @@ public class PointServiceTest {
         given(userAuthRepository.findById(userId)).willReturn(Optional.empty());
 
         // when
-        UserException exception = assertThrows(UserException.class, () -> pointService.getMyPoint(userId));
+        UserException exception = assertThrows(UserException.class,
+            () -> pointService.chargePoint(userId));
 
         // then
         assertEquals(UserErrorCode.USER_NOT_FOUND, exception.getErrorCode());
