@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface ProductLikesRepository extends JpaRepository<ProductLikes, Long> {
     Optional<ProductLikes> findByProductId(Long id);
 
-    List<ProductLikes> findTop12ByOrderByLikesDesc();
+    List<ProductLikes> findTop50ByOrderByLikesDesc();
+
 
 }

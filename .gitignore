@@ -39,3 +39,6 @@ out/
 *.log
 .logs/
 
+##properties###
+*.properties
+

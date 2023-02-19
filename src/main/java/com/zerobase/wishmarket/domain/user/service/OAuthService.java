@@ -1,9 +1,8 @@
 package com.zerobase.wishmarket.domain.user.service;
 
-import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
+import com.zerobase.wishmarket.domain.user.model.dto.OAuthAttributes;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
-import com.zerobase.wishmarket.domain.user.model.type.OAuthAttributes;
-import com.zerobase.wishmarket.domain.user.repository.UserRepository;
+import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -14,14 +13,12 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
 import java.util.Collections;
 
 @RequiredArgsConstructor
 @Service
 public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
-    private final UserRepository userRepository;
-    private final HttpSession httpSession;
+    private final UserAuthRepository userAuthRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -38,8 +35,6 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
 
         UserEntity userEntity = saveOrUpdate(attributes);
-        // 세션에 사용자 정보를 저장하기 위한 Dto 클래스 : SessionUser
-        httpSession.setAttribute("user", new OAuthUserInfo(userEntity));
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("USER")),
@@ -48,10 +43,10 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
     }
 
     private UserEntity saveOrUpdate(OAuthAttributes attributes) {
-        UserEntity userEntity = userRepository.findByEmail(attributes.getEmail())
+        UserEntity userEntity = userAuthRepository.findByEmail(attributes.getEmail())
                 .map(entity -> entity.update(attributes.getName(), attributes.getProfileImage()))
                 .orElse(attributes.toEntity());
 
-        return userRepository.save(userEntity);
+        return userAuthRepository.save(userEntity);
     }
 }

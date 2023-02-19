@@ -26,6 +26,8 @@ public class Review extends BaseEntity{
 
     private Long userId;
 
+    private String userName;
+
     private String comment;
 
     private boolean isRecommend;

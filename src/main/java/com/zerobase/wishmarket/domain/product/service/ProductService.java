@@ -3,8 +3,6 @@ package com.zerobase.wishmarket.domain.product.service;
 import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
-import com.zerobase.wishmarket.domain.product.model.dto.ProductBestDto;
-import com.zerobase.wishmarket.domain.product.model.dto.ProductCategoryDto;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
 import com.zerobase.wishmarket.domain.product.model.entity.RedisBestProducts;
@@ -12,6 +10,7 @@ import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.domain.product.repository.ProductLikesRepository;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.product.repository.RedisBestRepository;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,6 +18,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +35,7 @@ import org.springframework.util.FileCopyUtils;
 public class ProductService {
 
     private final ProductRepository productRepository;
+
     private final ProductLikesRepository productLikesRepository;
 
     private final RedisBestRepository redisBestRepository;
@@ -77,8 +78,9 @@ public class ProductService {
     public boolean updateBestProducts() {
 
         //기존의 베스트 상품의 isBest값을 false로 바꾸기
-        List<Product> oldBestproducts = productRepository.findAllByIsBestIsTrue();
-        for (Product p : oldBestproducts) {
+
+        List<Product> oldBestproducts = productRepository.findAllByBestIsTrue();
+        for(Product p : oldBestproducts){
             p.setIsBestFalse();
         }
 
@@ -206,4 +208,25 @@ public class ProductService {
         return newFilename;
     }
 
+
+    public Page<ProductSearchDto> search(String keyword,
+        PageRequest pageRequest) {
+        Page<Product> pagingProduct = productRepository.findAllByNameContains(keyword, pageRequest);
+        List<Product> productList = pagingProduct.getContent();
+        List<ProductSearchDto> productSearchDtoList = new ArrayList<>();
+        for (Product product : productList) {
+            ProductSearchDto productSearchDto = ProductSearchDto.of(product);
+            productSearchDtoList.add(productSearchDto);
+        }
+        return new PageImpl<>(productSearchDtoList, pageRequest, pagingProduct.getTotalElements());
+
+    }
+
+    public ProductDetailDto detail(Long productId) {
+        return ProductDetailDto.of(productRepository.findById(productId).
+            orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND)));
+
+    }
+
 }
+
