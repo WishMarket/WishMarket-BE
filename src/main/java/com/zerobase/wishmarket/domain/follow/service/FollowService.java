@@ -129,7 +129,7 @@ public class FollowService {
         } else if (!name.isEmpty()) {
             log.info("이름 검색 : " + name);
 
-            return userAuthRepository.findByEmailContainsIgnoreCase(name, limit)
+            return userAuthRepository.findByNameContainsIgnoreCase(name, limit)
                 .stream()
                 .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
                 .collect(Collectors.toList());
@@ -137,7 +137,7 @@ public class FollowService {
         } else if (!nickName.isEmpty()) {
             log.info("닉네임 검색 : " + nickName);
 
-            return userAuthRepository.findByEmailContainsIgnoreCase(nickName, limit)
+            return userAuthRepository.findByNickNameContainsIgnoreCase(nickName, limit)
                 .stream()
                 .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
                 .collect(Collectors.toList());
