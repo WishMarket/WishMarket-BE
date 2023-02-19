@@ -1,6 +1,7 @@
 package com.zerobase.wishmarket.domain.user.service;
 
 import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.dto.UserDto;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
@@ -21,18 +22,19 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserEntity passwordChange(String email, String password) {
+    public UserDto passwordChange(String email, String password) {
 
         String encodePassword = passwordEncoder.encode(password);
         Optional<UserEntity> user = userRepository.findByEmailAndUserRegistrationType(email, UserRegistrationType.EMAIL);
 
-        if (user.isPresent()) {
-            user.get().setPassword(encodePassword);
-            userRepository.save(user.get());
-        } else {
+        if (!user.isPresent()) {
             throw new UserException(USER_NOT_FOUND);
+        } else {
+            UserEntity userInfo = user.get();
+            userInfo.setPassword(encodePassword);
+            UserEntity changeUserInfo = userRepository.save(userInfo);
+            return UserDto.from(changeUserInfo);
         }
 
-        return user.get();
     }
 }
