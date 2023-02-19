@@ -66,7 +66,7 @@ public class UserEntity extends BaseEntity {
 
     // 1 : 1 Mapping
     // 주소
-    @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
 
     @OneToOne(fetch = FetchType.LAZY)

@@ -35,7 +35,9 @@ public class DeliveryAddress extends BaseEntity {
     private String address;
 
     // 1 : 1 Mapping relationship with user
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private UserEntity userEntity;
+//    @OneToOne(fetch = FetchType.LAZY)
+////    @JoinColumn(name = "user_id")
+//    @JoinColumn
+//    private UserEntity userEntity;
+
 }
