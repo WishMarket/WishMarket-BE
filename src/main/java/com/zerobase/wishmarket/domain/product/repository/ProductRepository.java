@@ -16,9 +16,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findAllByProductIdIn(List<Long> ids);
 
-    Page<Product> findAllByNameContains(String keyword, PageRequest pageRequest);
-
-    //List<Product> findAllByBestIsTrue();
 }
 
 

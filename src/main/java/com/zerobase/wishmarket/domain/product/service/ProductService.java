@@ -3,9 +3,6 @@ package com.zerobase.wishmarket.domain.product.service;
 import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
-import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
-import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
-
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
 import com.zerobase.wishmarket.domain.product.model.entity.RedisBestProducts;
@@ -81,15 +78,16 @@ public class ProductService {
     public boolean updateBestProducts() {
 
         //기존의 베스트 상품의 isBest값을 false로 바꾸기
-        /*List<Product> oldBestproducts = productRepository.findAllByBestIsTrue();
+
+        List<Product> oldBestproducts = productRepository.findAllByBestIsTrue();
         for(Product p : oldBestproducts){
             p.setIsBestFalse();
-        }*/
+        }
 
-        //베스트 상품 삭제
-        redisBestRepository.deleteAll();
-
-        //문제의 정렬 부분
+        //지금은 정렬하여 50개의 상품을 가져오는 로직으로 마무리
+        //베스트 상품의 기준이 현재는 좋아요 수로 판별하지만
+        //실제 서비스에서는 사용자들의 클릭 수, 관심도, 좋아요 등
+        //다양한 판별기준으로 베스트 알고리즘을 짜는 방법이 있다.
         List<ProductLikes> bestProductLikes = productLikesRepository.findTop50ByOrderByLikesDesc();
 
         List<Long> ids = new ArrayList<>();
@@ -104,6 +102,7 @@ public class ProductService {
         }
 
         //redis repository에 넣기
+        //기존에 레디스값에 Set하기 때문에 기존의 레디스를 삭제할 필요가 없음
         redisBestRepository.save(RedisBestProducts.builder()
             .id(KEY_BEST_PRODUCTS)
             .products(newBestproducts)
@@ -113,19 +112,32 @@ public class ProductService {
     }
 
     //카테고리별 상품 조회
-    public Page<Product> getProductByCategory(ProductCategory category,
+    public Page<ProductCategoryDto> getProductByCategory(ProductCategory category,
         PageRequest pageRequest) {
-        Page<Product> productList = productRepository.findAllByCategory(category,
+        Page<Product> pagingProduct = productRepository.findAllByCategory(category,
             pageRequest);
-        return productList;
+        List<Product> productList = pagingProduct.getContent();
+        List<ProductCategoryDto> productCategoryDtoList = new ArrayList<>();
+        for (Product product : productList) {
+            ProductCategoryDto productCategoryDto = ProductCategoryDto.of(product);
+            productCategoryDtoList.add(productCategoryDto);
+        }
+        return new PageImpl<>(productCategoryDtoList, pageRequest,
+            pagingProduct.getTotalElements());
+
     }
 
 
     //베스트 상품 조회
-    public List<Product> getBestProducts() {
+    public List<ProductBestDto> getBestProducts() {
         List<Product> productList = redisBestRepository.findById(KEY_BEST_PRODUCTS).get()
             .getProducts();
-        return productList;
+        List<ProductBestDto> productBestDtoList = new ArrayList<>();
+        for (Product product : productList) {
+            ProductBestDto productBestDto = ProductBestDto.of(product);
+            productBestDtoList.add(productBestDto);
+        }
+        return productBestDtoList;
     }
 
 

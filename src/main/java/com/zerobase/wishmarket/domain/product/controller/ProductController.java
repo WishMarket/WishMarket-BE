@@ -1,9 +1,6 @@
 package com.zerobase.wishmarket.domain.product.controller;
 
 import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
-import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
-import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
-import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.domain.product.service.ProductService;
 import java.util.List;
@@ -27,19 +24,21 @@ public class ProductController {
 
     //카테고리별 상품 조회
     @GetMapping("/category")
-    public Page<Product> getProductListByCategory(
-        @RequestParam ProductCategory categories,
+    public Page<ProductCategoryDto> getProductListByCategory(
+        @RequestParam int categoryCode,
         @RequestParam("page") Integer page, @RequestParam("size") Integer size) {
 
         PageRequest pageRequest = PageRequest.of(page - 1, size);
+        ProductCategory[] categories = ProductCategory.values();
+
         return ResponseEntity.ok()
-            .body(productService.getProductByCategory(categories, pageRequest)).getBody();
+            .body(productService.getProductByCategory(categories[categoryCode], pageRequest)).getBody();
 
     }
 
     //베스트 상품 조회
     @GetMapping("/best")
-    public ResponseEntity<List<Product>> getBestProductList() {
+    public ResponseEntity<List<ProductBestDto>> getBestProductList() {
         return ResponseEntity.ok().body(productService.getBestProducts());
     }
 

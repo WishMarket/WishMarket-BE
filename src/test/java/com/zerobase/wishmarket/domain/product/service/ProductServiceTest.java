@@ -80,27 +80,8 @@ class ProductServiceTest {
         assertEquals(ProductErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());
     }
 
-    @Test
-    public void testSearchProduct() {
-        //given
-        String keyword = "t1";
-        int page = 2; // 0 일 수 는 없음
-        PageRequest pageRequest = PageRequest.of(page - 1, 12);
+  
 
-        //when
-        Page<ProductSearchDto> pagingSearchProductList = productService.search(keyword, pageRequest);
-        List<ProductSearchDto> resultProductList = pagingSearchProductList.getContent();
-        int cnt = 0;
-        for (ProductSearchDto productSearchDto : resultProductList) {
-            if (productSearchDto.getName().contains(keyword)) {
-                cnt++;
-            }
-        }
-
-        //then
-        assertEquals(cnt, resultProductList.size());
-        assertEquals(cnt, pagingSearchProductList.getNumberOfElements());
-    }
 
 
 }
