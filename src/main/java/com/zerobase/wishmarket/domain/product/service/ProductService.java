@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.domain.product.service;
 import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
 
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
@@ -51,18 +52,18 @@ public class ProductService {
         for (ProductCategory category : ProductCategory.values()) {
             for (int i = 1; i < 21; i++) {
                 Product product = Product.builder()
-                        .name("product" + i)
-                        .productImage("제품" + i + "파일 경로")
-                        .category(category)
-                        .price(1000)
-                        .description("제품설명" + i)
-                        .build();
+                    .name("product" + i)
+                    .productImage("제품" + i + "파일 경로")
+                    .category(category)
+                    .price(1000)
+                    .description("제품설명" + i)
+                    .build();
                 productRepository.save(product);
 
                 ProductLikes productLikes = ProductLikes.builder()
-                        .productId(product.getProductId())
-                        .likes(0)
-                        .build();
+                    .productId(product.getProductId())
+                    .likes(0)
+                    .build();
                 productLikesRepository.save(productLikes);
             }
         }
@@ -70,7 +71,7 @@ public class ProductService {
         //베스트 상품 등록을 위해 likes 수 몇개만 변경
         for (Long i = 1L; i < 13L; i++) {
             ProductLikes productLikes = productLikesRepository.findById(i)
-                    .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+                .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
             productLikes.setLikes(10);
         }
     }
@@ -104,18 +105,18 @@ public class ProductService {
 
         //redis repository에 넣기
         redisBestRepository.save(RedisBestProducts.builder()
-                .id(KEY_BEST_PRODUCTS)
-                .products(newBestproducts)
-                .build());
+            .id(KEY_BEST_PRODUCTS)
+            .products(newBestproducts)
+            .build());
 
         return true;
     }
 
     //카테고리별 상품 조회
     public Page<Product> getProductByCategory(ProductCategory category,
-                                              PageRequest pageRequest) {
+        PageRequest pageRequest) {
         Page<Product> productList = productRepository.findAllByCategory(category,
-                pageRequest);
+            pageRequest);
         return productList;
     }
 
@@ -123,7 +124,7 @@ public class ProductService {
     //베스트 상품 조회
     public List<Product> getBestProducts() {
         List<Product> productList = redisBestRepository.findById(KEY_BEST_PRODUCTS).get()
-                .getProducts();
+            .getProducts();
         return productList;
     }
 
@@ -144,24 +145,24 @@ public class ProductService {
             try {
                 File newFile = new File(saveFilename);
                 FileCopyUtils.copy(productInputForm.getImage().getInputStream(),
-                        new FileOutputStream(newFile));
+                    new FileOutputStream(newFile));
             } catch (IOException e) {
                 log.info(e.getMessage());
             }
         }
         Product product = Product.builder()
-                .name(productInputForm.getName())
-                .productImage(saveFilename)
-                .category(productCategory)
-                .price(productInputForm.getPrice())
-                .description(productInputForm.getDescription())
-                .build();
+            .name(productInputForm.getName())
+            .productImage(saveFilename)
+            .category(productCategory)
+            .price(productInputForm.getPrice())
+            .description(productInputForm.getDescription())
+            .build();
         productRepository.save(product);
 
         ProductLikes productLikes = ProductLikes.builder()
-                .productId(product.getProductId())
-                .likes(0)
-                .build();
+            .productId(product.getProductId())
+            .likes(0)
+            .build();
         productLikesRepository.save(productLikes);
 
 
@@ -197,7 +198,7 @@ public class ProductService {
 
 
     public Page<ProductSearchDto> search(String keyword,
-                                         PageRequest pageRequest) {
+        PageRequest pageRequest) {
         Page<Product> pagingProduct = productRepository.findAllByNameContains(keyword, pageRequest);
         List<Product> productList = pagingProduct.getContent();
         List<ProductSearchDto> productSearchDtoList = new ArrayList<>();
@@ -207,6 +208,8 @@ public class ProductService {
         }
         return new PageImpl<>(productSearchDtoList, pageRequest, pagingProduct.getTotalElements());
 
+    }
+
     public ProductDetailDto detail(Long productId) {
         return ProductDetailDto.of(productRepository.findById(productId).
             orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND)));
@@ -214,3 +217,4 @@ public class ProductService {
     }
 
 }
+
