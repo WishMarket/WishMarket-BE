@@ -23,4 +23,7 @@ public class Alarm extends BaseEntity {
     boolean isRead;
     Long userId;
 
+    public void setAsRead() {
+        isRead = true;
+    }
 }

@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,6 +22,12 @@ public class AlarmController {
 
         return ResponseEntity.ok().body(alarmService.getMyAlarms(userId));
     }
+    @PutMapping("/{alarmId}")
+    public ResponseEntity<?> setAsRead(@AuthenticationPrincipal Long userId,
+        @PathVariable Long alarmId) {
+        return ResponseEntity.ok().body(alarmService.readAlarm(alarmId,userId));
+    }
+
 
 
 }

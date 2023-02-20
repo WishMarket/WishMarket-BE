@@ -8,6 +8,8 @@ import com.zerobase.wishmarket.domain.alarm.repository.AlarmRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
+import com.zerobase.wishmarket.exception.CommonErrorCode;
+import com.zerobase.wishmarket.exception.GlobalException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,19 @@ public class AlarmService {
             responseAlarmDtoList.add(responseDto);
         }
         return responseAlarmDtoList;
+    }
+
+    public AlarmResponseDto readAlarm(Long alarmId, Long userId) {
+        Alarm alarm = alarmRepository.findById(alarmId)
+            .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_NOT_FOUND));
+
+        if (!alarm.getUserId().equals(userId)) {
+            throw new GlobalException(CommonErrorCode.INVALID_TOKEN);
+        }
+        alarm.setAsRead();
+        alarmRepository.save(alarm);
+
+        return AlarmResponseDto.of(alarm);
     }
 
 }

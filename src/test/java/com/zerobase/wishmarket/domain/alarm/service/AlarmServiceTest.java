@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.domain.alarm.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import com.zerobase.wishmarket.domain.alarm.exception.AlarmErrorCode;
@@ -14,8 +15,11 @@ import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
+import com.zerobase.wishmarket.exception.CommonErrorCode;
+import com.zerobase.wishmarket.exception.GlobalException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -81,7 +85,7 @@ public class AlarmServiceTest {
 
         //then
         assertEquals(3, alarmDtoList.size());
-        assertEquals(alarmList.size(),alarmDtoList.size());
+        assertEquals(alarmList.size(), alarmDtoList.size());
 
     }
 
@@ -98,6 +102,67 @@ public class AlarmServiceTest {
 
         // then
         assertEquals(AlarmErrorCode.ALARM_IS_EMPTY, exception.getErrorCode());
+    }
+
+    @Test
+    public void readAlarmTest_success() {
+        //given
+        Long userId = 1L;
+        UserEntity.builder()
+            .userId(userId)
+            .build();
+
+        Long alarmId = 1L;
+        Alarm alarm = Alarm.builder()
+            .id(alarmId)
+            .userId(userId)
+            .contents("testAlarm")
+            .isRead(false)
+            .build();
+        given(alarmRepository.findById(alarmId)).willReturn(Optional.of(alarm));
+
+        // when
+        AlarmResponseDto readAlarm = alarmService.readAlarm(alarmId, userId);
+
+        // then
+        assertTrue(readAlarm.isRead());
+        assertEquals(alarmId, readAlarm.getId());
+        assertEquals(alarm.getContents(),readAlarm.getContents());
+    }
+
+    @Test
+    public void readAlarmTest_ALARM_NOT_FOUND() {
+        //when
+        AlarmException exception = assertThrows(AlarmException.class,
+            () -> alarmService.readAlarm(1L, 1L));
+        // then
+        assertEquals(AlarmErrorCode.ALARM_NOT_FOUND, exception.getErrorCode());
+
+    }
+
+    @Test
+    public void readAlarmTest_INVAID_TOKEN(){
+        //given
+        Long userId = 1L;
+        UserEntity.builder()
+            .userId(userId)
+            .build();
+        Long alarmId = 1L;
+        Alarm alarm = Alarm.builder()
+            .id(alarmId)
+            .userId(userId)
+            .contents("testAlarm")
+            .isRead(false)
+            .build();
+        given(alarmRepository.findById(alarmId)).willReturn(Optional.of(alarm));
+
+        //when
+        GlobalException exception = assertThrows(GlobalException.class,
+            () -> alarmService.readAlarm(1L, 2L));
+
+        // then
+        assertEquals(CommonErrorCode.INVALID_TOKEN, exception.getErrorCode());
+
     }
 
 }
