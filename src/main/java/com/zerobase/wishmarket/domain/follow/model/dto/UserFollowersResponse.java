@@ -11,23 +11,23 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-public class UserSearchResponse {
+public class UserFollowersResponse {
+
     private Long userId;
     private String name;
-    private String nickName;
     private String email;
+    private String nickName;
     private String profileImageUrl;
-    private Boolean isFriend;
 
-    public static UserSearchResponse of(UserEntity userEntity, boolean isFriend){
-        return UserSearchResponse.builder()
+    public static UserFollowersResponse from(UserEntity userEntity){
+        return UserFollowersResponse.builder()
             .userId(userEntity.getUserId())
-            .email(userEntity.getEmail())
             .name(userEntity.getName())
+            .email(userEntity.getEmail())
             .nickName(userEntity.getNickName())
             .profileImageUrl(userEntity.getProfileImage())
-            .isFriend(isFriend)
             .build();
     }
+
 
 }

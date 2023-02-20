@@ -18,7 +18,6 @@ import org.hibernate.envers.AuditOverride;
 
 @Getter
 @Builder
-@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)

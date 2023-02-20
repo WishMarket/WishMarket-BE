@@ -6,8 +6,10 @@ import static com.zerobase.wishmarket.domain.follow.exception.FollowErrorCode.CA
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import com.zerobase.wishmarket.domain.follow.exception.FollowException;
+import com.zerobase.wishmarket.domain.follow.model.dto.UserFollowersResponse;
 import com.zerobase.wishmarket.domain.follow.model.dto.UserSearchResponse;
 import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
+import com.zerobase.wishmarket.domain.follow.repository.FollowQueryRepository;
 import com.zerobase.wishmarket.domain.follow.repository.FollowRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
@@ -19,6 +21,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,8 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final UserAuthRepository userAuthRepository;
+    private final FollowQueryRepository followQueryRepository;
+
 
     @Transactional
     public boolean followUser(Long userId, Long followId) {
@@ -102,7 +107,11 @@ public class FollowService {
 
     // https://bcp0109.tistory.com/304
     // 1 + N 문제 https://incheol-jung.gitbook.io/docs/q-and-a/spring/n+1
-    public void followerList(Long userId) {
+    public List<UserFollowersResponse> getMyFollowerList(Long userId, Pageable pageable) {
+        // 내가 팔로우한 유저 ID
+        return followQueryRepository.findByFollows(userId, pageable).stream()
+            .map(UserFollowersResponse::from)
+            .collect(Collectors.toList());
 
     }
 

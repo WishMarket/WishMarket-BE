@@ -1,10 +1,13 @@
 package com.zerobase.wishmarket.domain.follow.controller;
 
+import com.zerobase.wishmarket.domain.follow.model.dto.UserFollowersResponse;
 import com.zerobase.wishmarket.domain.follow.model.dto.UserSearchResponse;
 import com.zerobase.wishmarket.domain.follow.service.FollowService;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,8 +49,8 @@ public class FollowController {
         return ResponseEntity.ok(followService.searchUser(userId, email, name, nickName, page));
     }
 
-    @GetMapping("/{followId}")
-    public void followerList(@AuthenticationPrincipal Long userId) {
-
+    @GetMapping("/friends")
+    public ResponseEntity<List<UserFollowersResponse>> getMyFollowerList(@AuthenticationPrincipal Long userId, Pageable pageable) {
+        return ResponseEntity.ok(followService.getMyFollowerList(userId, pageable));
     }
 }
