@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.domain.user.service;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_PREFIX;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_USING_EMAIL;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
@@ -13,6 +14,8 @@ import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
 import com.zerobase.wishmarket.common.redis.RedisClient;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
+import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
@@ -42,11 +45,10 @@ public class UserAuthService {
     private final JwtAuthenticationProvider jwtProvider;
     private final RedisClient redisClient;
 
+    private static final String EMAIL_USING_STATUS = "사용 가능한 이메일입니다.";
+    
     @Transactional
     public SignUpEmailResponse signUp(SignUpForm form) {
-        if (checkInvalidEmail(form.getEmail())) {
-            throw new UserException(INVALID_EMAIL_FORMAT);
-        }
 
         if (checkInvalidPassword(form.getPassword())) {
             throw new UserException(INVALID_PASSWORD_FORMAT);
@@ -79,6 +81,32 @@ public class UserAuthService {
             userAuthRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL, UserStatusType.ACTIVE))
         );
 
+    }
+
+    public EmailCheckResponse emailCheck(EmailCheckForm form) {
+        if (checkInvalidEmail(form.getEmail())) {
+            throw new UserException(INVALID_EMAIL_FORMAT);
+        }
+
+        Optional<UserEntity> optionalUser = userAuthRepository.findByEmailAndUserRegistrationType(
+            form.getEmail(),
+            UserRegistrationType.EMAIL
+        );
+
+        if (optionalUser.isPresent()) {
+            UserEntity userEntity = optionalUser.get();
+
+            // 회원 정보 존재 -> 활동중
+            if (userEntity.getUserStatusType() == UserStatusType.ACTIVE) {
+                throw new UserException(ALREADY_USING_EMAIL);
+            }
+        }
+
+        // 1. 정보가 없음. 가입 가능한 이메일입니다.
+        // 2. 탈퇴 했던 회원 withdrawal => 사용 가능.
+        return EmailCheckResponse.builder()
+            .status(EMAIL_USING_STATUS)
+            .build();
     }
 
     @Transactional
