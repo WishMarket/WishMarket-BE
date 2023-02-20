@@ -46,8 +46,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .httpBasic().disable()
             .csrf().disable() // csrf 방지
-            .cors().configurationSource(this.corsConfigurationSource())
-            .and()
+//            .cors().configurationSource(this.corsConfigurationSource())
+//            .and()
             // Spring Security에서 session을 생성하거나 사용하지 않도록 설정
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
@@ -79,19 +79,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authenticationEntryPoint(jwtAuthenticationEntryPoint); // 인증되지 않은 사용자 접근 시
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.addAllowedOrigin("*");
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//
+//        configuration.addAllowedOrigin("*");
+//        configuration.addAllowedHeader("*");
+//        configuration.addAllowedMethod("*");
+//        configuration.setAllowCredentials(true);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
