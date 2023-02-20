@@ -1,5 +1,6 @@
 package com.zerobase.wishmarket.domain.user.service;
 
+import com.zerobase.wishmarket.domain.user.model.dto.ChangePwdForm;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
@@ -13,7 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -53,9 +54,14 @@ class UserServiceTest {
                         .build()));
 
         // when
-        UserEntity user = userService.passwordChange(email, "potato");
+        ChangePwdForm form = ChangePwdForm.builder()
+                .email("test@test.com")
+                .password("potato")
+                .build();
+        userService.passwordChange(form);
 
         // then
-        assertTrue(this.passwordEncoder.matches("potato", user.getPassword()));
+        assertEquals(true, this.passwordEncoder.matches("potato",
+                userRepository.findByEmailAndUserRegistrationType(form.getEmail(), UserRegistrationType.EMAIL).get().getPassword()));
     }
 }
