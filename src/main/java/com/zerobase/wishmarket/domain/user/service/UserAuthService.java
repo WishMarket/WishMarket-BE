@@ -46,7 +46,7 @@ public class UserAuthService {
     private final RedisClient redisClient;
 
     private static final String EMAIL_USING_STATUS = "사용 가능한 이메일입니다.";
-    
+
     @Transactional
     public SignUpEmailResponse signUp(SignUpForm form) {
 
@@ -69,10 +69,6 @@ public class UserAuthService {
                 return SignUpEmailResponse.from(userAuthRepository.save(userEntity));
             }
 
-        }
-
-        if (isEmailExist(form.getEmail())) {
-            throw new UserException(ALREADY_REGISTER_USER);
         }
 
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
@@ -98,7 +94,7 @@ public class UserAuthService {
 
             // 회원 정보 존재 -> 활동중
             if (userEntity.getUserStatusType() == UserStatusType.ACTIVE) {
-                throw new UserException(ALREADY_USING_EMAIL);
+                throw new UserException(ALREADY_REGISTER_USER);
             }
         }
 
