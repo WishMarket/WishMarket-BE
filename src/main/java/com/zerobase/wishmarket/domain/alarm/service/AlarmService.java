@@ -63,4 +63,17 @@ public class AlarmService {
         return AlarmResponseDto.of(alarm);
     }
 
+    public AlarmResponseDto deleteAlarm(Long alarmId, Long userId) {
+        Alarm alarm = alarmRepository.findById(alarmId)
+            .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_NOT_FOUND));
+
+        if (!alarm.getUserId().equals(userId)) {
+            throw new GlobalException(CommonErrorCode.INVALID_TOKEN);
+        }
+        AlarmResponseDto responseDto = AlarmResponseDto.of(alarm);
+        alarmRepository.deleteById(alarmId);
+
+        return responseDto;
+    }
+
 }

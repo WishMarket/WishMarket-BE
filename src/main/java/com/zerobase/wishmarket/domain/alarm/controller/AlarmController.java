@@ -4,6 +4,7 @@ import com.zerobase.wishmarket.domain.alarm.service.AlarmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -22,10 +23,17 @@ public class AlarmController {
 
         return ResponseEntity.ok().body(alarmService.getMyAlarms(userId));
     }
-    @PutMapping("/{alarmId}")
+    @PutMapping("/{alarmId}/read")
     public ResponseEntity<?> setAsRead(@AuthenticationPrincipal Long userId,
         @PathVariable Long alarmId) {
         return ResponseEntity.ok().body(alarmService.readAlarm(alarmId,userId));
+    }
+
+    @DeleteMapping("/{alarmId}/delete")
+    public ResponseEntity<?> deleteAlarm(@AuthenticationPrincipal Long userId,
+        @PathVariable Long alarmId) {
+
+        return ResponseEntity.ok().body(alarmService.deleteAlarm(alarmId, userId));
     }
 
 

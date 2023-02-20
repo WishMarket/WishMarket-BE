@@ -71,9 +71,9 @@ public class AlarmServiceTest {
         Long userId = 1L;
         UserEntity.builder().userId(userId).build();
         List<Alarm> alarmList = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 1; i <= 3; i++) {
             Alarm alarm = Alarm.builder()
-                .id((long) (i + 1))
+                .id((long) (i))
                 .userId(userId)
                 .build();
             alarmList.add(alarm);
@@ -127,7 +127,7 @@ public class AlarmServiceTest {
         // then
         assertTrue(readAlarm.isRead());
         assertEquals(alarmId, readAlarm.getId());
-        assertEquals(alarm.getContents(),readAlarm.getContents());
+        assertEquals(alarm.getContents(), readAlarm.getContents());
     }
 
     @Test
@@ -141,7 +141,7 @@ public class AlarmServiceTest {
     }
 
     @Test
-    public void readAlarmTest_INVAID_TOKEN(){
+    public void readAlarmTest_INVAID_TOKEN() {
         //given
         Long userId = 1L;
         UserEntity.builder()
@@ -162,6 +162,27 @@ public class AlarmServiceTest {
 
         // then
         assertEquals(CommonErrorCode.INVALID_TOKEN, exception.getErrorCode());
+
+    }
+
+    @Test
+    public void deleteAlarmTest() {
+        //given
+        Long userId = 1L;
+        UserEntity.builder().userId(userId).build();
+        Alarm alarm = Alarm.builder()
+            .id(1L)
+            .contents("test")
+            .userId(userId)
+            .build();
+        given(alarmRepository.findById(userId)).willReturn(Optional.of(alarm));
+
+        // when
+        AlarmResponseDto deletedAlarm = alarmService.deleteAlarm(1L, userId);
+
+        // then
+        assertEquals(1L, deletedAlarm.getId());
+        assertEquals("test", deletedAlarm.getContents());
 
     }
 
