@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -52,7 +53,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
             .authorizeRequests()
-            .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+//            .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+            .mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .antMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/email-check",
                 "/api/auth/email-auth/**", "/api/products/**","/api/reviews/**").permitAll()
             .anyRequest().authenticated()
