@@ -3,6 +3,10 @@ package com.zerobase.wishmarket.domain.product.service;
 import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductBestDto;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductCategoryDto;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
 import com.zerobase.wishmarket.domain.product.model.entity.RedisBestProducts;
@@ -79,7 +83,7 @@ public class ProductService {
 
         //기존의 베스트 상품의 isBest값을 false로 바꾸기
 
-        List<Product> oldBestproducts = productRepository.findAllByBestIsTrue();
+        List<Product> oldBestproducts = productRepository.findAllByIsBestIsTrue();
         for(Product p : oldBestproducts){
             p.setIsBestFalse();
         }
