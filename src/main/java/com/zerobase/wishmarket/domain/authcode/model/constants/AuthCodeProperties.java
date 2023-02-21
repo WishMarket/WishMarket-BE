@@ -4,4 +4,6 @@ public interface AuthCodeProperties {
     long REDIS_AUTH_CODE_EXPIRE_TIME = 1000 * 60 * 3; // 3분
     int AUTH_CODE_LENGTH = 6;
     String KEY_PREFIX = "auth_key:";
+    String AUTH_MAIL_SEND_SUCCESS = "메일 전송에 성공하였습니다.";
+    String AUTH_CODE_VERIFICATION_SUCCESS = "인증이 완료되었습니다.";
 }

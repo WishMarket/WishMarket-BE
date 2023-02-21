@@ -1,7 +1,9 @@
 package com.zerobase.wishmarket.domain.user.service;
 
+import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_REFRESH_TOKEN_REISSUE_TIME;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_PREFIX;
+import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.KEY_PREFIX;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_USING_EMAIL;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
@@ -9,6 +11,11 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALI
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWORD_DO_NOT_MATCH;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_ACCESS_TOKEN;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_REFRESH_TOKEN;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.INVALID_TOKEN;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_EXPIRED_ACCESS_TOKEN;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_VERIFICATION_AUTH_CODE;
 
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
@@ -17,6 +24,7 @@ import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
 import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
+import com.zerobase.wishmarket.domain.user.model.dto.ReissueResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
@@ -25,6 +33,8 @@ import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
+import com.zerobase.wishmarket.exception.GlobalException;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +59,13 @@ public class UserAuthService {
 
     @Transactional
     public SignUpEmailResponse signUp(SignUpForm form) {
+        String key = KEY_PREFIX + form.getName() + form.getEmail();
+        String value = redisClient.getAutoCode(key);
+
+        if(value == null || !value.equals(form.getEmail())){
+            throw new GlobalException(NOT_VERIFICATION_AUTH_CODE);
+        }
+
 
         if (checkInvalidPassword(form.getPassword())) {
             throw new UserException(INVALID_PASSWORD_FORMAT);
@@ -73,10 +90,11 @@ public class UserAuthService {
 
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
 
+        redisClient.del(key);
+
         return SignUpEmailResponse.from(
             userAuthRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL, UserStatusType.ACTIVE))
         );
-
     }
 
     public EmailCheckResponse emailCheck(EmailCheckForm form) {
@@ -126,6 +144,7 @@ public class UserAuthService {
             tokenSetDto.getRefreshToken(),
             TimeUnit.SECONDS,
             expirationSeconds);
+
 
         return SignInResponse.builder()
             .email(user.getEmail())
