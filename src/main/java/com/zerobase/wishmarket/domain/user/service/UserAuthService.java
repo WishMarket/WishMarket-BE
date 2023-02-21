@@ -1,7 +1,21 @@
 package com.zerobase.wishmarket.domain.user.service;
 
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
+
+import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_PREFIX;
+import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_PREFIX;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWORD_DO_NOT_MATCH;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
+
+import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
+import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
+import com.zerobase.wishmarket.common.redis.RedisClient;
+import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
+import com.zerobase.wishmarket.domain.follow.repository.FollowInfoRepository;
+import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.ReissueResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
@@ -43,6 +57,8 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.*;
 public class UserAuthService {
 
     private final UserAuthRepository userAuthRepository;
+    private final FollowInfoRepository followInfoRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationProvider jwtProvider;
     private final RedisClient redisClient;
@@ -83,12 +99,18 @@ public class UserAuthService {
 
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
 
+        FollowInfo empthFollowInfo = FollowInfo.builder()
+            .followerCount(0L)
+            .followCount(0L)
+            .build();
+
+        followInfoRepository.save(empthFollowInfo);
+
         redisClient.del(key);
 
         return SignUpEmailResponse.from(
-
-            userAuthRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL, UserStatusType.ACTIVE))
-
+            userAuthRepository.save(
+                UserEntity.of(form, UserRegistrationType.EMAIL, UserStatusType.ACTIVE, empthFollowInfo))
         );
     }
 

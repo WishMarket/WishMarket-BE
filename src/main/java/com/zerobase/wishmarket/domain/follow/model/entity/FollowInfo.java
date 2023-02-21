@@ -1,14 +1,11 @@
-package com.zerobase.wishmarket.domain.user.model.entity;
+package com.zerobase.wishmarket.domain.follow.model.entity;
 
 import com.zerobase.wishmarket.entity.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,20 +21,33 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class DeliveryAddress extends BaseEntity {
+public class FollowInfo extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DELIVERY_ID")
-    private Long deliveryId;
+    private Long id;
 
-    private Integer zipCode;
+    @Column(nullable = false)
+    private Long followerCount; // 날 팔로우 하는 사람 수
 
-    private String address;
+    @Column(nullable = false)
+    private Long followCount; // 내가 팔로우 하는 사람 수
 
-    // 1 : 1 Mapping relationship with user
-//    @OneToOne(fetch = FetchType.LAZY)
-////    @JoinColumn(name = "user_id")
-//    @JoinColumn
-//    private UserEntity userEntity;
+
+    public void followerCountPlus() {
+        this.followerCount += 1L;
+    }
+
+    public void followCountPlus() {
+        this.followCount += 1L;
+    }
+
+    public void followerCountMinus() {
+        this.followerCount -= 1L;
+    }
+
+    public void followCountMinus() {
+        this.followCount -= 1L;
+    }
 
 }

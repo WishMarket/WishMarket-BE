@@ -1,14 +1,13 @@
-package com.zerobase.wishmarket.domain.user.model.entity;
+package com.zerobase.wishmarket.domain.follow.model.entity;
 
+import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.entity.BaseEntity;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,25 +18,22 @@ import org.hibernate.envers.AuditOverride;
 
 @Getter
 @Builder
-@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class DeliveryAddress extends BaseEntity {
+public class Follow extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DELIVERY_ID")
-    private Long deliveryId;
+    private Long id;
 
-    private Integer zipCode;
+    @ManyToOne
+    @JoinColumn
+    private UserEntity follower; // 팔로우를 하는 사람
 
-    private String address;
-
-    // 1 : 1 Mapping relationship with user
-//    @OneToOne(fetch = FetchType.LAZY)
-////    @JoinColumn(name = "user_id")
-//    @JoinColumn
-//    private UserEntity userEntity;
+    @ManyToOne
+    @JoinColumn
+    private UserEntity followee; // 팔로우를 받는 사람
 
 }
