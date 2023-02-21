@@ -1,14 +1,25 @@
 package com.zerobase.wishmarket.domain.user.service;
 
-import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
-import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
-import com.zerobase.wishmarket.common.redis.RedisClient;
-import com.zerobase.wishmarket.domain.user.exception.UserException;
-import com.zerobase.wishmarket.domain.user.model.dto.*;
+import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
+import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
+import com.zerobase.wishmarket.domain.user.model.dto.ReissueResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
+import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
+
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
+
+import com.zerobase.wishmarket.exception.GlobalException;
+import java.time.Duration;
+import java.util.Date;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,11 +48,17 @@ public class UserAuthService {
     private final RedisClient redisClient;
     private final RedisTemplate redisTemplate;
 
+    private static final String EMAIL_USING_STATUS = "사용 가능한 이메일입니다.";
+
     @Transactional
     public SignUpEmailResponse signUp(SignUpForm form) {
-        if (checkInvalidEmail(form.getEmail())) {
-            throw new UserException(INVALID_EMAIL_FORMAT);
+        String key = KEY_PREFIX + form.getName() + form.getEmail();
+        String value = redisClient.getAutoCode(key);
+
+        if(value == null || !value.equals(form.getEmail())){
+            throw new GlobalException(NOT_VERIFICATION_AUTH_CODE);
         }
+
 
         if (checkInvalidPassword(form.getPassword())) {
             throw new UserException(INVALID_PASSWORD_FORMAT);
@@ -64,18 +81,41 @@ public class UserAuthService {
 
         }
 
-        if (isEmailExist(form.getEmail())) {
-            throw new UserException(ALREADY_REGISTER_USER);
-        }
-
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
+
+        redisClient.del(key);
 
         return SignUpEmailResponse.from(
 
             userAuthRepository.save(UserEntity.of(form, UserRegistrationType.EMAIL, UserStatusType.ACTIVE))
 
         );
+    }
 
+    public EmailCheckResponse emailCheck(EmailCheckForm form) {
+        if (checkInvalidEmail(form.getEmail())) {
+            throw new UserException(INVALID_EMAIL_FORMAT);
+        }
+
+        Optional<UserEntity> optionalUser = userAuthRepository.findByEmailAndUserRegistrationType(
+            form.getEmail(),
+            UserRegistrationType.EMAIL
+        );
+
+        if (optionalUser.isPresent()) {
+            UserEntity userEntity = optionalUser.get();
+
+            // 회원 정보 존재 -> 활동중
+            if (userEntity.getUserStatusType() == UserStatusType.ACTIVE) {
+                throw new UserException(ALREADY_REGISTER_USER);
+            }
+        }
+
+        // 1. 정보가 없음. 가입 가능한 이메일입니다.
+        // 2. 탈퇴 했던 회원 withdrawal => 사용 가능.
+        return EmailCheckResponse.builder()
+            .status(EMAIL_USING_STATUS)
+            .build();
     }
 
     @Transactional
@@ -100,12 +140,15 @@ public class UserAuthService {
                 TimeUnit.SECONDS,
                 expirationSeconds);
 
+
         return SignInResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
-                .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
-                .build();
+            .email(user.getEmail())
+            .name(user.getName())
+            .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+            .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
+            .refreshToken(tokenSetDto.getRefreshToken())
+            .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
+            .build();
     }
 
     @Transactional

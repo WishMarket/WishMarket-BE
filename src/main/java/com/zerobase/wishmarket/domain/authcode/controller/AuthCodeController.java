@@ -25,8 +25,8 @@ public class AuthCodeController {
     }
 
     @PostMapping("/code")
-    public ResponseEntity<Void> authCodeVerify(@RequestBody @Valid AuthCodeVerifyForm form){
+    public ResponseEntity<String> authCodeVerify(@RequestBody @Valid AuthCodeVerifyForm form){
         authCodeService.authCodeVerify(form);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("인증이 완료되었습니다.");
     }
 }

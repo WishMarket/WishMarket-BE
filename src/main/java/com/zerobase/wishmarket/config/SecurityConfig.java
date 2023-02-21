@@ -51,8 +51,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
             .authorizeRequests()
-            .antMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/email-check",
-                "/api/auth/email-auth/**", "/api/products/**","/api/reviews/**","/admin/**").permitAll()
+            .antMatchers("/api/auth/sign-up","/api/auth/sign-in/**", "/api/auth/email-check","/api/auth/email-auth/**",
+                "/api/products/**","/api/reviews/**", "/admin/**").permitAll()
             .anyRequest().authenticated()
             .and()
             // logout 요청시 홈으로 이동 - 기본 logout url = "/logout"
