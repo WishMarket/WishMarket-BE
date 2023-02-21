@@ -2,15 +2,23 @@ package com.zerobase.wishmarket.domain.authcode.service;
 
 import static com.zerobase.wishmarket.domain.authcode.exception.AuthErrorCode.INVALID_AUTH_CODE;
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.AUTH_CODE_LENGTH;
+import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.AUTH_CODE_VERIFICATION_SUCCESS;
+import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.AUTH_MAIL_SEND_SUCCESS;
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.KEY_PREFIX;
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.REDIS_AUTH_CODE_EXPIRE_TIME;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_KEY;
 
 import com.zerobase.wishmarket.common.redis.RedisClient;
 import com.zerobase.wishmarket.domain.authcode.components.MailComponents;
 import com.zerobase.wishmarket.domain.authcode.exception.AuthException;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeMailForm;
+import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeResponse;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeVerifyForm;
+import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
+import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
+import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import com.zerobase.wishmarket.exception.GlobalException;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +30,20 @@ import org.springframework.stereotype.Service;
 public class AuthCodeService {
 
 
-
     private final MailComponents mailComponents;
     private final RedisClient redisClient;
 
+    private final UserAuthRepository userAuthRepository;
 
-    public void sendAuthCode(AuthCodeMailForm form) {
+    public AuthCodeResponse sendAuthCode(AuthCodeMailForm form) {
+
+        boolean isExist = userAuthRepository.existsByEmailAndUserRegistrationType(form.getEmail(),
+            UserRegistrationType.EMAIL);
+
+        if(isExist){
+            throw new UserException(ALREADY_REGISTER_USER);
+        }
+
         String authCode = getRandomAuthCode();
         String key = KEY_PREFIX + form.getName() + form.getEmail();
 
@@ -41,9 +57,13 @@ public class AuthCodeService {
         redisClient.put(key, authCode, TimeUnit.MILLISECONDS, REDIS_AUTH_CODE_EXPIRE_TIME);
 
         mailComponents.sendAuthCodeMail(form.getEmail(), authCode);
+
+        return AuthCodeResponse.builder()
+            .status(AUTH_MAIL_SEND_SUCCESS)
+            .build();
     }
 
-    public void authCodeVerify(AuthCodeVerifyForm form) {
+    public AuthCodeResponse authCodeVerify(AuthCodeVerifyForm form) {
         String key = KEY_PREFIX + form.getName() + form.getEmail();
 
         // key 시간 만료
@@ -51,14 +71,17 @@ public class AuthCodeService {
             throw new GlobalException(EXPIRED_KEY);
         }
 
-        String verifiedAuthCode = redisClient.get(key, String.class);
+        String verifiedAuthCode = redisClient.getAutoCode(key);
 
         if(!verifiedAuthCode.equals(form.getCode())){
             throw new AuthException(INVALID_AUTH_CODE);
         }
 
-        // 정상적인 인증 후 key 제거
-        redisClient.del(key);
+        redisClient.put(key, form.getEmail());
+
+        return AuthCodeResponse.builder()
+            .status(AUTH_CODE_VERIFICATION_SUCCESS)
+            .build();
     }
 
     private String getRandomAuthCode() {

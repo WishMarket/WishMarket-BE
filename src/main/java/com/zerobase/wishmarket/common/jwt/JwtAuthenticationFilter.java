@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtAuthenticationProvider jwtProvider;
+    private final RedisTemplate redisTemplate;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -35,9 +37,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = this.resolveTokenFromRequest(request);
 
-            if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token, request)) {
+            if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token)) {
                 // 토큰 유효성 검증
                 Authentication auth = this.jwtProvider.getAuthentication(token);
+
+                // Redis 에 해당 Token 의 로그아웃 여부 확인
+                String isLogout = (String) redisTemplate.opsForValue().get(token);
+                if (ObjectUtils.isEmpty(isLogout)) {
+                    // 토큰이 유효하면 토큰으로부터 유저 정보를 받아옵니다.
+                    Authentication authentication = jwtProvider.getAuthentication(token);
+                    // SecurityContext 에 Authentication 객체를 저장합니다.
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
 
                 // Security Context 에 인증 정보 넣기
                 SecurityContextHolder.getContext().setAuthentication(auth);

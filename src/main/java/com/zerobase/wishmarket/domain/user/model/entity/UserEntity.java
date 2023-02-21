@@ -28,6 +28,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.envers.AuditOverride;
 
+import javax.persistence.*;
+
 @Getter
 @Builder
 @ToString
@@ -91,6 +93,7 @@ public class UserEntity extends BaseEntity {
             .userStatusType(userStatusType)
             .followInfo(followInfo)
             .build();
+
     }
 
 
@@ -118,7 +121,18 @@ public class UserEntity extends BaseEntity {
 
     public void hasUnFollowing() {
         this.followInfo.followCountMinus();
+
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
+    public void increasePointPrice() {
+        this.pointPrice += 10000L;
+    }
+
+    public void usePointPrice(Long usePoint) {
+        this.pointPrice -= usePoint;
+    }
 
 }

@@ -14,9 +14,14 @@ public enum CommonErrorCode implements ErrorCode {
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다."),
     EMPTY_FILE(HttpStatus.BAD_REQUEST, "업로드한 파일이 없습니다."),
     FILE_SIZE_EXCEED(HttpStatus.BAD_REQUEST, "파일 업로드 용량을 초과하였습니다."),
+
     /* 401 UNAUTHORIZED : 인증되지 않은 사용자 */
     ACCESS_DENIED(HttpStatus.UNAUTHORIZED,  "인증 정보가 존재하지 않습니다."),
     EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "Access Token이 만료되었습니다."),
+    NOT_EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 Access Token이 아닙니다."),
+    EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "Refresh Token이 만료되었습니다."),
+    NOT_VERIFICATION_AUTH_CODE(HttpStatus.UNAUTHORIZED, "비정상적인 접근!! 인증 코드 검증이 완료되지 않았습니다."),
+
     /* 404 NOT_FOUND : Resource 를 찾을 수 없음 */
     EXPIRED_KEY(HttpStatus.NOT_FOUND, "해당 Key는 이미 만료되었습니다."),
 
