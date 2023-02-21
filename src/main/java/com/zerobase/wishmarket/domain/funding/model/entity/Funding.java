@@ -43,7 +43,7 @@ public class Funding extends BaseEntity{
 
     // N : 1
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "target_id")
     private UserEntity targetUser;
 
     // N : 1
