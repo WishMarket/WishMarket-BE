@@ -5,21 +5,10 @@ import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.entity.BaseEntity;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.envers.AuditOverride;
+
+import javax.persistence.*;
 
 @Getter
 @Builder
@@ -72,6 +61,7 @@ public class UserEntity extends BaseEntity {
             .userRegistrationType(userRegistrationType)
             .userStatusType(userStatusType)
             .build();
+
     }
 
     public void setUserStatusType(UserStatusType userStatusType) {
@@ -82,7 +72,10 @@ public class UserEntity extends BaseEntity {
         this.name = name;
         this.profileImage = profileImage;
         return this;
+    }
 
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 
