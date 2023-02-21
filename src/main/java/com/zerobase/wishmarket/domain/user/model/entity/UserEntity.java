@@ -5,21 +5,10 @@ import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.entity.BaseEntity;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.envers.AuditOverride;
+
+import javax.persistence.*;
 
 @Getter
 @Builder
@@ -62,14 +51,17 @@ public class UserEntity extends BaseEntity {
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
 
-    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType) {
+    // 회원 가입 시 가입 정보 입력
+    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType, UserStatusType userStatusType) {
         return UserEntity.builder()
             .name(form.getName())
             .email(form.getEmail())
             .nickName(form.getNickName())
             .password(form.getPassword())
             .userRegistrationType(userRegistrationType)
+            .userStatusType(userStatusType)
             .build();
+
     }
 
     public void setUserStatusType(UserStatusType userStatusType) {
@@ -80,8 +72,18 @@ public class UserEntity extends BaseEntity {
         this.name = name;
         this.profileImage = profileImage;
         return this;
-
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void increasePointPrice() {
+        this.pointPrice += 10000L;
+    }
+
+    public void usePointPrice(Long usePoint) {
+        this.pointPrice -= usePoint;
+    }
 
 }
