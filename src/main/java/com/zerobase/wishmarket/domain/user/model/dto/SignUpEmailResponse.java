@@ -2,6 +2,7 @@ package com.zerobase.wishmarket.domain.user.model.dto;
 
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
+import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ public class SignUpEmailResponse {
     private String email;
     private String nickName;
     private UserRegistrationType userRegistrationType;
+    private UserStatusType userStatusType;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
@@ -31,6 +33,7 @@ public class SignUpEmailResponse {
             .email(userEntity.getEmail())
             .nickName(userEntity.getNickName())
             .userRegistrationType(userEntity.getUserRegistrationType())
+            .userStatusType(userEntity.getUserStatusType())
             .createdAt(userEntity.getCreatedAt())
             .modifiedAt(userEntity.getModifiedAt())
             .build();

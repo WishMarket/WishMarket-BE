@@ -8,6 +8,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import javax.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -48,12 +51,12 @@ public class MailComponents {
 
 
     public void sendAuthCodeMail(String email, String authCode) {
-        ClassPathResource resource = (ClassPathResource) resourceLoader
-            .getResource("classpath:static/mailTemplate/AuthCodeMail.html");
+
 
         try {
-            File file = resource.getFile();
-            FileReader reader = new FileReader(file, StandardCharsets.UTF_8);
+            InputStream inputStream = resourceLoader
+                .getResource("classpath:static/mailTemplate/AuthCodeMail.html").getInputStream();
+            Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(reader);
 
             String line = "";

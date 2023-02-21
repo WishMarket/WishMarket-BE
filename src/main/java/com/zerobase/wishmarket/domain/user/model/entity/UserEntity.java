@@ -51,14 +51,17 @@ public class UserEntity extends BaseEntity {
     @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
     private DeliveryAddress deliveryAddress;
 
-    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType) {
+    // 회원 가입 시 가입 정보 입력
+    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType, UserStatusType userStatusType) {
         return UserEntity.builder()
-                .name(form.getName())
-                .email(form.getEmail())
-                .nickName(form.getNickName())
-                .password(form.getPassword())
-                .userRegistrationType(userRegistrationType)
-                .build();
+            .name(form.getName())
+            .email(form.getEmail())
+            .nickName(form.getNickName())
+            .password(form.getPassword())
+            .userRegistrationType(userRegistrationType)
+            .userStatusType(userStatusType)
+            .build();
+
     }
 
     public void setUserStatusType(UserStatusType userStatusType) {
