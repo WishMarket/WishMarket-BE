@@ -22,7 +22,7 @@ public class ProductInputForm {
 
     private int price;
 
-    private String description;
+    private MultipartFile description;
 
 
 }

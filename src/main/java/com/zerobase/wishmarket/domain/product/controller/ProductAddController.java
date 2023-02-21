@@ -29,9 +29,12 @@ public class ProductAddController {
 
     @PostMapping("/admin/addProducts")
     public String upload(@RequestParam MultipartFile productImage,
+        @RequestParam MultipartFile descriptionImage,
         ProductInputForm productInputForm) throws IOException {
 
         productInputForm.setImage(productImage);
+        productInputForm.setDescription(descriptionImage);
+
         productAddService.addProductData(productInputForm);
 
         return "redirect:/admin/addProducts";

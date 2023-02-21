@@ -35,20 +35,29 @@ public class ProductAddService {
         ProductCategory productCategory = ProductCategory.values()[productInputForm.getCategoryCode()];
         String category = productCategory.toString();
 
-        String storedFileName = "";
+        String imageFileName = "";
+        String descriptionFileName="";
         if (productInputForm.getImage() != null) {
             if (!productInputForm.getImage().isEmpty()) {
-                storedFileName = s3Util.upload(PRODUCTS_DIRECTORY,
+                imageFileName = s3Util.upload(PRODUCTS_DIRECTORY,
                     category, productInputForm.getImage());
             }
         }
 
+        if (productInputForm.getDescription() != null) {
+            if (!productInputForm.getDescription().isEmpty()) {
+                descriptionFileName = s3Util.upload(PRODUCTS_DIRECTORY,
+                    category, productInputForm.getDescription());
+            }
+        }
+
+
         Product product = Product.builder()
             .name(productInputForm.getName())
-            .productImage(storedFileName)
+            .productImage(imageFileName)
             .category(productCategory)
             .price(productInputForm.getPrice())
-            .description(productInputForm.getDescription())
+            .description(descriptionFileName)
             .build();
         productRepository.save(product);
 
