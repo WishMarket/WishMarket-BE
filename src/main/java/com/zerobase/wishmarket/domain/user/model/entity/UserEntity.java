@@ -78,5 +78,12 @@ public class UserEntity extends BaseEntity {
         this.password = password;
     }
 
+    public void increasePointPrice() {
+        this.pointPrice += 10000L;
+    }
+
+    public void usePointPrice(Long usePoint) {
+        this.pointPrice -= usePoint;
+    }
 
 }

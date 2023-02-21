@@ -104,7 +104,8 @@ public class JwtAuthenticationProvider {
             .build();
     }
 
-    public boolean isValidationToken(String token, HttpServletRequest request) {
+//    public boolean isValidationToken(String token, HttpServletRequest request) {
+    public boolean isValidationToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;

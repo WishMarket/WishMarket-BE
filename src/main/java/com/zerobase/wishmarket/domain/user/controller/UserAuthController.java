@@ -1,12 +1,6 @@
 package com.zerobase.wishmarket.domain.user.controller;
 
 import com.zerobase.wishmarket.domain.user.annotation.LoginUserInfo;
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
-import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
-import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
-import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
-import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.service.UserAuthService;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -25,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAuthController {
 
     private final UserAuthService userAuthService;
-//    private final RedirectView redirectView;
 
     @PostMapping("/sign-up")
     public ResponseEntity<SignUpEmailResponse> signUpEmail(@RequestBody @Valid SignUpForm form) {
@@ -44,13 +37,16 @@ public class UserAuthController {
 
     @PostMapping("/sign-in/google")
     public ResponseEntity<?> signInGoogle(@LoginUserInfo OAuthUserInfo userInfo) {
-//        redirectView.setUrl("/oauth2/authorization/google");
         return ResponseEntity.ok(userAuthService.signInSocial(userInfo));
     }
 
     @PostMapping("/sign-in/naver")
     public ResponseEntity<?> signInNaver(@LoginUserInfo OAuthUserInfo userInfo) {
-//        redirectView.setUrl("/oauth2/authorization/naver");
         return ResponseEntity.ok(userAuthService.signInSocial(userInfo));
+    }
+
+    @PostMapping("/logout")
+    public void logout(SignInResponse signInResponse) {
+        userAuthService.logout(signInResponse);
     }
 }
