@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.common.jwt.model.constants;
 import java.time.Duration;
 
 public interface JwtConstants {
+
     String TOKEN_HEADER = "Authorization";
     String TOKEN_PREFIX = "Bearer ";
     long ACCESS_TOKEN_VALID_TIME = Duration.ofMinutes(60).toMillis(); // Access Token: 30분

@@ -1,9 +1,8 @@
 package com.zerobase.wishmarket.domain.user.model.dto;
 
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
-import lombok.Getter;
-
 import java.io.Serializable;
+import lombok.Getter;
 
 @Getter
 public class OAuthUserInfo implements Serializable {

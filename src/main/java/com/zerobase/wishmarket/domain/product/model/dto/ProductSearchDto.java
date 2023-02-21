@@ -11,21 +11,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductSearchDto {
-    Long productId;
-    String name;
-    String productImage;
-    int price;
-    int likes;
+
+    private Long productId;
+    private String name;
+    private String productImage;
+    private int price;
+    private int likes;
     private boolean isBest;
 
-    public static ProductSearchDto of(Product product){
+    public static ProductSearchDto of(Product product) {
         return ProductSearchDto.builder()
-                .productId(product.getProductId())
-                .name(product.getName())
-                .productImage(product.getProductImage())
-                .price(product.getPrice())
-                .likes(product.getLikes())
-                .isBest(product.isBest())
-                .build();
+            .productId(product.getProductId())
+            .name(product.getName())
+            .productImage(product.getProductImage())
+            .price(product.getPrice())
+            .likes(product.getLikes())
+            .isBest(product.isBest())
+            .build();
     }
 }

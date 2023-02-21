@@ -13,11 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
+/**
+ * 백엔드 단에서만 사용!, 상품 데이터 넣기
+ */
 @Service
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
-//백엔드 단에서만 사용!, 상품 데이터 넣기
 public class ProductAddService {
 
     private final ProductRepository productRepository;
@@ -36,7 +38,7 @@ public class ProductAddService {
         String category = productCategory.toString();
 
         String imageFileName = "";
-        String descriptionFileName="";
+        String descriptionFileName = "";
         if (productInputForm.getImage() != null) {
             if (!productInputForm.getImage().isEmpty()) {
                 imageFileName = s3Util.upload(PRODUCTS_DIRECTORY,
@@ -50,7 +52,6 @@ public class ProductAddService {
                     category, productInputForm.getDescription());
             }
         }
-
 
         Product product = Product.builder()
             .name(productInputForm.getName())

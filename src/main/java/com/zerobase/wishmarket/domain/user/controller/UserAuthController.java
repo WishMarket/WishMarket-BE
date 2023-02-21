@@ -1,15 +1,20 @@
 package com.zerobase.wishmarket.domain.user.controller;
 
 import com.zerobase.wishmarket.domain.user.annotation.LoginUserInfo;
+import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
+import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
+import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
+import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.service.UserAuthService;
 import javax.validation.Valid;
-import javax.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -26,7 +31,7 @@ public class UserAuthController {
     }
 
     @PostMapping("/email-check")
-    public ResponseEntity<EmailCheckResponse> emailCheck(@RequestBody @Valid EmailCheckForm from){
+    public ResponseEntity<EmailCheckResponse> emailCheck(@RequestBody @Valid EmailCheckForm from) {
         return ResponseEntity.ok(userAuthService.emailCheck(from));
     }
 

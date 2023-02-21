@@ -1,13 +1,12 @@
 package com.zerobase.wishmarket.domain.wishList.model.entity;
 
+import java.util.List;
+import javax.persistence.Id;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.redis.core.RedisHash;
-
-import javax.persistence.Id;
-import java.util.List;
 
 @Getter
 @Setter

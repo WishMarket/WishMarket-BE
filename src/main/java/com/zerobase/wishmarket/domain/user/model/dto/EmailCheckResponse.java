@@ -12,5 +12,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EmailCheckResponse {
+
     private String status;
 }

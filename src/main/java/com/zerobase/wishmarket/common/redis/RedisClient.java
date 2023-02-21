@@ -3,7 +3,6 @@ package com.zerobase.wishmarket.common.redis;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.REDIS_PUT_EMPTY_KEY;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.REDIS_PUT_FAIL;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.exception.GlobalException;
@@ -12,13 +11,13 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class RedisClient {
+
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
     private final JwtAuthenticationProvider provider;
@@ -32,19 +31,12 @@ public class RedisClient {
             return null;
         }
 
-        String redisValue = (String)redisTemplate.opsForValue().get(key);
+        String redisValue = (String) redisTemplate.opsForValue().get(key);
 
         if (StringUtil.isNullOrEmpty(redisValue)) {
             return null;
         }
-//        else {
-//            try {
-//                return objectMapper.readValue(redisValue, classType);
-//            } catch (JsonProcessingException ex) {
-//                log.error("Parsing error", ex);
-//                return null;
-//            }
-//        }
+
         return redisValue;
     }
 

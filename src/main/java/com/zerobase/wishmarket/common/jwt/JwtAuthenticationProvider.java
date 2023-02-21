@@ -13,7 +13,6 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import java.util.Base64;
 import java.util.Date;
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,18 +103,18 @@ public class JwtAuthenticationProvider {
             .build();
     }
 
-//    public boolean isValidationToken(String token, HttpServletRequest request) {
+    //    public boolean isValidationToken(String token, HttpServletRequest request) {
     public boolean isValidationToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
-        } catch(SecurityException | MalformedJwtException e) {
+        } catch (SecurityException | MalformedJwtException e) {
             log.error("Invalid JWT signature");
             return false;
-        } catch(UnsupportedJwtException e) {
+        } catch (UnsupportedJwtException e) {
             log.error("Unsupported JWT token");
             return false;
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.error("JWT token is invalid");
             return false;
         }
@@ -141,7 +140,8 @@ public class JwtAuthenticationProvider {
 
         // Spring에서 지원해주는 형태의 토큰으로 바꿔주기
         // userDetails와 권한 정보 넣어주기
-        return new UsernamePasswordAuthenticationToken(Long.parseLong(this.getUserId(jwt)), "", userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(Long.parseLong(this.getUserId(jwt)), "",
+            userDetails.getAuthorities());
     }
 
 

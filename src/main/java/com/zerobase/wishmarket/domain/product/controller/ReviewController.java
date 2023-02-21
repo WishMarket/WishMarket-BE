@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 public class ReviewController {
+
     private final ReviewService reviewService;
 
     @GetMapping("/api/reviews")
     public Page<Review> reviews(@RequestParam Long productId,
-                                @RequestParam("page") Integer page) {
+        @RequestParam("page") Integer page) {
         return reviewService.reviews(productId, page);
     }
 }

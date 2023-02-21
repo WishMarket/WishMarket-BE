@@ -1,9 +1,8 @@
 package com.zerobase.wishmarket.domain.user.model.dto;
 
+import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
-
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Builder

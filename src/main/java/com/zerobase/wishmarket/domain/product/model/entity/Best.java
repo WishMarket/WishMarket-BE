@@ -24,5 +24,4 @@ public class Best {
     private Long productId;
 
 
-
 }

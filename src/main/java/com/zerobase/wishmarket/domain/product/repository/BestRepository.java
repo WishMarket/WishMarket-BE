@@ -7,7 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface BestRepository extends JpaRepository<Best,Long> {
+public interface BestRepository extends JpaRepository<Best, Long> {
+
     @Query("select b.productId from Best b")
     List<Long> findBestList();
 

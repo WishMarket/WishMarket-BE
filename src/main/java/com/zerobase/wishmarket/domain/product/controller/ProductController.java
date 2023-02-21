@@ -37,7 +37,6 @@ public class ProductController {
 
         return ResponseEntity.ok()
             .body(productService.getProductByCategory(categories[categoryCode], pageRequest)).getBody();
-
     }
 
     //베스트 상품 조회
@@ -45,14 +44,6 @@ public class ProductController {
     public ResponseEntity<List<ProductBestDto>> getBestProductList() {
         return ResponseEntity.ok().body(productService.getBestProducts());
     }
-
-    //상품 데이터 넣기
-    @PostMapping("/add")
-    public ResponseEntity addProduct(@ModelAttribute ProductInputForm productInputForm) {
-        productService.addProductData(productInputForm);
-        return ResponseEntity.ok().body("상품 정보가 정상적으로 업로드 되었습니다.");
-    }
-
 
     @GetMapping("/search")
     public Page<ProductSearchDto> search(@RequestParam("keyword") String keyword,
@@ -65,7 +56,6 @@ public class ProductController {
     public ResponseEntity<?> productDetail(Long productId) {
         ProductDetailDto responseDto = productService.detail(productId);
         return ResponseEntity.ok().body(responseDto);
-
     }
 
 

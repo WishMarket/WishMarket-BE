@@ -14,6 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignUpForm {
+
     @NotNull
     @Email(message = "올바른 이메일 형식이 아닙니다.")
 

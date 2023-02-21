@@ -19,7 +19,7 @@ public enum UserErrorCode implements ErrorCode {
     EMAIL_NOT_FOUND(BAD_REQUEST, "존재하지 않는 Email 입니다."),
     PASSWORD_DO_NOT_MATCH(BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
-        ;
+    ;
 
     private final HttpStatus errorCode;
     private final String message;

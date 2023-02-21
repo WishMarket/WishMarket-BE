@@ -28,8 +28,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.envers.AuditOverride;
 
-import javax.persistence.*;
-
 @Getter
 @Builder
 @ToString
@@ -84,6 +82,7 @@ public class UserEntity extends BaseEntity {
     // 회원 가입 시 가입 정보 입력
     public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType,
         UserStatusType userStatusType, FollowInfo followInfo) {
+
         return UserEntity.builder()
             .name(form.getName())
             .email(form.getEmail())
@@ -121,7 +120,7 @@ public class UserEntity extends BaseEntity {
 
     public void hasUnFollowing() {
         this.followInfo.followCountMinus();
-
+    }
 
     public void setPassword(String password) {
         this.password = password;

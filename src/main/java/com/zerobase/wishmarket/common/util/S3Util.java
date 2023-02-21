@@ -27,9 +27,6 @@ public class S3Util {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName; // Bucket 이름
 
-//    @Value("${cloud.aws.s3.directory}")
-//    private String directory;
-
     // 파일 확장자 구분선
     private static final String FILE_EXTENSION_SEPARATOR = ".";
     private static final String SEPARATOR = "_";

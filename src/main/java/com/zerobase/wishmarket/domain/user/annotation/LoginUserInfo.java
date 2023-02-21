@@ -11,4 +11,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 // 어노테이션 클래스 지정 -> @LoginUserInfo 생성
 public @interface LoginUserInfo {
+
 }

@@ -14,7 +14,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
 
     public Page<Review> reviews(Long productId, Integer page) {
-        PageRequest pageRequest = PageRequest.of(page-1, 12);
+        PageRequest pageRequest = PageRequest.of(page - 1, 12);
         return reviewRepository.findAllByProductId(productId, pageRequest);
     }
 }

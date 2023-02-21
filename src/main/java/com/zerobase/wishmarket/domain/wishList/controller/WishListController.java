@@ -3,12 +3,16 @@ package com.zerobase.wishmarket.domain.wishList.controller;
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.domain.wishList.model.entity.WishList;
 import com.zerobase.wishmarket.domain.wishList.service.WishListService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/wishlist")
@@ -23,9 +27,9 @@ public class WishListController {
     //위시리스트 추가
     @PostMapping("/add")
     public ResponseEntity<WishList> addWishList(@AuthenticationPrincipal Long userId,
-                                                @RequestParam Long productId) {
+        @RequestParam Long productId) {
         return ResponseEntity.ok()
-                .body(wishListService.addWishList(userId, productId));
+            .body(wishListService.addWishList(userId, productId));
     }
 
     //위시리스트 조회
@@ -37,9 +41,9 @@ public class WishListController {
     //위시리스트 삭제
     @DeleteMapping
     public ResponseEntity<Boolean> deleteWishList(@AuthenticationPrincipal Long userId,
-                                                  @RequestParam Long wishListId) {
+        @RequestParam Long wishListId) {
         return ResponseEntity.ok()
-                .body(wishListService.deleteWishList(userId, wishListId));
+            .body(wishListService.deleteWishList(userId, wishListId));
 
     }
 

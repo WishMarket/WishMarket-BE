@@ -2,7 +2,6 @@ package com.zerobase.wishmarket.domain.product.service;
 
 import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
-import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductBestDto;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductCategoryDto;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
@@ -14,15 +13,8 @@ import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.domain.product.repository.ProductLikesRepository;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.product.repository.RedisBestRepository;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 
 @Service
 @Configuration
@@ -84,7 +75,7 @@ public class ProductService {
         //기존의 베스트 상품의 isBest값을 false로 바꾸기
 
         List<Product> oldBestproducts = productRepository.findAllByIsBestIsTrue();
-        for(Product p : oldBestproducts){
+        for (Product p : oldBestproducts) {
             p.setIsBestFalse();
         }
 
@@ -131,7 +122,6 @@ public class ProductService {
 
     }
 
-
     //베스트 상품 조회
     public List<ProductBestDto> getBestProducts() {
         List<Product> productList = redisBestRepository.findById(KEY_BEST_PRODUCTS).get()
@@ -143,75 +133,6 @@ public class ProductService {
         }
         return productBestDtoList;
     }
-
-
-    //상품 넣기
-    public void addProductData(ProductInputForm productInputForm) {
-        String saveFilename = "";
-        ProductCategory productCategory = ProductCategory.values()[productInputForm.getCategoryCode()];
-        System.out.println(productCategory);
-        //등록한 이미지가 있다면 처리
-        if (productInputForm.getImage() != null) {
-
-            String originalFilename = productInputForm.getImage().getOriginalFilename();
-            String baseLocalPath = "src/main/java/com/zerobase/wishmarket/domain/product/Images";
-            saveFilename = getNewSaveFile(baseLocalPath, originalFilename,
-                productInputForm.getCategoryCode());
-
-            try {
-                File newFile = new File(saveFilename);
-                FileCopyUtils.copy(productInputForm.getImage().getInputStream(),
-                    new FileOutputStream(newFile));
-            } catch (IOException e) {
-                log.info(e.getMessage());
-            }
-        }
-        Product product = Product.builder()
-            .name(productInputForm.getName())
-            .productImage(saveFilename)
-            .category(productCategory)
-            .price(productInputForm.getPrice())
-            .description(productInputForm.getDescription())
-            .build();
-        productRepository.save(product);
-
-        ProductLikes productLikes = ProductLikes.builder()
-            .productId(product.getProductId())
-            .likes(0)
-            .build();
-        productLikesRepository.save(productLikes);
-
-
-    }
-
-    public String getNewSaveFile(String baseLocalPath, String originalFilename, int categoryCode) {
-        ProductCategory productCategory = ProductCategory.values()[categoryCode];
-        LocalDate now = LocalDate.now();
-        String dir = String.format("%s/%s/", baseLocalPath, productCategory);
-
-        File file = new File(dir);
-        if (!file.isDirectory()) {
-            file.mkdir();   //디렉토리가 없으면 생성하기
-        }
-
-        String fileExtension = "";
-        if (originalFilename != null) {
-            int dotPos = originalFilename.lastIndexOf(".");
-            if (dotPos > -1) {
-                fileExtension = originalFilename.substring(dotPos + 1);
-            }
-        }
-
-        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-        String newFilename = String.format("%s%s", dir, uuid);
-
-        if (fileExtension.length() > 0) {
-            newFilename += "." + fileExtension;
-
-        }
-        return newFilename;
-    }
-
 
     public Page<ProductSearchDto> search(String keyword,
         PageRequest pageRequest) {

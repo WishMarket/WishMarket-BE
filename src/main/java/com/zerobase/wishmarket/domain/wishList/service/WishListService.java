@@ -34,18 +34,17 @@ public class WishListService {
 
         //추가할 위시리스트 저장
         WishList wishList = wishListRepository.save(WishList.builder()
-                .userId(userId)
-                .productId(productId)
-                .build());
+            .userId(userId)
+            .productId(productId)
+            .build());
 
         userWishList.add(wishList);
 
-
         //레디스 업데이트
         redisUserWishListRepository.save(RedisUserWishList.builder()
-                .id(userId)
-                .wishLists(userWishList)
-                .build());
+            .id(userId)
+            .wishLists(userWishList)
+            .build());
 
         return wishList;
     }
@@ -66,19 +65,19 @@ public class WishListService {
 
     public boolean deleteWishList(Long userId, Long wishListId) {
         WishList wishList = wishListRepository.findByWishListId(wishListId)
-                .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
+            .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
 
         RedisUserWishList redisUserWishList = redisUserWishListRepository.findById(userId)
-                .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
+            .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
 
         wishListRepository.delete(wishList);
 
         //레디스도 업데이트
         List<WishList> updatedUserWishList = wishListRepository.findAllByUserId(userId);
         redisUserWishListRepository.save(RedisUserWishList.builder()
-                .id(userId)
-                .wishLists(updatedUserWishList)
-                .build());
+            .id(userId)
+            .wishLists(updatedUserWishList)
+            .build());
 
         return true;
     }

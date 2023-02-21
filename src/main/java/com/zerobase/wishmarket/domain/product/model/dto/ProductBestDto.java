@@ -12,18 +12,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductBestDto {
-    Long productId;
-    String name;
-    String productImageUrl;
-    int category;
-    int price;
-    String description;
-    int likes;
-    private boolean isBest;
-    LocalDateTime createdAt;
-    LocalDateTime modifiedAt;
 
-    public static ProductBestDto of(Product product){
+    private Long productId;
+    private String name;
+    private String productImageUrl;
+    private int category;
+    private int price;
+    private String description;
+    private int likes;
+    private boolean isBest;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+
+    public static ProductBestDto of(Product product) {
         return ProductBestDto.builder()
             .productId(product.getProductId())
             .name(product.getName())

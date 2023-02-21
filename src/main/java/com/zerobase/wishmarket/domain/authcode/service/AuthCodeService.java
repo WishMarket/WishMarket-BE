@@ -15,7 +15,6 @@ import com.zerobase.wishmarket.domain.authcode.exception.AuthException;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeMailForm;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeResponse;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeVerifyForm;
-import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
@@ -40,7 +39,7 @@ public class AuthCodeService {
         boolean isExist = userAuthRepository.existsByEmailAndUserRegistrationType(form.getEmail(),
             UserRegistrationType.EMAIL);
 
-        if(isExist){
+        if (isExist) {
             throw new UserException(ALREADY_REGISTER_USER);
         }
 
@@ -73,7 +72,7 @@ public class AuthCodeService {
 
         String verifiedAuthCode = redisClient.getAutoCode(key);
 
-        if(!verifiedAuthCode.equals(form.getCode())){
+        if (!verifiedAuthCode.equals(form.getCode())) {
             throw new AuthException(INVALID_AUTH_CODE);
         }
 

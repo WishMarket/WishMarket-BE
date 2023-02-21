@@ -9,6 +9,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class TokenSetDto {
+
     private String accessToken;
     private String refreshToken;
     private Date accessTokenExpiredAt;
