@@ -95,6 +95,17 @@ public class UserEntity extends BaseEntity {
 
     }
 
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setProfileImage(String profileImageUrl) {
+        this.profileImage = profileImageUrl;
+    }
 
     public void setUserStatusType(UserStatusType userStatusType) {
         this.userStatusType = userStatusType;

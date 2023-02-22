@@ -33,7 +33,16 @@ public class DeliveryAddress extends BaseEntity {
 
     private Integer zipCode;
 
-    private String address;
+    private String baseAddress;
+    private String detailAddress;
+
+    public void setBaseAddress(String baseAddress) {
+        this.baseAddress = baseAddress;
+    }
+
+    public void setDetailAddress(String detailAddress) {
+        this.detailAddress = detailAddress;
+    }
 
     // 1 : 1 Mapping relationship with user
 //    @OneToOne(fetch = FetchType.LAZY)
