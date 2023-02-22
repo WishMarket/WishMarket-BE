@@ -1,6 +1,7 @@
 package com.zerobase.wishmarket.domain.user.service;
 
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthAttributes;
+import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import java.util.Collections;
@@ -14,11 +15,14 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpSession;
+
 @RequiredArgsConstructor
 @Service
 public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final UserAuthRepository userAuthRepository;
+    private final HttpSession httpSession;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -36,6 +40,7 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
             oAuth2User.getAttributes());
 
         UserEntity userEntity = saveOrUpdate(attributes);
+        httpSession.setAttribute("user", new OAuthUserInfo(userEntity));
 
         return new DefaultOAuth2User(
             Collections.singleton(new SimpleGrantedAuthority("USER")),
