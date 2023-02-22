@@ -1,19 +1,15 @@
 package com.zerobase.wishmarket.domain.funding.exception;
 
-import com.zerobase.wishmarket.exception.ErrorCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import com.zerobase.wishmarket.exception.GlobalException;
 
-@Getter
-@RequiredArgsConstructor
-public enum FundingException implements ErrorCode {
-    FUNDING_START_FAIL(HttpStatus.BAD_REQUEST, "펀딩 시작을 실패하였습니다."),
-    FUNDING_JOIN_FAIL(HttpStatus.BAD_REQUEST, "펀딩 참여를 실패하였습니다."),
-    FUNDING_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당하는 펀딩이 없습니다.")
+public class FundingException extends GlobalException {
 
-    ;
+    private final FundingErrorCode fundingErrorCode;
 
-    private final HttpStatus errorCode;
-    private final String message;
+    public FundingException(FundingErrorCode errorCode) {
+        super(errorCode);
+        this.fundingErrorCode = errorCode;
+    }
+
+
 }
