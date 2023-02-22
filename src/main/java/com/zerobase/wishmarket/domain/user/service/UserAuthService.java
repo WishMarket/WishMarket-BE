@@ -1,8 +1,9 @@
 package com.zerobase.wishmarket.domain.user.service;
 
 
+import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_REFRESH_TOKEN_REISSUE_TIME;
+import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_PREFIX;
-import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_PREFIX;
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.KEY_PREFIX;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
@@ -10,6 +11,9 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALI
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWORD_DO_NOT_MATCH;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_REFRESH_TOKEN;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.INVALID_TOKEN;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_EXPIRED_ACCESS_TOKEN;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_VERIFICATION_AUTH_CODE;
 
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
@@ -21,6 +25,7 @@ import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
 import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
+import com.zerobase.wishmarket.domain.user.model.dto.ReissueResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
@@ -41,6 +46,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -155,7 +161,7 @@ public class UserAuthService {
         return SignInResponse.builder()
             .email(user.getEmail())
             .name(user.getName())
-            .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+            .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
             .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
             .refreshToken(tokenSetDto.getRefreshToken())
             .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
@@ -185,10 +191,11 @@ public class UserAuthService {
         return SignInResponse.builder()
             .email(user.getEmail())
             .name(user.getName())
-            .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+            .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
             .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
             .build();
     }
+
 
     @Transactional
     public void logout(SignInResponse signInResponse) {
@@ -211,6 +218,64 @@ public class UserAuthService {
             .getTime();
         redisTemplate.opsForValue().set(signInResponse.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
 
+    }
+
+
+    public ReissueResponse reissue(String accessToken, String refreshToken) {
+
+        if (!ObjectUtils.isEmpty(accessToken) && accessToken.startsWith(ACCESS_TOKEN_PREFIX)) {
+            accessToken = accessToken.substring(ACCESS_TOKEN_PREFIX.length());
+        }
+
+        // 만료 되지 않은 Access Token이면 에러
+        if (!jwtProvider.isExpiredToken(accessToken)) {
+            throw new GlobalException(NOT_EXPIRED_ACCESS_TOKEN);
+        }
+
+        Long userId = Long.valueOf(jwtProvider.getUserId(accessToken));
+
+        UserEntity user = userAuthRepository.findById(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        // 1. Refresh Token 유효성 검사
+        // 1-1. 유효하지 않거나 만료된 Refresh Token 일 시 Error Response
+        if (jwtProvider.isExpiredToken(refreshToken)) {
+            throw new GlobalException(EXPIRED_REFRESH_TOKEN); // 리프레쉬까지 만료되면 재 로그인 =>  로그아웃 처리
+        }
+
+        if (!redisClient.validationRefreshToken(REFRESH_TOKEN_PREFIX + user.getUserId(), refreshToken)) {
+            throw new GlobalException(INVALID_TOKEN);
+        }
+
+        // 2. Access Token 재발급
+        TokenSetDto tokenSetDto = jwtProvider.generateAccessToken(user.getUserId());
+
+        ReissueResponse reissueResponse = ReissueResponse.builder()
+            .email(user.getEmail())
+            .name(user.getName())
+            .accessToken(tokenSetDto.getAccessToken())
+            .accessTokenExpiredAt(String.valueOf(tokenSetDto.getAccessTokenExpiredAt()))
+            .build();
+
+        // 3. 현재시간과 Refresh Token의 만료일을 통해 남은 만료기간 계산
+        long now = new Date().getTime();
+
+        long refreshExpireTime = jwtProvider.getExpiredDate(refreshToken).getTime();
+
+        // 4. Refresh Token의 남은 만료기간이 15일 미만일 시 Refresh Token도 재발급
+        if (refreshExpireTime - now < ACCESS_REFRESH_TOKEN_REISSUE_TIME) {
+            tokenSetDto = jwtProvider.generateTokenSet(user.getUserId());
+            reissueResponse = ReissueResponse.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .accessToken(tokenSetDto.getAccessToken())
+                .accessTokenExpiredAt(String.valueOf(tokenSetDto.getAccessTokenExpiredAt()))
+                .refreshToken(tokenSetDto.getRefreshToken())
+                .refreshTokenExpiredAt(String.valueOf(tokenSetDto.getRefreshTokenExpiredAt()))
+                .build();
+        }
+
+        return reissueResponse;
     }
 
 
