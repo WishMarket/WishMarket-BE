@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.domain.user.model.entity;
 import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
+import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
@@ -83,6 +84,9 @@ public class UserEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Funding> fundingList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<FundingParticipation> participationList = new ArrayList<>();
 
     // 회원 가입 시 가입 정보 입력
     public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType,
