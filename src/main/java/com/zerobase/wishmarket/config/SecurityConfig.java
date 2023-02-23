@@ -17,10 +17,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.CorsUtils;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -55,7 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .antMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/email-check",
                 "/api/auth/email-auth/**",
-                "/api/products/**", "/api/reviews/**", "/admin/**").permitAll()
+                "/api/products/**", "/api/reviews/**", "/admin/**", "/api/auth/reissue").permitAll()
             .anyRequest().authenticated()
             .and()
             // logout 요청시 홈으로 이동 - 기본 logout url = "/logout"
