@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.common.jwt;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.CREDENTIALS_DO_NOT_EXIST;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_ACCESS_TOKEN;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.INVALID_TOKEN;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_VERIFICATION_LOGOUT;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.WRONG_TYPE_SIGNATURE;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.WRONG_TYPE_TOKEN;
 
@@ -33,6 +34,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         if (exception == null) {
             log.info("JwtAuthenticationEntryPoint : " + CREDENTIALS_DO_NOT_EXIST);
             setResponse(response, CREDENTIALS_DO_NOT_EXIST);
+        } else if(exception.equals(NOT_VERIFICATION_LOGOUT.getMessage())){
+            log.info("JwtAuthenticationEntryPoint : " + NOT_VERIFICATION_LOGOUT);
+            setResponse(response, NOT_VERIFICATION_LOGOUT);
         } else if (exception.equals(EXPIRED_ACCESS_TOKEN.getMessage())) { // 만료된 JWT 토큰입니다."
             log.info("JwtAuthenticationEntryPoint : " + EXPIRED_ACCESS_TOKEN);
             setResponse(response, EXPIRED_ACCESS_TOKEN);

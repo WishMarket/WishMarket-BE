@@ -5,6 +5,7 @@ import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.AC
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_HEADER;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_ACCESS_TOKEN;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.INVALID_TOKEN;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_VERIFICATION_LOGOUT;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.WRONG_TYPE_SIGNATURE;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.WRONG_TYPE_TOKEN;
 
@@ -45,12 +46,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token)) {
                 // Redis 에 해당 Token 의 로그아웃 여부 확인
                 String isLogout = (String) redisTemplate.opsForValue().get(ACCESS_TOKEN_BLACK_LIST_PREFIX + token);
+                System.out.println(isLogout);
                 if (ObjectUtils.isEmpty(isLogout)) {
                     // 토큰이 유효하면 토큰으로부터 유저 정보를 받아옵니다.
                     Authentication authentication = jwtProvider.getAuthentication(token);
                     // SecurityContext 에 Authentication 객체를 저장합니다.
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     log.info(String.format("[%s] -> %s", this.jwtProvider.getUserId(token), request.getRequestURI()));
+                }else{
+                    request.setAttribute("exception", NOT_VERIFICATION_LOGOUT.getMessage() );
                 }
             }
             // 에러가 발생했을 때, request에 attribute를 세팅하고 RestAuthenticationEntryPoint로 request를 넘겨준다.

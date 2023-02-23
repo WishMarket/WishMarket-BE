@@ -23,6 +23,7 @@ public enum CommonErrorCode implements ErrorCode {
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "Refresh Token이 만료되었습니다. 재 로그인 해주세요~"),
     NOT_EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 Access Token이 아닙니다."),
     NOT_VERIFICATION_AUTH_CODE(HttpStatus.UNAUTHORIZED, "비정상적인 접근!! 인증 코드 검증이 완료되지 않았습니다."),
+    NOT_VERIFICATION_LOGOUT(HttpStatus.UNAUTHORIZED, "로그아웃 된 Token으로 접근하셨습니다. 재로그인 부탁드립니다."),
 
     /* 404 NOT_FOUND : Resource 를 찾을 수 없음 */
     EXPIRED_KEY(HttpStatus.NOT_FOUND, "해당 Key는 이미 만료되었습니다."),
