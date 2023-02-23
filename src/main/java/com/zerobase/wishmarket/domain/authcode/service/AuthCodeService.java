@@ -8,6 +8,7 @@ import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodePr
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.REDIS_AUTH_CODE_EXPIRE_TIME;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_KEY;
 
 import com.zerobase.wishmarket.common.redis.RedisClient;
@@ -60,6 +61,8 @@ public class AuthCodeService {
             if (form.getType().equals("signUp") && userEntity.getUserStatusType() == UserStatusType.ACTIVE) {
                 throw new UserException(ALREADY_REGISTER_USER);
             }
+        }else{
+            throw new UserException(USER_NOT_FOUND);
         }
 
         String authCode = getRandomAuthCode();
