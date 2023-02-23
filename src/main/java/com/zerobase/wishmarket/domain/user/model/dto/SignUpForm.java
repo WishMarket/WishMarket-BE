@@ -28,4 +28,6 @@ public class SignUpForm {
 
     @NotNull
     private String password;
+
+    private String code;
 }

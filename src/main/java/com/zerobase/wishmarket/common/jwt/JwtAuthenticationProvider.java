@@ -7,9 +7,7 @@ import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
 import java.util.Base64;
 import java.util.Date;
 import javax.annotation.PostConstruct;
@@ -87,6 +85,7 @@ public class JwtAuthenticationProvider {
             .signWith(SignatureAlgorithm.HS512, secretKey)
             .compact();
 
+        log.info("Refresh Token 만료 시간 : " + new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME));
         Date refreshTokenExpiredAt = new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME);
         String refreshToken = Jwts.builder()
             .setSubject(String.valueOf(id))
@@ -103,22 +102,21 @@ public class JwtAuthenticationProvider {
             .build();
     }
 
+
     //    public boolean isValidationToken(String token, HttpServletRequest request) {
     public boolean isValidationToken(String token) {
+        return !Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().isEmpty();
+    }
+
+    public boolean isExpiredToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+            return false;
+        } catch (ExpiredJwtException e) {
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            log.error("Invalid JWT signature");
-            return false;
-        } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token");
-            return false;
-        } catch (IllegalArgumentException e) {
-            log.error("JWT token is invalid");
-            return false;
         }
     }
+
 
     // Jwt 토큰에서 회원 Id 얻기
     public String getUserId(String accessToken) {
