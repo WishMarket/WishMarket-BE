@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class FundingStartDto {
+public class FundingStartResponse {
 
     private Long fundingId;
     private Long userId;
@@ -23,8 +23,8 @@ public class FundingStartDto {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    public static FundingStartDto of(Funding funding) {
-        return FundingStartDto.builder()
+    public static FundingStartResponse of(Funding funding) {
+        return FundingStartResponse.builder()
             .fundingId(funding.getId())
             .userId(funding.getUser().getUserId())
             .targetId(funding.getTargetUser().getUserId())

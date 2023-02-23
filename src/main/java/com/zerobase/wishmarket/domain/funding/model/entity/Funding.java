@@ -6,6 +6,8 @@ import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.entity.BaseEntity;
 import java.time.LocalDateTime;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,7 +32,7 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class Funding extends BaseEntity{
+public class Funding extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +54,9 @@ public class Funding extends BaseEntity{
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @OneToMany(mappedBy = "funding", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<FundingParticipation> participationList;
+
     // 목표 상품 가격
     private Long targetPrice;
 
@@ -66,4 +72,21 @@ public class Funding extends BaseEntity{
     private LocalDateTime startDate;
 
     private LocalDateTime endDate;
+
+    //펀딩된 누적 금액 업데이트
+    public void setFundedPrice(Long fundedPrice, Long fundPrice) {
+        this.fundedPrice = fundedPrice + fundPrice;
+    }
+
+    //내가 친구들한테 준 펀딩 상태 set
+    public void setFundingStatusType(FundingStatusType fundingStatusType) {
+        this.fundingStatusType = fundingStatusType;
+    }
+
+    //받은 펀딩 상태 set
+    private void setFundedStatusType(FundedStatusType fundedStatusType) {
+        this.fundedStatusType = fundedStatusType;
+    }
+
+
 }
