@@ -61,11 +61,11 @@ public class UserAuthService {
     private final RedisTemplate redisTemplate;
 
     private static final String EMAIL_USING_STATUS = "사용 가능한 이메일입니다.";
-    private static final String LOGOUT_MESSAGE =  "로그아웃 되셨습니다.";
+    private static final String LOGOUT_MESSAGE = "로그아웃 되셨습니다.";
 
     @Transactional
     public SignUpEmailResponse signUp(SignUpForm form) {
-        String key = KEY_PREFIX + form.getName() + form.getEmail();
+        String key = KEY_PREFIX + form.getEmail();
         authCodeVerification(key, form);
 
         if (checkInvalidPassword(form.getPassword())) {

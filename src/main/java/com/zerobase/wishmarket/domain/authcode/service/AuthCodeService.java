@@ -9,7 +9,6 @@ import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodePr
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_KEY;
-import static com.zerobase.wishmarket.exception.CommonErrorCode.UNKNOWN_ERROR;
 
 import com.zerobase.wishmarket.common.redis.RedisClient;
 import com.zerobase.wishmarket.domain.authcode.components.MailComponents;
@@ -18,8 +17,6 @@ import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeMailForm;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeResponse;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeVerifyForm;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
@@ -66,7 +63,7 @@ public class AuthCodeService {
         }
 
         String authCode = getRandomAuthCode();
-        String key = KEY_PREFIX + form.getName() + form.getEmail();
+        String key = KEY_PREFIX + form.getEmail();
 
         // client에서 인증 코드 만료 시간 3분 안에 페이지를 벗어났다가 인증 코드 재요청 시
         // 해당 key 삭제 후 메일 전송
@@ -85,7 +82,7 @@ public class AuthCodeService {
     }
 
     public AuthCodeResponse authCodeVerify(AuthCodeVerifyForm form) {
-        String key = KEY_PREFIX + form.getName() + form.getEmail();
+        String key = KEY_PREFIX + form.getEmail();
 
         // key 시간 만료
         if (!redisClient.hasKey(key)) {
