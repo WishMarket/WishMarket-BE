@@ -6,7 +6,6 @@ import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.domain.product.service.ProductService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +23,7 @@ public class ProductController {
 
     private final ProductService productService;
 
+
     //카테고리별 상품 조회
     @GetMapping("/category")
     public Page<ProductCategoryDto> getProductListByCategory(
@@ -34,13 +34,15 @@ public class ProductController {
         ProductCategory[] categories = ProductCategory.values();
 
         return ResponseEntity.ok()
-            .body(productService.getProductByCategory(categories[categoryCode], pageRequest)).getBody();
+            .body(productService.getProductByCategory(categories[categoryCode], pageRequest))
+            .getBody();
     }
 
     //베스트 상품 조회
     @GetMapping("/best")
-    public ResponseEntity<List<ProductBestDto>> getBestProductList() {
-        return ResponseEntity.ok().body(productService.getBestProducts());
+    public Page<ProductBestDto> getBestProductList(@RequestParam("page") Integer page, @RequestParam("size") Integer size) {
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        return ResponseEntity.ok().body(productService.getBestProducts(pageRequest)).getBody();
     }
 
     @GetMapping("/search")
