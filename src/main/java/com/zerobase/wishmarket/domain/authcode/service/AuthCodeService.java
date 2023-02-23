@@ -7,7 +7,9 @@ import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodePr
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.KEY_PREFIX;
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.REDIS_AUTH_CODE_EXPIRE_TIME;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_KEY;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.UNKNOWN_ERROR;
 
 import com.zerobase.wishmarket.common.redis.RedisClient;
 import com.zerobase.wishmarket.domain.authcode.components.MailComponents;
@@ -16,13 +18,20 @@ import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeMailForm;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeResponse;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeVerifyForm;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
+import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
+import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
+import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import com.zerobase.wishmarket.exception.GlobalException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,13 +43,26 @@ public class AuthCodeService {
 
     private final UserAuthRepository userAuthRepository;
 
+    @Transactional
     public AuthCodeResponse sendAuthCode(AuthCodeMailForm form) {
+        // 메일 정규식 확인
+        if (checkInvalidEmail(form.getEmail())) {
+            throw new UserException(INVALID_EMAIL_FORMAT);
+        }
 
-        boolean isExist = userAuthRepository.existsByEmailAndUserRegistrationType(form.getEmail(),
-            UserRegistrationType.EMAIL);
+        // 메일 중복 확인
+        Optional<UserEntity> optionalUser = userAuthRepository.findByEmailAndUserRegistrationType(
+            form.getEmail(),
+            UserRegistrationType.EMAIL
+        );
 
-        if (isExist) {
-            throw new UserException(ALREADY_REGISTER_USER);
+        if (optionalUser.isPresent()) {
+            UserEntity userEntity = optionalUser.get();
+
+            // 회원 정보 존재 -> 활동중
+            if (userEntity.getUserStatusType() == UserStatusType.ACTIVE) {
+                throw new UserException(ALREADY_REGISTER_USER);
+            }
         }
 
         String authCode = getRandomAuthCode();
@@ -58,7 +80,7 @@ public class AuthCodeService {
         mailComponents.sendAuthCodeMail(form.getEmail(), authCode);
 
         return AuthCodeResponse.builder()
-            .status(AUTH_MAIL_SEND_SUCCESS)
+            .message(AUTH_MAIL_SEND_SUCCESS)
             .build();
     }
 
@@ -79,11 +101,15 @@ public class AuthCodeService {
         redisClient.put(key, form.getEmail());
 
         return AuthCodeResponse.builder()
-            .status(AUTH_CODE_VERIFICATION_SUCCESS)
+            .message(AUTH_CODE_VERIFICATION_SUCCESS)
             .build();
     }
 
     private String getRandomAuthCode() {
         return RandomStringUtils.random(AUTH_CODE_LENGTH, true, true);
+    }
+
+    private boolean checkInvalidEmail(String email) {
+        return !Pattern.matches("^[a-zA-Z.].+[@][a-zA-Z].+[.][a-zA-Z]{2,4}$", email);
     }
 }
