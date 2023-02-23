@@ -1,6 +1,7 @@
 package com.zerobase.wishmarket.domain.user.service;
 
 
+import com.zerobase.wishmarket.common.util.S3Util;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.dto.ChangePwdForm;
 import com.zerobase.wishmarket.domain.user.model.dto.UpdateForm;
@@ -26,6 +27,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final S3Util s3Util;
+    private static final String PROFILE_IMAGES = "profile_images";
 
     public UserDto userDetail(Long userId) {
         Optional<UserEntity> userInfo = userRepository.findByUserId(userId);
@@ -64,16 +67,16 @@ public class UserService {
                     .detailAddress(form.getDetailAddress())
                     .build();
 
+            String imageFileName = "";
+            if(form.getProfileImage() != null) {
+                imageFileName = s3Util.upload(PROFILE_IMAGES, String.valueOf(userId), form.getProfileImage());
+            }
+
             UserEntity updateUser = UserEntity.builder()
-                    .userId(user.get().getUserId())
-                    .name(user.get().getName())
                     .nickName(form.getNickName())
-                    .email(user.get().getEmail())
-                    .pointPrice(user.get().getPointPrice())
                     .deliveryAddress(updateAddress)
                     .phone(form.getPhone())
-                    .profileImage(form.getProfileImageUrl())
-                    .userRegistrationType(user.get().getUserRegistrationType())
+                    .profileImage(imageFileName)
                     .build();
 
             return UserDto.from(userRepository.save(updateUser));

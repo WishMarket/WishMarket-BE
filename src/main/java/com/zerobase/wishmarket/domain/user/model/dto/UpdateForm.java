@@ -2,6 +2,7 @@ package com.zerobase.wishmarket.domain.user.model.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Builder
@@ -13,5 +14,5 @@ public class UpdateForm {
     private String detailAddress;
 
     private String phone;
-    private String profileImageUrl;
+    private MultipartFile profileImage;
 }
