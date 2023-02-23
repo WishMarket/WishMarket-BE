@@ -57,16 +57,27 @@ public class AuthCodeService {
         if (optionalUser.isPresent()) {
             UserEntity userEntity = optionalUser.get();
 
-            // 회원 정보 존재 -> 활동중
+            // 회원 가입 회원 정보 존재 => 이미 가입된 회원
             if (form.getType().equals("signUp") && userEntity.getUserStatusType() == UserStatusType.ACTIVE) {
                 throw new UserException(ALREADY_REGISTER_USER);
+            }else if(form.getType().equals("passwordChange")&& userEntity.getUserStatusType() == UserStatusType.ACTIVE){
+                sendMail(form.getEmail());
+                return AuthCodeResponse.builder()
+                    .message(AUTH_MAIL_SEND_SUCCESS)
+                    .build();
             }
-        }else{
-            throw new UserException(USER_NOT_FOUND);
         }
 
+        sendMail(form.getEmail());
+        
+        return AuthCodeResponse.builder()
+            .message(AUTH_MAIL_SEND_SUCCESS)
+            .build();
+    }
+
+    private void sendMail(String email){
         String authCode = getRandomAuthCode();
-        String key = KEY_PREFIX + form.getEmail();
+        String key = KEY_PREFIX + email;
 
         // client에서 인증 코드 만료 시간 3분 안에 페이지를 벗어났다가 인증 코드 재요청 시
         // 해당 key 삭제 후 메일 전송
@@ -77,11 +88,7 @@ public class AuthCodeService {
         // 메일 전송 성공 시 redis에 키 저장
         redisClient.put(key, authCode, TimeUnit.MILLISECONDS, REDIS_AUTH_CODE_EXPIRE_TIME);
 
-        mailComponents.sendAuthCodeMail(form.getEmail(), authCode);
-
-        return AuthCodeResponse.builder()
-            .message(AUTH_MAIL_SEND_SUCCESS)
-            .build();
+        mailComponents.sendAuthCodeMail(email, authCode);
     }
 
     public AuthCodeResponse authCodeVerify(AuthCodeVerifyForm form) {
