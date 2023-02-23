@@ -2,7 +2,7 @@ package com.zerobase.wishmarket.domain.authcode.model.constants;
 
 public interface AuthCodeProperties {
 
-    long REDIS_AUTH_CODE_EXPIRE_TIME = 1000 * 60 * 3; // 3분
+    long REDIS_AUTH_CODE_EXPIRE_TIME = 1000 * 60 * 6; // 3분
     int AUTH_CODE_LENGTH = 6;
     String KEY_PREFIX = "auth_key:";
     String AUTH_MAIL_SEND_SUCCESS = "인증코드가 발송되었습니다";
