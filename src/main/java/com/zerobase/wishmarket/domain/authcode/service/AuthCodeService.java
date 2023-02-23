@@ -57,7 +57,7 @@ public class AuthCodeService {
             UserEntity userEntity = optionalUser.get();
 
             // 회원 정보 존재 -> 활동중
-            if (userEntity.getUserStatusType() == UserStatusType.ACTIVE) {
+            if (form.getType().equals("signUp") && userEntity.getUserStatusType() == UserStatusType.ACTIVE) {
                 throw new UserException(ALREADY_REGISTER_USER);
             }
         }
