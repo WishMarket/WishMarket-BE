@@ -5,10 +5,9 @@ import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.AC
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_BLACK_LIST_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_PREFIX;
+
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.KEY_PREFIX;
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.ALREADY_REGISTER_USER;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_EMAIL_FORMAT;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWORD_DO_NOT_MATCH;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
@@ -17,14 +16,16 @@ import static com.zerobase.wishmarket.exception.CommonErrorCode.INVALID_TOKEN;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_EXPIRED_ACCESS_TOKEN;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_VERIFICATION_AUTH_CODE;
 
+import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_KEY;
+
+
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
 import com.zerobase.wishmarket.common.redis.RedisClient;
+import com.zerobase.wishmarket.domain.authcode.exception.AuthException;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.follow.repository.FollowInfoRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.ReissueResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
@@ -66,11 +67,7 @@ public class UserAuthService {
     @Transactional
     public SignUpEmailResponse signUp(SignUpForm form) {
         String key = KEY_PREFIX + form.getName() + form.getEmail();
-        String value = redisClient.getAutoCode(key);
-
-        if (value == null || !value.equals(form.getEmail())) {
-            throw new GlobalException(NOT_VERIFICATION_AUTH_CODE);
-        }
+        authCodeVerification(key, form);
 
         if (checkInvalidPassword(form.getPassword())) {
             throw new UserException(INVALID_PASSWORD_FORMAT);
@@ -108,32 +105,6 @@ public class UserAuthService {
             userAuthRepository.save(
                 UserEntity.of(form, UserRegistrationType.EMAIL, UserStatusType.ACTIVE, empthFollowInfo))
         );
-    }
-
-    public EmailCheckResponse emailCheck(EmailCheckForm form) {
-        if (checkInvalidEmail(form.getEmail())) {
-            throw new UserException(INVALID_EMAIL_FORMAT);
-        }
-
-        Optional<UserEntity> optionalUser = userAuthRepository.findByEmailAndUserRegistrationType(
-            form.getEmail(),
-            UserRegistrationType.EMAIL
-        );
-
-        if (optionalUser.isPresent()) {
-            UserEntity userEntity = optionalUser.get();
-
-            // 회원 정보 존재 -> 활동중
-            if (userEntity.getUserStatusType() == UserStatusType.ACTIVE) {
-                throw new UserException(ALREADY_REGISTER_USER);
-            }
-        }
-
-        // 1. 정보가 없음. 가입 가능한 이메일입니다.
-        // 2. 탈퇴 했던 회원 withdrawal => 사용 가능.
-        return EmailCheckResponse.builder()
-            .status(EMAIL_USING_STATUS)
-            .build();
     }
 
     @Transactional
@@ -276,6 +247,23 @@ public class UserAuthService {
         return reissueResponse;
     }
 
+    public void authCodeVerification(String key, SignUpForm form) {
+        String value = redisClient.getAutoCode(key);
+
+        // key 시간 만료
+        if (!redisClient.hasKey(key)) {
+            throw new GlobalException(EXPIRED_KEY);
+        }
+
+        String verifiedAuthCode = redisClient.getAutoCode(key);
+
+        if (value == null || !verifiedAuthCode.equals(form.getCode())) {
+            throw new AuthException(INVALID_AUTH_CODE);
+        }
+
+        redisClient.put(key, form.getEmail());
+
+    }
 
     private void validationPassword(String password, UserEntity user) {
         if (!this.passwordEncoder.matches(password, user.getPassword())) {
@@ -290,9 +278,6 @@ public class UserAuthService {
             UserRegistrationType.EMAIL);
     }
 
-    private boolean checkInvalidEmail(String email) {
-        return !Pattern.matches("^[a-zA-Z.].+[@][a-zA-Z].+[.][a-zA-Z]{2,4}$", email);
-    }
 
     private boolean checkInvalidPassword(String password) {
         return !Pattern.matches("^.{8,}$", password);
