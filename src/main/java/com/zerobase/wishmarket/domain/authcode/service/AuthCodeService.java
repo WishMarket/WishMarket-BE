@@ -66,13 +66,20 @@ public class AuthCodeService {
                     .message(AUTH_MAIL_SEND_SUCCESS)
                     .build();
             }
+        }else{ // 회원 없으면
+            // 회원 가입이면 메일 전송
+            if(form.getType().equals("signUp")){
+                sendMail(form.getEmail());
+
+                return AuthCodeResponse.builder()
+                    .message(AUTH_MAIL_SEND_SUCCESS)
+                    .build();
+            }else{ // 비밀번호 변경이면 에러
+                throw new UserException(USER_NOT_FOUND);
+            }
         }
 
-        sendMail(form.getEmail());
-        
-        return AuthCodeResponse.builder()
-            .message(AUTH_MAIL_SEND_SUCCESS)
-            .build();
+        return null;
     }
 
     private void sendMail(String email){
