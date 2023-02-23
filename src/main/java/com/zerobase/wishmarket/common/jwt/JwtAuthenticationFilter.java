@@ -1,5 +1,6 @@
 package com.zerobase.wishmarket.common.jwt;
 
+import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_BLACK_LIST_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.TOKEN_HEADER;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_ACCESS_TOKEN;
@@ -42,22 +43,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = this.resolveTokenFromRequest(request);
 
             if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token)) {
-                // 토큰 유효성 검증
-                Authentication auth = this.jwtProvider.getAuthentication(token);
-
                 // Redis 에 해당 Token 의 로그아웃 여부 확인
-                String isLogout = (String) redisTemplate.opsForValue().get(token);
+                String isLogout = (String) redisTemplate.opsForValue().get(ACCESS_TOKEN_BLACK_LIST_PREFIX + token);
                 if (ObjectUtils.isEmpty(isLogout)) {
                     // 토큰이 유효하면 토큰으로부터 유저 정보를 받아옵니다.
                     Authentication authentication = jwtProvider.getAuthentication(token);
                     // SecurityContext 에 Authentication 객체를 저장합니다.
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.info(String.format("[%s] -> %s", this.jwtProvider.getUserId(token), request.getRequestURI()));
                 }
-
-                // Security Context 에 인증 정보 넣기
-                SecurityContextHolder.getContext().setAuthentication(auth);
-
-                log.info(String.format("[%s] -> %s", this.jwtProvider.getUserId(token), request.getRequestURI()));
             }
             // 에러가 발생했을 때, request에 attribute를 세팅하고 RestAuthenticationEntryPoint로 request를 넘겨준다.
         } catch (ExpiredJwtException e) { // "만료된 JWT 토큰입니다."

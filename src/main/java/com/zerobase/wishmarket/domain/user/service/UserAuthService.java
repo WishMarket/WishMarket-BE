@@ -2,6 +2,7 @@ package com.zerobase.wishmarket.domain.user.service;
 
 
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_REFRESH_TOKEN_REISSUE_TIME;
+import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_BLACK_LIST_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.KEY_PREFIX;
@@ -42,7 +43,6 @@ import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -198,26 +198,24 @@ public class UserAuthService {
 
 
     @Transactional
-    public void logout(SignInResponse signInResponse) {
-        // 로그아웃 하고 싶은 토큰이 유효한 지 먼저 검증하기
-        if (!jwtProvider.isValidationToken(signInResponse.getAccessToken())) {
-            throw new IllegalArgumentException("로그아웃 : 유효하지 않은 토큰입니다.");
+    public void logout(Long userId, String accessToken) {
+
+        if (!ObjectUtils.isEmpty(accessToken) && accessToken.startsWith(ACCESS_TOKEN_PREFIX)) {
+            accessToken = accessToken.substring(ACCESS_TOKEN_PREFIX.length());
         }
 
-        // Access Token에서 User email을 가져온다
-        Authentication authentication = jwtProvider.getAuthentication(signInResponse.getAccessToken());
-
-        // Redis에서 해당 User email로 저장된 Refresh Token 이 있는지 여부를 확인 후에 있을 경우 삭제를 한다.
-        if (redisTemplate.opsForValue().get("RT:" + authentication.getName()) != null) {
+        // Redis에서 해당 User id로 저장된 Refresh Token 이 있는지 여부를 확인 후에 있을 경우 삭제를 한다.
+        if (redisClient.getRefreshToken(REFRESH_TOKEN_PREFIX + userId) != null) {
             // Refresh Token을 삭제
-            redisTemplate.delete("RT:" + authentication.getName());
+            redisClient.del(REFRESH_TOKEN_PREFIX + userId);
         }
 
         // 해당 Access Token 유효시간을 가지고 와서 BlackList에 저장하기
-        Long expiration = jwtProvider.getExpiredDate(String.valueOf(signInResponse.getAccessTokenExpiredAt()))
-            .getTime();
-        redisTemplate.opsForValue().set(signInResponse.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
-
+        long expirationSeconds = (jwtProvider.getExpiredDate(accessToken).getTime() - new Date().getTime()) / 1000;
+        if (expirationSeconds > 0) {
+            redisClient.put(ACCESS_TOKEN_BLACK_LIST_PREFIX + accessToken, String.valueOf(userId), TimeUnit.SECONDS,
+                expirationSeconds);
+        }
     }
 
 

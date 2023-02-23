@@ -40,6 +40,20 @@ public class RedisClient {
         return redisValue;
     }
 
+    public String getRefreshToken(String key) {
+        if (StringUtil.isNullOrEmpty(key)) {
+            return null;
+        }
+
+        String redisValue = (String) redisTemplate.opsForValue().get(key);
+
+        if (StringUtil.isNullOrEmpty(redisValue)) {
+            return null;
+        }
+
+        return redisValue;
+    }
+
     public void put(String key, String value) {
         if (StringUtil.isNullOrEmpty(key)) {
             throw new GlobalException(REDIS_PUT_EMPTY_KEY);

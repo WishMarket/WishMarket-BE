@@ -7,13 +7,13 @@ import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.RefreshForm;
 import com.zerobase.wishmarket.domain.user.model.dto.ReissueResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
-import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.service.UserAuthService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -62,7 +62,8 @@ public class UserAuthController {
     }
 
     @PostMapping("/logout")
-    public void logout(SignInResponse signInResponse) {
-        userAuthService.logout(signInResponse);
+    public void logout(@AuthenticationPrincipal Long userId,
+        @RequestHeader(name = "Authorization") String accessToken) {
+        userAuthService.logout(userId, accessToken);
     }
 }
