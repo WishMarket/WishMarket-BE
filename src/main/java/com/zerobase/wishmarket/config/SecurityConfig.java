@@ -50,7 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //            .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
             .mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .antMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/email-check",
-                "/api/auth/email-auth/**",
+                "/api/auth/email-auth/**", "/api/user/password",
                 "/api/products/**", "/api/reviews/**", "/admin/**", "/api/auth/reissue").permitAll()
             .anyRequest().authenticated()
             .and()
