@@ -23,6 +23,7 @@ import com.zerobase.wishmarket.domain.authcode.exception.AuthException;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.follow.repository.FollowInfoRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.dto.LogoutResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.ReissueResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
@@ -60,6 +61,7 @@ public class UserAuthService {
     private final RedisTemplate redisTemplate;
 
     private static final String EMAIL_USING_STATUS = "사용 가능한 이메일입니다.";
+    private static final String LOGOUT_MESSAGE =  "로그아웃 되셨습니다.";
 
     @Transactional
     public SignUpEmailResponse signUp(SignUpForm form) {
@@ -166,7 +168,7 @@ public class UserAuthService {
 
 
     @Transactional
-    public void logout(Long userId, String accessToken) {
+    public LogoutResponse logout(Long userId, String accessToken) {
 
         if (!ObjectUtils.isEmpty(accessToken) && accessToken.startsWith(ACCESS_TOKEN_PREFIX)) {
             accessToken = accessToken.substring(ACCESS_TOKEN_PREFIX.length());
@@ -184,6 +186,10 @@ public class UserAuthService {
             redisClient.put(ACCESS_TOKEN_BLACK_LIST_PREFIX + accessToken, String.valueOf(userId), TimeUnit.SECONDS,
                 expirationSeconds);
         }
+
+        return LogoutResponse.builder()
+            .message(LOGOUT_MESSAGE)
+            .build();
     }
 
 
