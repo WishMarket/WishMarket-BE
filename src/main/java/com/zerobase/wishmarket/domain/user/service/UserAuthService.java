@@ -5,19 +5,16 @@ import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.AC
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_BLACK_LIST_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.REFRESH_TOKEN_PREFIX;
-
+import static com.zerobase.wishmarket.domain.authcode.exception.AuthErrorCode.INVALID_AUTH_CODE;
 import static com.zerobase.wishmarket.domain.authcode.model.constants.AuthCodeProperties.KEY_PREFIX;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.EMAIL_NOT_FOUND;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.INVALID_PASSWORD_FORMAT;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.PASSWORD_DO_NOT_MATCH;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
+import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_KEY;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_REFRESH_TOKEN;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.INVALID_TOKEN;
 import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_EXPIRED_ACCESS_TOKEN;
-import static com.zerobase.wishmarket.exception.CommonErrorCode.NOT_VERIFICATION_AUTH_CODE;
-
-import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_KEY;
-
 
 import com.zerobase.wishmarket.common.jwt.JwtAuthenticationProvider;
 import com.zerobase.wishmarket.common.jwt.model.dto.TokenSetDto;
