@@ -1,8 +1,6 @@
 package com.zerobase.wishmarket.domain.user.controller;
 
 import com.zerobase.wishmarket.domain.user.annotation.LoginUserInfo;
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckForm;
-import com.zerobase.wishmarket.domain.user.model.dto.EmailCheckResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInForm;
 import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
@@ -28,11 +26,6 @@ public class UserAuthController {
     @PostMapping("/sign-up")
     public ResponseEntity<SignUpEmailResponse> signUpEmail(@RequestBody @Valid SignUpForm form) {
         return ResponseEntity.ok(userAuthService.signUp(form));
-    }
-
-    @PostMapping("/email-check")
-    public ResponseEntity<EmailCheckResponse> emailCheck(@RequestBody @Valid EmailCheckForm from) {
-        return ResponseEntity.ok(userAuthService.emailCheck(from));
     }
 
     @PostMapping("/sign-in/email")
