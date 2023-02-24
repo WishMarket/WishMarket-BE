@@ -17,9 +17,10 @@ public class ProductDetailDto {
     private String name;
     private String productImage;
     private int category;
-    private int price;
+    private Long price;
     private String description;
     private int likes;
+    private boolean isBest;
 
     public static ProductDetailDto of(Product product) {
         return ProductDetailDto.builder()
@@ -30,6 +31,7 @@ public class ProductDetailDto {
             .price(product.getPrice())
             .description(product.getDescription())
             .likes(product.getLikes())
+            .isBest(product.isBest())
             .build();
     }
 }

@@ -47,7 +47,7 @@ public class ProductService {
                     .name("product" + i)
                     .productImage("제품" + i + "파일 경로")
                     .category(category)
-                    .price(1000)
+                    .price(1000L)
                     .description("제품설명" + i)
                     .build();
                 productRepository.save(product);
@@ -123,15 +123,21 @@ public class ProductService {
     }
 
     //베스트 상품 조회
-    public List<ProductBestDto> getBestProducts() {
+    public Page<ProductBestDto> getBestProducts(PageRequest pageRequest) {
+
         List<Product> productList = redisBestRepository.findById(KEY_BEST_PRODUCTS).get()
             .getProducts();
         List<ProductBestDto> productBestDtoList = new ArrayList<>();
-        for (Product product : productList) {
+
+        //직접 페이징 처리
+        int start = pageRequest.getPageNumber() * pageRequest.getPageSize();
+        int end = Math.min(start + pageRequest.getPageSize(), productList.size());
+
+        for (Product product : productList.subList(start, end)) {
             ProductBestDto productBestDto = ProductBestDto.of(product);
             productBestDtoList.add(productBestDto);
         }
-        return productBestDtoList;
+        return new PageImpl<>(productBestDtoList, pageRequest, productList.size());
     }
 
     public Page<ProductSearchDto> search(String keyword,

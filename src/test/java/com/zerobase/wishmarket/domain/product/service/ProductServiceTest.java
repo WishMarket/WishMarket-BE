@@ -42,7 +42,7 @@ class ProductServiceTest {
                 .name("상품1")
                 .productImage("이미지1")
                 .category(ProductCategory.CLOTHES)
-                .price(50000)
+                .price(50000L)
                 .description("상세1")
                 .productLikes(productLikes)
                 .build();
