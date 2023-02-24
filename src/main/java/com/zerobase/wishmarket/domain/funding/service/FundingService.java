@@ -75,29 +75,29 @@ public class FundingService {
 
         FundingStatusType fundingStatusType = FundingStatusType.ING;
         FundedStatusType fundedStatusType = FundedStatusType.ING;
-        //펀딩 성공 체크 ( 펀딩 처음 시작하는 사람이 필요한 총 금액을 한번에 다 할수도 있으므로)
+        //펀딩 성공 체크 (펀딩 처음 시작하는 사람이 필요한 총 금액을 한번에 다 할수도 있으므로)
         if (userFundedPrice.longValue() == product.getPrice().longValue()) {
             fundingStatusType = FundingStatusType.SUCCESS;
             fundedStatusType = FundedStatusType.BEFORE_RECEIPT;
         }
 
-        Funding funding = Funding.builder()
+
+        Funding savedFunding = fundingRepository.save(Funding.builder()
             .user(user)
             .targetUser(targetUser)
             .product(product)
             .targetPrice(product.getPrice())
             .fundedPrice(fundingStartInputForm.getFundedPrice())
             .fundedPrice(userFundedPrice)
+            .participationCount(1L)
             .fundingStatusType(fundingStatusType)
             .fundedStatusType(fundedStatusType)
             .startDate(fundingStartInputForm.getStartDate())
             .endDate(fundingStartInputForm.getEndDate())
-            .build();
-
-        fundingRepository.save(funding);
+            .build());
 
         FundingParticipation participation = FundingParticipation.builder()
-            .funding(funding)
+            .funding(savedFunding)
             .user(user)
             .price(userFundedPrice)
             .fundedAt(LocalDateTime.now())
@@ -105,8 +105,7 @@ public class FundingService {
 
         fundingParticipationRepository.save(participation);
 
-        return FundingStartResponse.of(funding);
-
+        return FundingStartResponse.of(savedFunding);
 
     }
 
@@ -159,20 +158,23 @@ public class FundingService {
 
         fundingParticipationRepository.save(participation);
 
+
         //펀딩 금액 업데이트
         funding.setFundedPrice(userFundedPrice);
+
+        //펀딩 참여자수 업데이트
+        funding.participationPlus();
 
         //펀딩 성공여부 확인
         if (funding.getTargetPrice().longValue() == funding.getFundedPrice().longValue()) {
             funding.setFundingStatusType(FundingStatusType.SUCCESS);
             funding.setFundedStatusType(FundedStatusType.BEFORE_RECEIPT);
-            //fundingRepository.save(funding);
         }
 
         return FundingJoinResponse.of(funding);
     }
 
-    //매일 하루 시작시(00시)  펀딩을 기간에 맞춰 체크해줘야 하는 로직도 필요
+    //매 시간마다 펀딩을 기간에 맞춰 체크해줘야 하는 로직도 필요
     //목표 기간이 지난 펀딩들 상태값을 FAIL로 변경해줘야 함
 
 }

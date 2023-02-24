@@ -19,6 +19,7 @@ public class FundingStartResponse {
     private Long productId;
     private Long targetPrice;
     private Long fundedPrice;
+    private Long participationCount;
     private FundingStatusType fundingStatusType;
     private FundedStatusType fundedStatusType;
     private LocalDateTime startDate;
@@ -32,6 +33,7 @@ public class FundingStartResponse {
             .productId(funding.getProduct().getProductId())
             .targetPrice(funding.getTargetPrice())
             .fundedPrice(funding.getFundedPrice())
+            .participationCount(1L)
             .fundingStatusType(funding.getFundingStatusType())
             .fundedStatusType(funding.getFundedStatusType())
             .startDate(funding.getStartDate())
