@@ -17,7 +17,7 @@ public class ProductCategoryDto {
     private String name;
     private String productImageUrl;
     private int category;
-    private int price;
+    private Long price;
     private String description;
     private int likes;
     private boolean isBest;

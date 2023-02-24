@@ -41,4 +41,5 @@ public class DeliveryAddress extends BaseEntity {
 //    @JoinColumn
 //    private UserEntity userEntity;
 
+
 }
