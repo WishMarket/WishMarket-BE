@@ -22,6 +22,7 @@ import com.zerobase.wishmarket.common.redis.RedisClient;
 import com.zerobase.wishmarket.domain.authcode.exception.AuthException;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.follow.repository.FollowInfoRepository;
+import com.zerobase.wishmarket.domain.user.annotation.LoginUserInfo;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.dto.LogoutResponse;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
@@ -139,31 +140,64 @@ public class UserAuthService {
     }
 
     @Transactional
-    public SignInResponse signInSocial(OAuthUserInfo userInfo) {
+    public SignInResponse signInGoogle(@LoginUserInfo OAuthUserInfo userInfo) {
+        UserEntity user = userAuthRepository.findByEmailAndUserRegistrationType(
+                        userInfo.getEmail(),
+                        UserRegistrationType.GOOGLE
+                )
+                .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
 
-        UserEntity user = userAuthRepository.findByEmail(userInfo.getEmail())
-            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
-        TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(userInfo.getUserId());
-
-        redisTemplate.opsForValue().set("RT:" + user.getEmail(), tokenSetDto.getRefreshToken()
-            , tokenSetDto.getRefreshTokenExpiredAt().getTime(), TimeUnit.MILLISECONDS);
+        TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(user.getUserId());
 
         // 작성된 날짜에서 현재 날짜를 빼고 밀리초로 나누면 지나간 시간(초)이 계산
         long expirationSeconds = (tokenSetDto.getRefreshTokenExpiredAt().getTime() - new Date().getTime()) / 1000;
 
         // redis에 refresh토큰 저장
         redisClient.put(
-            REFRESH_TOKEN_PREFIX + user.getUserId(),
-            tokenSetDto.getRefreshToken(),
-            TimeUnit.SECONDS,
-            expirationSeconds);
+                REFRESH_TOKEN_PREFIX + user.getUserId(),
+                tokenSetDto.getRefreshToken(),
+                TimeUnit.SECONDS,
+                expirationSeconds);
 
         return SignInResponse.builder()
-            .email(user.getEmail())
-            .name(user.getName())
-            .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
-            .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
-            .build();
+                .email(user.getEmail())
+                .name(user.getName())
+                .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+                .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
+                .refreshToken(tokenSetDto.getRefreshToken())
+                .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
+                .build();
+    }
+
+    @Transactional
+    public SignInResponse signInNaver(@LoginUserInfo OAuthUserInfo userInfo) {
+        UserEntity user = userAuthRepository.findByEmailAndUserRegistrationType(
+                        userInfo.getEmail(),
+                        UserRegistrationType.NAVER
+                )
+                .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
+
+        TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(user.getUserId());
+
+        // 작성된 날짜에서 현재 날짜를 빼고 밀리초로 나누면 지나간 시간(초)이 계산
+        long expirationSeconds = (tokenSetDto.getRefreshTokenExpiredAt().getTime() - new Date().getTime()) / 1000;
+
+        // redis에 refresh토큰 저장
+        redisClient.put(
+                REFRESH_TOKEN_PREFIX + user.getUserId(),
+                tokenSetDto.getRefreshToken(),
+                TimeUnit.SECONDS,
+                expirationSeconds);
+
+        return SignInResponse.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+                .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
+                .refreshToken(tokenSetDto.getRefreshToken())
+                .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
+                .build();
+
     }
 
 

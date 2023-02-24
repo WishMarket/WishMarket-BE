@@ -10,6 +10,11 @@ import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartDto;
+import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
+import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
+import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
+import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
 import com.zerobase.wishmarket.domain.point.exception.PointErrorCode;
 import com.zerobase.wishmarket.domain.point.exception.PointException;
@@ -33,7 +38,7 @@ import org.springframework.stereotype.Service;
 public class FundingService {
 
     private final FundingRepository fundingRepository;
-
+    
     private final FundingParticipationRepository fundingParticipationRepository;
 
     private final ProductRepository productRepository;
@@ -41,6 +46,7 @@ public class FundingService {
     private final UserRepository userRepository;
 
     private final PointService pointService;
+
 
     public FundingStartResponse startFunding(Long userId, FundingStartInputForm fundingStartInputForm) {
 
@@ -68,14 +74,13 @@ public class FundingService {
             throw new FundingException(FundingErrorCode.FUNDING_TOO_MUCH_POINT);
         }
 
-
-
         Funding funding = Funding.builder()
             .user(user)
             .targetUser(targetUser)
             .product(product)
             .targetPrice(product.getPrice())
             .fundedPrice(fundingStartInputForm.getFundedPrice())
+            .fundedPrice(userFundedPrice)
             .fundingStatusType(FundingStatusType.ING)
             .fundedStatusType(FundedStatusType.BEFORE_RECEIPT)
             .startDate(fundingStartInputForm.getStartDate())
@@ -120,7 +125,7 @@ public class FundingService {
 
         return null;
 
-    }
+   
 
     //펀딩 성공여부 확인
 
@@ -131,8 +136,6 @@ public class FundingService {
 
 
 
-
-
-
+  }
 
 }
