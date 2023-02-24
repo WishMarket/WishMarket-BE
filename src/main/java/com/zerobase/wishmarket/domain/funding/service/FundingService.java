@@ -45,6 +45,7 @@ public class FundingService {
     private final PointService pointService;
 
 
+    @Transactional
     public FundingStartResponse startFunding(Long userId,
         FundingStartInputForm fundingStartInputForm) {
 
