@@ -1,5 +1,6 @@
 package com.zerobase.wishmarket.domain.funding.controller;
 
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartDto;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.service.FundingService;
@@ -22,6 +23,16 @@ public class FundingController {
 
     @PostMapping("/start")
     public ResponseEntity<FundingStartDto> startFunding(@AuthenticationPrincipal Long userId,
+        @RequestBody FundingStartInputForm fundingStartInputForm) {
+
+        return ResponseEntity.ok().body(fundingService.startFunding(userId, fundingStartInputForm));
+    }
+
+
+    private final FundingService fundingService;
+
+    @PostMapping("/start")
+    public ResponseEntity<FundingStartResponse> startFunding(@AuthenticationPrincipal Long userId,
         @RequestBody FundingStartInputForm fundingStartInputForm) {
 
         return ResponseEntity.ok().body(fundingService.startFunding(userId, fundingStartInputForm));

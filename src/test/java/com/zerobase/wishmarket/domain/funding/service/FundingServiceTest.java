@@ -6,7 +6,13 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
+import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
+import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
+import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
+import com.zerobase.wishmarket.domain.product.model.entity.Product;
+import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
+import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
+import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
@@ -40,11 +46,13 @@ class FundingServiceTest {
     @Mock
     private UserRepository userRepository;
 
+
     @Mock
     private PointService pointService;
 
     @InjectMocks
     private FundingService fundingService;
+
 
 
     //펀딩 성공
@@ -63,6 +71,13 @@ class FundingServiceTest {
         UserEntity targetUser = UserEntity.builder()
             .userId(2L)
             .name("targetUser")
+            .userRegistrationType(UserRegistrationType.EMAIL)
+            .build();
+
+        Product product = Product.builder()
+            .productId(999L)
+            .name("상품")
+            .price(1000L)
             .userStatusType(UserStatusType.ACTIVE)
             .build();
 
@@ -79,6 +94,9 @@ class FundingServiceTest {
             .willReturn(Optional.of(product));
 
         FundingStartInputForm fundingStartInputForm = FundingStartInputForm.builder()
+            .productId(999L)
+            .targetId(targetUser.getUserId())
+            .fundedPrice(1000L)
             .productId(1L)
             .targetId(targetUser.getUserId())
             .fundedPrice(100L)
