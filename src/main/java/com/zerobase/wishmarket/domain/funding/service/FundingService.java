@@ -10,11 +10,6 @@ import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
-import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartDto;
-import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
-import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
-import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
-import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
 import com.zerobase.wishmarket.domain.point.exception.PointErrorCode;
 import com.zerobase.wishmarket.domain.point.exception.PointException;
@@ -38,7 +33,7 @@ import org.springframework.stereotype.Service;
 public class FundingService {
 
     private final FundingRepository fundingRepository;
-    
+
     private final FundingParticipationRepository fundingParticipationRepository;
 
     private final ProductRepository productRepository;
@@ -65,12 +60,12 @@ public class FundingService {
         //포인트 사용
         try {
             pointService.usePoint(userId, userFundedPrice);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new PointException(PointErrorCode.NOT_ENOUGH_POINT);
         }
 
         //펀딩하려는 금액(포인트)이 상품 가격보다 많은 경우
-        if(userFundedPrice > product.getPrice()){
+        if (userFundedPrice > product.getPrice()) {
             throw new FundingException(FundingErrorCode.FUNDING_TOO_MUCH_POINT);
         }
 
@@ -88,7 +83,6 @@ public class FundingService {
             .build();
 
         fundingRepository.save(funding);
-
 
         FundingParticipation participation = FundingParticipation.builder()
             .funding(funding)
@@ -121,21 +115,15 @@ public class FundingService {
 
         //펀딩 성공여부 확인
 
-
-
         return null;
 
-   
+        //펀딩 성공여부 확인
 
-    //펀딩 성공여부 확인
+        //펀딩이 성공이면(금액이 다 차면)
+        //펀딩 스테이터스값을 변경 후,
 
-    //펀딩이 성공이면(금액이 다 차면)
-    //펀딩 스테이터스값을 변경 후,
+        //그 외 로직 처리, (알람 등)
 
-    //그 외 로직 처리, (알람 등)
-
-
-
-  }
+    }
 
 }

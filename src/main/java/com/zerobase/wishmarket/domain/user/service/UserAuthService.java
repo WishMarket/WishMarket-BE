@@ -59,7 +59,6 @@ public class UserAuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationProvider jwtProvider;
     private final RedisClient redisClient;
-    private final RedisTemplate redisTemplate;
 
     private static final String EMAIL_USING_STATUS = "사용 가능한 이메일입니다.";
     private static final String LOGOUT_MESSAGE = "로그아웃 되셨습니다.";
@@ -162,7 +161,7 @@ public class UserAuthService {
         return SignInResponse.builder()
                 .email(user.getEmail())
                 .name(user.getName())
-                .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+                .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
                 .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
                 .refreshToken(tokenSetDto.getRefreshToken())
                 .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
@@ -192,7 +191,7 @@ public class UserAuthService {
         return SignInResponse.builder()
                 .email(user.getEmail())
                 .name(user.getName())
-                .accessToken(TOKEN_PREFIX + tokenSetDto.getAccessToken())
+                .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
                 .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
                 .refreshToken(tokenSetDto.getRefreshToken())
                 .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
