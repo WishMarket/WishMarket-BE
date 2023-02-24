@@ -1,14 +1,9 @@
 package com.zerobase.wishmarket.domain.user.model.entity;
 
 import com.zerobase.wishmarket.entity.BaseEntity;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+
+import javax.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,16 +23,13 @@ public class DeliveryAddress extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DELIVERY_ID")
     private Long deliveryId;
 
-    private Integer zipCode;
-
-    private String baseAddress;
+    private String address;
     private String detailAddress;
 
-    public void setBaseAddress(String baseAddress) {
-        this.baseAddress = baseAddress;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public void setDetailAddress(String detailAddress) {
@@ -45,10 +37,8 @@ public class DeliveryAddress extends BaseEntity {
     }
 
     // 1 : 1 Mapping relationship with user
-//    @OneToOne(fetch = FetchType.LAZY)
-////    @JoinColumn(name = "user_id")
-//    @JoinColumn
-//    private UserEntity userEntity;
-
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private UserEntity userEntity;
 
 }
