@@ -15,7 +15,7 @@ public class ProductSearchDto {
     private Long productId;
     private String name;
     private String productImage;
-    private int price;
+    private Long price;
     private int likes;
     private boolean isBest;
 
