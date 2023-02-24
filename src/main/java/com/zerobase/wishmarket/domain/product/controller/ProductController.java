@@ -34,7 +34,7 @@ public class ProductController {
         ProductCategory[] categories = ProductCategory.values();
 
         return ResponseEntity.ok()
-            .body(productService.getProductByCategory(categories[categoryCode], pageRequest))
+            .body(productService.getProductByCategory(categories[categoryCode-1], pageRequest))
             .getBody();
     }
 
