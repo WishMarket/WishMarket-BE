@@ -47,7 +47,7 @@ public class ProductService {
                     .name("product" + i)
                     .productImage("제품" + i + "파일 경로")
                     .category(category)
-                    .price(1000)
+                    .price(1000L)
                     .description("제품설명" + i)
                     .build();
                 productRepository.save(product);

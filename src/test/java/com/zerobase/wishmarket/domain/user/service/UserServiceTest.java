@@ -1,29 +1,25 @@
 package com.zerobase.wishmarket.domain.user.service;
 
 
-import com.zerobase.wishmarket.domain.user.model.dto.UserDto;
-import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
-import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
-import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
-
 import com.zerobase.wishmarket.domain.user.model.dto.ChangePwdForm;
+import com.zerobase.wishmarket.domain.user.model.dto.UpdateForm;
+import com.zerobase.wishmarket.domain.user.model.dto.UserDto;
+import com.zerobase.wishmarket.domain.user.model.entity.DeliveryAddress;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
-
+import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
+import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -36,10 +32,9 @@ class UserServiceTest {
 
     @InjectMocks
     private UserService userService;
-    @Mock
-    private UserDto userInfo;
-    @Mock
-    private Optional<UserEntity> userEntity;
+
+    @Spy
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Test
     void userDetail() {
@@ -55,17 +50,30 @@ class UserServiceTest {
                         .userStatusType(UserStatusType.ACTIVE)
                         .build()));
 
-        userEntity = userRepository.findByUserId(1L);
-        userInfo = userService.userDetail(UserDto.from(userEntity.get()).getId());
+        UserEntity originUser = userRepository.findByUserId(1L).get();
 
-        assertEquals(1L, userInfo.getId());
-        assertEquals("coffee", userInfo.getNickName());
-        assertEquals("010-1234-5678", userInfo.getPhone());
-        assertEquals(UserRegistrationType.EMAIL, userInfo.getUserRegistrationType());
+        DeliveryAddress updateAddress = DeliveryAddress.builder()
+                .baseAddress("금천구 독산동 124")
+                .detailAddress("204호")
+                .build();
+
+        UserDto detailUser = UserDto.from(UserEntity.builder()
+                .userId(originUser.getUserId())
+                .name(originUser.getName())
+                .nickName(originUser.getNickName())
+                .email(originUser.getEmail())
+                .pointPrice(originUser.getPointPrice())
+                .deliveryAddress(updateAddress)
+                .phone(originUser.getPhone())
+                .profileImage(originUser.getProfileImage())
+                .userRegistrationType(originUser.getUserRegistrationType())
+                .build());
+
+        assertEquals(1L, detailUser.getId());
+        assertEquals("coffee", detailUser.getNickName());
+        assertEquals("010-1234-5678", detailUser.getPhone());
+        assertEquals(UserRegistrationType.EMAIL, detailUser.getUserRegistrationType());
     }
-
-    @Spy
-    private BCryptPasswordEncoder passwordEncoder;
 
     @Test
     void passwordChange() {
@@ -103,5 +111,53 @@ class UserServiceTest {
         assertEquals(true, this.passwordEncoder.matches("potato",
                 userRepository.findByEmailAndUserRegistrationType(form.getEmail(), UserRegistrationType.EMAIL).get().getPassword()));
 
+    }
+
+    @Test
+    void updateUserInfo() {
+
+        // given
+        given(userRepository.findByUserId(3L))
+                .willReturn(Optional.ofNullable(UserEntity.builder()
+                        .userId(3L)
+                        .name("tomato")
+                        .nickName("defaultNickName")
+                        .phone("010-1234-5678")
+                        .build())
+                );
+
+        // when
+        UserEntity originUser = userRepository.findByUserId(3L).get();
+
+        UpdateForm form = UpdateForm.builder()
+                .nickName("changeNickName")
+                .phone("010-9876-5432")
+                .baseAddress("서울특별시 영등포구 영중로 116")
+                .detailAddress("래시오 오피스텔 1221호")
+                .build();
+
+        DeliveryAddress updateAddress = DeliveryAddress.builder()
+                .baseAddress(form.getBaseAddress())
+                .detailAddress(form.getDetailAddress())
+                .build();
+
+        UserDto updateUser = UserDto.from(UserEntity.builder()
+                .userId(originUser.getUserId())
+                .name(originUser.getName())
+                .nickName(form.getNickName())
+                .email(originUser.getEmail())
+                .pointPrice(originUser.getPointPrice())
+                .deliveryAddress(updateAddress)
+                .phone(form.getPhone())
+                .profileImage(form.getProfileImageUrl())
+                .userRegistrationType(originUser.getUserRegistrationType())
+                .build());
+
+        // then
+        assertEquals(updateUser.getId(), 3L);
+        assertEquals(updateUser.getName(), "tomato");
+        assertEquals(updateUser.getNickName(), "changeNickName");
+        assertEquals(updateUser.getPhone(), "010-9876-5432");
+        assertEquals(updateUser.getAddress(), "서울특별시 영등포구 영중로 116 래시오 오피스텔 1221호");
     }
 }

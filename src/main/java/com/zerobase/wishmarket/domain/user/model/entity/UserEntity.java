@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.domain.user.model.entity;
 import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
+import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
@@ -11,7 +12,6 @@ import com.zerobase.wishmarket.entity.BaseEntity;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -84,6 +84,9 @@ public class UserEntity extends BaseEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Funding> fundingList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<FundingParticipation> participationList = new ArrayList<>();
+
     // 회원 가입 시 가입 정보 입력
     public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType,
         UserStatusType userStatusType, FollowInfo followInfo) {
@@ -100,6 +103,17 @@ public class UserEntity extends BaseEntity {
 
     }
 
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setProfileImage(String profileImageUrl) {
+        this.profileImage = profileImageUrl;
+    }
 
     public void setUserStatusType(UserStatusType userStatusType) {
         this.userStatusType = userStatusType;
