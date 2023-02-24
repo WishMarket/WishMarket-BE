@@ -34,7 +34,7 @@ public class ProductAddService {
     //상품 넣기
     public void addProductData(ProductInputForm productInputForm) throws IOException {
 
-        ProductCategory productCategory = ProductCategory.values()[productInputForm.getCategoryCode()];
+        ProductCategory productCategory = ProductCategory.values()[productInputForm.getCategoryCode()-1];
         String category = productCategory.toString();
 
         String imageFileName = "";

@@ -33,7 +33,8 @@
 <body>
 <h1>WishMarket - 관리자 상품 등록</h1>
 <h2>상품 카테고리 번호</h2>
-<h2>[1 : 의류]
+<h2>
+  [1 : 의류]
 [2 : 가전]
 [3 : 고가 레고 (완구)]
 [4 : IT]
@@ -67,10 +68,10 @@
 
       <tr>
         <th>
-          카테고리()
+          카테고리코드
         </th>
         <td>
-          <input th:value="${detail.categoryCode}" type="number" name="category" required placeholder="카테고리 번호 입력" />
+          <input th:value="${detail.categoryCode}" type="number" name="categoryCode" required placeholder="카테고리 번호 입력" />
         </td>
       </tr>
 
