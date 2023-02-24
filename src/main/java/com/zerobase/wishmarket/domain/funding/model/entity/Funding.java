@@ -74,8 +74,8 @@ public class Funding extends BaseEntity {
     private LocalDateTime endDate;
 
     //펀딩된 누적 금액 업데이트
-    public void setFundedPrice(Long fundedPrice, Long fundPrice) {
-        this.fundedPrice = fundedPrice + fundPrice;
+    public void setFundedPrice(Long fundPrice) {
+        this.fundedPrice = this.fundedPrice + fundPrice;
     }
 
     //내가 친구들한테 준 펀딩 상태 set
@@ -84,7 +84,7 @@ public class Funding extends BaseEntity {
     }
 
     //받은 펀딩 상태 set
-    private void setFundedStatusType(FundedStatusType fundedStatusType) {
+    public void setFundedStatusType(FundedStatusType fundedStatusType) {
         this.fundedStatusType = fundedStatusType;
     }
 

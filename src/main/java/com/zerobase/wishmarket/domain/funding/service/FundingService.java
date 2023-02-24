@@ -6,6 +6,7 @@ import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
+import com.zerobase.wishmarket.domain.funding.model.form.FundingJoinInputForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,7 +45,8 @@ public class FundingService {
     private final PointService pointService;
 
 
-    public FundingStartResponse startFunding(Long userId, FundingStartInputForm fundingStartInputForm) {
+    public FundingStartResponse startFunding(Long userId,
+        FundingStartInputForm fundingStartInputForm) {
 
         Product product = productRepository.findById(fundingStartInputForm.getProductId())
             .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
@@ -69,6 +72,14 @@ public class FundingService {
             throw new FundingException(FundingErrorCode.FUNDING_TOO_MUCH_POINT);
         }
 
+        FundingStatusType fundingStatusType = FundingStatusType.ING;
+        FundedStatusType fundedStatusType = FundedStatusType.ING;
+        //펀딩 성공 체크 ( 펀딩 처음 시작하는 사람이 필요한 총 금액을 한번에 다 할수도 있으므로)
+        if (userFundedPrice.longValue() == product.getPrice().longValue()) {
+            fundingStatusType = FundingStatusType.SUCCESS;
+            fundedStatusType = FundedStatusType.BEFORE_RECEIPT;
+        }
+
         Funding funding = Funding.builder()
             .user(user)
             .targetUser(targetUser)
@@ -76,8 +87,8 @@ public class FundingService {
             .targetPrice(product.getPrice())
             .fundedPrice(fundingStartInputForm.getFundedPrice())
             .fundedPrice(userFundedPrice)
-            .fundingStatusType(FundingStatusType.ING)
-            .fundedStatusType(FundedStatusType.BEFORE_RECEIPT)
+            .fundingStatusType(fundingStatusType)
+            .fundedStatusType(fundedStatusType)
             .startDate(fundingStartInputForm.getStartDate())
             .endDate(fundingStartInputForm.getEndDate())
             .build();
@@ -93,37 +104,74 @@ public class FundingService {
 
         fundingParticipationRepository.save(participation);
 
-        //펀딩 성공 체크
-
         return FundingStartResponse.of(funding);
 
 
     }
 
     //펀딩 참여
-
-    public FundingJoinResponse joinFunding(Long userId, FundingStartInputForm fundingStartInputForm) {
+    @Transactional
+    public FundingJoinResponse joinFunding(Long userId, FundingJoinInputForm fundingJoinInputForm) {
 
         //유저 확인
+        UserEntity user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         //펀딩 확인
+        Funding funding = fundingRepository.findById(fundingJoinInputForm.getFundingId())
+            .orElseThrow(() -> new FundingException(FundingErrorCode.FUNDING_NOT_FOUND));
 
-        //참여, 똑같이 금액 확인
-        //여기서 금액체크는 남은 펀딩금액이 최대, 그 금액보다 낮게끔 설정
+        //종료된 펀딩인지 확인
+        if ((funding.getFundingStatusType() == FundingStatusType.SUCCESS) | (
+            funding.getFundingStatusType() == FundingStatusType.FAIL)) {
+            throw new FundingException(FundingErrorCode.FUNDING_ALREADY_END);
+        }
+
+        //이미 참여한 펀딩인지 확인
+        fundingParticipationRepository.findByFundingAndUser(funding, user)
+            .ifPresent(p -> {
+                throw new FundingException(FundingErrorCode.FUNDING_ALREADY_PARTICIPATION);
+            });
+
+        //펀딩 참여 금액 확인
+        Long userFundedPrice = fundingJoinInputForm.getFundedPrice();
+
+        //포인트 사용
+        try {
+            pointService.usePoint(userId, userFundedPrice);
+        } catch (Exception e) {
+            throw new PointException(PointErrorCode.NOT_ENOUGH_POINT);
+        }
+
+        //펀딩하려는 금액(포인트)이 남은 펀딩 금액보다 많은 경우
+        if (userFundedPrice > (funding.getTargetPrice() - funding.getFundedPrice())) {
+            throw new FundingException(FundingErrorCode.FUNDING_TOO_MUCH_POINT);
+        }
 
         //펀딩 참여 리스트 추가
+        FundingParticipation participation = FundingParticipation.builder()
+            .funding(funding)
+            .user(user)
+            .price(userFundedPrice)
+            .fundedAt(fundingJoinInputForm.getFundedAt())
+            .build();
+
+        fundingParticipationRepository.save(participation);
+
+        //펀딩 금액 업데이트
+        funding.setFundedPrice(userFundedPrice);
 
         //펀딩 성공여부 확인
+        if (funding.getTargetPrice().longValue() == funding.getFundedPrice().longValue()) {
+            funding.setFundingStatusType(FundingStatusType.SUCCESS);
+            funding.setFundedStatusType(FundedStatusType.BEFORE_RECEIPT);
+            //fundingRepository.save(funding);
+        }
 
-        return null;
-
-        //펀딩 성공여부 확인
-
-        //펀딩이 성공이면(금액이 다 차면)
-        //펀딩 스테이터스값을 변경 후,
-
-        //그 외 로직 처리, (알람 등)
-
+        return FundingJoinResponse.of(funding);
     }
+
+    //매일 하루 시작시(00시)  펀딩을 기간에 맞춰 체크해줘야 하는 로직도 필요
+    //목표 기간이 지난 펀딩들 상태값을 FAIL로 변경해줘야 함
 
 }

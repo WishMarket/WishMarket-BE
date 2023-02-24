@@ -6,22 +6,17 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
-import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
-import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
-import com.zerobase.wishmarket.domain.product.model.entity.Product;
-import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
-import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
-import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
+import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
 import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
 import com.zerobase.wishmarket.domain.point.service.PointService;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
+import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -41,10 +36,15 @@ class FundingServiceTest {
     private FundingRepository fundingRepository;
 
     @Mock
+    private FundingParticipationRepository fundingParticipationRepository;
+
+    @Mock
     private ProductRepository productRepository;
 
     @Mock
     private UserRepository userRepository;
+
+
 
 
     @Mock
@@ -74,12 +74,6 @@ class FundingServiceTest {
             .userRegistrationType(UserRegistrationType.EMAIL)
             .build();
 
-        Product product = Product.builder()
-            .productId(999L)
-            .name("상품")
-            .price(1000L)
-            .userStatusType(UserStatusType.ACTIVE)
-            .build();
 
         Product product = Product.builder()
             .productId(1L)

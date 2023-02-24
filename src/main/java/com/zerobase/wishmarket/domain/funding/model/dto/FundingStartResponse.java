@@ -16,6 +16,7 @@ public class FundingStartResponse {
     private Long fundingId;
     private Long userId;
     private Long targetId;
+    private Long productId;
     private Long targetPrice;
     private Long fundedPrice;
     private FundingStatusType fundingStatusType;
@@ -28,6 +29,7 @@ public class FundingStartResponse {
             .fundingId(funding.getId())
             .userId(funding.getUser().getUserId())
             .targetId(funding.getTargetUser().getUserId())
+            .productId(funding.getProduct().getProductId())
             .targetPrice(funding.getTargetPrice())
             .fundedPrice(funding.getFundedPrice())
             .fundingStatusType(funding.getFundingStatusType())
