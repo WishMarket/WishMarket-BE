@@ -60,6 +60,9 @@ public class Funding extends BaseEntity {
     @OneToMany(mappedBy = "funding", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<FundingParticipation> participationList;
 
+    //펀딩에 참여한 사람 수
+    private Long participationCount;
+
     // 목표 상품 가격
     private Long targetPrice;
 
@@ -78,9 +81,13 @@ public class Funding extends BaseEntity {
 
     private LocalDateTime endDate;
 
+    public void participationPlus() {
+        this.participationCount = this.participationCount + 1;
+    }
+
     //펀딩된 누적 금액 업데이트
-    public void setFundedPrice(Long fundedPrice, Long fundPrice) {
-        this.fundedPrice = fundedPrice + fundPrice;
+    public void setFundedPrice(Long fundPrice) {
+        this.fundedPrice = this.fundedPrice + fundPrice;
     }
 
     //내가 친구들한테 준 펀딩 상태 set

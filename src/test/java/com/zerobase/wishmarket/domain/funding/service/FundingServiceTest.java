@@ -13,6 +13,7 @@ import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.Order;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
+import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
 import com.zerobase.wishmarket.domain.funding.repository.OrderRepository;
@@ -43,6 +44,9 @@ class FundingServiceTest {
     private FundingRepository fundingRepository;
 
     @Mock
+    private FundingParticipationRepository fundingParticipationRepository;
+
+    @Mock
     private ProductRepository productRepository;
 
     @Mock
@@ -53,6 +57,8 @@ class FundingServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
+
+
 
     @Mock
     private PointService pointService;
@@ -79,13 +85,7 @@ class FundingServiceTest {
             .name("targetUser")
             .userRegistrationType(UserRegistrationType.EMAIL)
             .build();
-//
-//        Product product = Product.builder()
-//            .productId(999L)
-//            .name("상품")
-//            .price(1000L)
-//            .(UserStatusType.ACTIVE)
-//            .build();
+
 
         Product product = Product.builder()
             .productId(1L)
