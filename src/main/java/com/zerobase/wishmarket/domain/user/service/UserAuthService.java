@@ -1,6 +1,5 @@
 package com.zerobase.wishmarket.domain.user.service;
 
-
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_REFRESH_TOKEN_REISSUE_TIME;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_BLACK_LIST_PREFIX;
 import static com.zerobase.wishmarket.common.jwt.model.constants.JwtConstants.ACCESS_TOKEN_PREFIX;
@@ -34,6 +33,7 @@ import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
+import com.zerobase.wishmarket.domain.user.model.type.UserWithdrawalReturnType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import com.zerobase.wishmarket.exception.GlobalException;
 import java.util.Date;
@@ -42,7 +42,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,7 +89,7 @@ public class UserAuthService {
         }
 
         form.setPassword(this.passwordEncoder.encode(form.getPassword()));
-
+        
         FollowInfo empthFollowInfo = FollowInfo.builder()
             .followerCount(0L)
             .followCount(0L)
@@ -141,10 +140,10 @@ public class UserAuthService {
     @Transactional
     public SignInResponse signInGoogle(@LoginUserInfo OAuthUserInfo userInfo) {
         UserEntity user = userAuthRepository.findByEmailAndUserRegistrationType(
-                        userInfo.getEmail(),
-                        UserRegistrationType.GOOGLE
-                )
-                .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
+                userInfo.getEmail(),
+                UserRegistrationType.GOOGLE
+            )
+            .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
 
         TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(user.getUserId());
 
@@ -153,28 +152,28 @@ public class UserAuthService {
 
         // redis에 refresh토큰 저장
         redisClient.put(
-                REFRESH_TOKEN_PREFIX + user.getUserId(),
-                tokenSetDto.getRefreshToken(),
-                TimeUnit.SECONDS,
-                expirationSeconds);
+            REFRESH_TOKEN_PREFIX + user.getUserId(),
+            tokenSetDto.getRefreshToken(),
+            TimeUnit.SECONDS,
+            expirationSeconds);
 
         return SignInResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
-                .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
-                .refreshToken(tokenSetDto.getRefreshToken())
-                .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
-                .build();
+            .email(user.getEmail())
+            .name(user.getName())
+            .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
+            .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
+            .refreshToken(tokenSetDto.getRefreshToken())
+            .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
+            .build();
     }
 
     @Transactional
     public SignInResponse signInNaver(@LoginUserInfo OAuthUserInfo userInfo) {
         UserEntity user = userAuthRepository.findByEmailAndUserRegistrationType(
-                        userInfo.getEmail(),
-                        UserRegistrationType.NAVER
-                )
-                .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
+                userInfo.getEmail(),
+                UserRegistrationType.NAVER
+            )
+            .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
 
         TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(user.getUserId());
 
@@ -183,22 +182,21 @@ public class UserAuthService {
 
         // redis에 refresh토큰 저장
         redisClient.put(
-                REFRESH_TOKEN_PREFIX + user.getUserId(),
-                tokenSetDto.getRefreshToken(),
-                TimeUnit.SECONDS,
-                expirationSeconds);
+            REFRESH_TOKEN_PREFIX + user.getUserId(),
+            tokenSetDto.getRefreshToken(),
+            TimeUnit.SECONDS,
+            expirationSeconds);
 
         return SignInResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
-                .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
-                .refreshToken(tokenSetDto.getRefreshToken())
-                .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
-                .build();
+            .email(user.getEmail())
+            .name(user.getName())
+            .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
+            .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
+            .refreshToken(tokenSetDto.getRefreshToken())
+            .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
+            .build();
 
     }
-
 
     @Transactional
     public LogoutResponse logout(Long userId, String accessToken) {
@@ -225,6 +223,40 @@ public class UserAuthService {
             .build();
     }
 
+    @Transactional
+    public UserWithdrawalReturnType withdrawal(Long userId, String accessToken) {
+
+        Optional<UserEntity> userEntity = userAuthRepository.findById(userId);
+
+        if (!userEntity.isPresent()) {
+            return UserWithdrawalReturnType.WITHDRAWAL_FAIL;
+        } else if (ObjectUtils.isEmpty(accessToken) || !(accessToken.startsWith(ACCESS_TOKEN_PREFIX))) {
+            return UserWithdrawalReturnType.WITHDRAWAL_FAIL;
+        } else {
+            // 로그인한 유저의 userId 와 일치하는 Entity 의 StatusType 변경 및 저장
+            userEntity.get().setUserStatusType(UserStatusType.WITHDRAWAL);
+            userAuthRepository.save(userEntity.get());
+
+            if (!ObjectUtils.isEmpty(accessToken) && accessToken.startsWith(ACCESS_TOKEN_PREFIX)) {
+                accessToken = accessToken.substring(ACCESS_TOKEN_PREFIX.length());
+            }
+
+            // Redis에서 해당 User id로 저장된 Refresh Token 이 있는지 여부를 확인 후에 있을 경우 삭제를 한다.
+            if (redisClient.getRefreshToken(REFRESH_TOKEN_PREFIX + userId) != null) {
+                // Refresh Token을 삭제
+                redisClient.del(REFRESH_TOKEN_PREFIX + userId);
+            }
+
+            // 해당 Access Token 유효시간을 가지고 와서 BlackList에 저장하기
+            long expirationSeconds = (jwtProvider.getExpiredDate(accessToken).getTime() - new Date().getTime()) / 1000;
+            if (expirationSeconds > 0) {
+                redisClient.put(ACCESS_TOKEN_BLACK_LIST_PREFIX + accessToken, String.valueOf(userId), TimeUnit.SECONDS,
+                    expirationSeconds);
+            }
+
+            return UserWithdrawalReturnType.WITHDRAWAL_SUCCESS;
+        }
+    }
 
     public ReissueResponse reissue(String accessToken, String refreshToken) {
 
@@ -314,10 +346,8 @@ public class UserAuthService {
             UserRegistrationType.EMAIL);
     }
 
-
     private boolean checkInvalidPassword(String password) {
         return !Pattern.matches("^.{8,}$", password);
     }
-
 
 }

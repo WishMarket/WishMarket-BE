@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.domain.funding.controller;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingJoinInputForm;
+import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.service.FundingService;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +35,9 @@ public class FundingController {
         return ResponseEntity.ok().body(fundingService.joinFunding(userId, fundingJoinInputForm));
     }
 
+    @PostMapping("/reception")
+    public void fundingReception(@AuthenticationPrincipal Long userId, @RequestBody FundingReceptionForm form){
+        fundingService.receptionFunding(userId, form);
+    }
 
 }
