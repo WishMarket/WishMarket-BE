@@ -10,14 +10,22 @@ import static org.mockito.Mockito.verify;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
+import com.zerobase.wishmarket.domain.funding.model.entity.Order;
+import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
+import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
+import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
+import com.zerobase.wishmarket.domain.funding.repository.OrderRepository;
 import com.zerobase.wishmarket.domain.point.service.PointService;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
+import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
+import com.zerobase.wishmarket.domain.product.model.entity.Review;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
+import com.zerobase.wishmarket.domain.product.repository.ReviewRepository;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
@@ -49,6 +57,13 @@ class FundingServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
+
 
     @Mock
     private PointService pointService;
@@ -75,6 +90,7 @@ class FundingServiceTest {
             .name("targetUser")
             .userRegistrationType(UserRegistrationType.EMAIL)
             .build();
+
 
         Product product = Product.builder()
             .productId(1L)
@@ -158,6 +174,7 @@ class FundingServiceTest {
         assertEquals(FundingErrorCode.FUNDING_TOO_MUCH_POINT, exception.getErrorCode());
     }
 
+
     //펀딩 스케줄러를 통해 기간이 만료가 된 펀딩 상태값 테스트
 
     @DisplayName("펀딩 스케줄러를 통해 기간이 만료가 된 펀딩 상태값 테스트")
@@ -208,6 +225,51 @@ class FundingServiceTest {
         //then
         assertEquals(FundingStatusType.FAIL, funding.getFundingStatusType());
 
+    @Test
+    void success_funding_reception() {
+        //given
+        FundingReceptionForm form = FundingReceptionForm.builder()
+            .fundingId(1L)
+            .productId(5L)
+            .address("test Address")
+            .detailAddress("test DetailAddress")
+            .comment("test Comment")
+            .isLike(false)
+            .build();
+
+        Funding funding = Funding.builder()
+            .id(1L)
+            .fundedStatusType(FundedStatusType.BEFORE_RECEIPT)
+            .build();
+
+        Product product = Product.builder()
+            .productId(5L)
+            .build();
+        given(fundingRepository.findById(anyLong()))
+            .willReturn(Optional.of(funding));
+
+        given(productRepository.findById(anyLong()))
+            .willReturn(Optional.of(product));
+
+        given(userRepository.findById(anyLong()))
+            .willReturn(Optional.of(UserEntity.builder()
+                .userId(1L)
+                .name("test User")
+                .build()));
+
+        ProductLikes productLikes = ProductLikes.builder().likes(0).build();
+
+        ArgumentCaptor<Funding> captor1 = ArgumentCaptor.forClass(Funding.class);
+        ArgumentCaptor<Order> captor2 = ArgumentCaptor.forClass(Order.class);
+        ArgumentCaptor<Review> captor3 = ArgumentCaptor.forClass(Review.class);
+
+        //when
+        fundingService.receptionFunding(1L, form);
+
+        //then
+        verify(fundingRepository, times(1)).save(captor1.capture());
+        verify(orderRepository, times(1)).save(captor2.capture());
+        verify(reviewRepository, times(1)).save(captor3.capture());
 
     }
 
