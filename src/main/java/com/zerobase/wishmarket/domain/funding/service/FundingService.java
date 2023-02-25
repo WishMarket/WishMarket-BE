@@ -12,7 +12,7 @@ import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingJoinInputForm;
-import com.zerobase.wishmarket.domain.funding.model.entity.Order;
+import com.zerobase.wishmarket.domain.funding.model.entity.OrderEntity;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
@@ -128,19 +128,11 @@ public class FundingService {
 
         //유저 확인
         UserEntity user = userRepository.findByUserId(userId)
-            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
         //펀딩 확인
         Funding funding = fundingRepository.findById(fundingJoinInputForm.getFundingId())
             .orElseThrow(() -> new FundingException(FundingErrorCode.FUNDING_NOT_FOUND));
-
-
-        //종료된 펀딩인지 확인
-        if ((funding.getFundingStatusType() == FundingStatusType.SUCCESS) | (
-            funding.getFundingStatusType() == FundingStatusType.FAIL)) {
-            throw new FundingException(FundingErrorCode.FUNDING_ALREADY_END);
-        }
-
 
 
         //종료된 펀딩인지 확인
@@ -240,7 +232,7 @@ public class FundingService {
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
         // 배송 정보 등록
-        Order order = Order.builder()
+        OrderEntity order = OrderEntity.builder()
             .fundingId(funding.getId())
             .productId(product.getProductId())
             .address(form.getAddress())

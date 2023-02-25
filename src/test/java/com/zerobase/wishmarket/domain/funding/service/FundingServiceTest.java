@@ -10,14 +10,12 @@ import static org.mockito.Mockito.verify;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
-import com.zerobase.wishmarket.domain.funding.model.entity.Order;
+import com.zerobase.wishmarket.domain.funding.model.entity.OrderEntity;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
-import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
-import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
 import com.zerobase.wishmarket.domain.funding.repository.OrderRepository;
 import com.zerobase.wishmarket.domain.point.service.PointService;
@@ -260,7 +258,7 @@ class FundingServiceTest {
         ProductLikes productLikes = ProductLikes.builder().likes(0).build();
 
         ArgumentCaptor<Funding> captor1 = ArgumentCaptor.forClass(Funding.class);
-        ArgumentCaptor<Order> captor2 = ArgumentCaptor.forClass(Order.class);
+        ArgumentCaptor<OrderEntity> captor2 = ArgumentCaptor.forClass(OrderEntity.class);
         ArgumentCaptor<Review> captor3 = ArgumentCaptor.forClass(Review.class);
 
         //when

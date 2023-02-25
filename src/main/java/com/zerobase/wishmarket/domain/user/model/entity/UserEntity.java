@@ -2,7 +2,6 @@ package com.zerobase.wishmarket.domain.user.model.entity;
 
 import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
-import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
@@ -102,7 +101,7 @@ public class UserEntity extends BaseEntity {
 
     }
 
-    public void setDeliveryAddress(DeliveryAddress deliveryAddress){
+    public void setDeliveryAddress(DeliveryAddress deliveryAddress) {
         this.deliveryAddress = deliveryAddress;
     }
 
@@ -116,10 +115,6 @@ public class UserEntity extends BaseEntity {
 
     public void setProfileImage(String profileImageUrl) {
         this.profileImage = profileImageUrl;
-    }
-
-    public void setDeliveryAddress(DeliveryAddress deliveryAddress) {
-        this.deliveryAddress = deliveryAddress;
     }
 
     public void setUserStatusType(UserStatusType userStatusType) {

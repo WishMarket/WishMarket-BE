@@ -20,7 +20,7 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class Order {
+public class OrderEntity extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

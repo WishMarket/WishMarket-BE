@@ -15,11 +15,10 @@ public enum FundingErrorCode implements ErrorCode {
     FUNDING_TARGET_NOT_FOUND(HttpStatus.BAD_REQUEST, "펀딩 대상자가 존재하지 않습니다."),
     FUNDING_TOO_MUCH_POINT(HttpStatus.BAD_REQUEST, "펀딩하려는 금액이 너무 많습니다."),
     FUNDING_ALREADY_END(HttpStatus.BAD_REQUEST, "이미 종료된 펀딩입니다."),
-    FUNDING_ALREADY_PARTICIPATION(HttpStatus.BAD_REQUEST, "이미 참여한 펀딩입니다.");
+    FUNDING_ALREADY_PARTICIPATION(HttpStatus.BAD_REQUEST, "이미 참여한 펀딩입니다.")
 
     ;
 
-    FUNDING_TOO_MUCH_POINT(HttpStatus.BAD_REQUEST, "펀딩하려는 금액이 너무 많습니다.");
 
 
     private final HttpStatus errorCode;
