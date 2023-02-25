@@ -96,6 +96,7 @@ public class UserEntity extends BaseEntity {
             .email(form.getEmail())
             .nickName(form.getNickName())
             .password(form.getPassword())
+            .pointPrice(0L)
             .userRegistrationType(userRegistrationType)
             .userStatusType(userStatusType)
             .followInfo(followInfo)

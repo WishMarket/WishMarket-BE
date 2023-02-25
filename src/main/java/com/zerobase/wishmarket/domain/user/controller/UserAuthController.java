@@ -61,9 +61,9 @@ public class UserAuthController {
     }
 
     @PostMapping("/logout")
-    public void logout(@AuthenticationPrincipal Long userId,
+    public ResponseEntity<LogoutResponse> logout(@AuthenticationPrincipal Long userId,
                        @RequestHeader(name = "Authorization") String accessToken) {
-        userAuthService.logout(userId, accessToken);
+        return ResponseEntity.ok(userAuthService.logout(userId, accessToken));
     }
 
     @PatchMapping("/withdrawal")
