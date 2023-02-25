@@ -24,7 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
-@Configuration
 @Slf4j
 @RequiredArgsConstructor
 public class ProductService {
