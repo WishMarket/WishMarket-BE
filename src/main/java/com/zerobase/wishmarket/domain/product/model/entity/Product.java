@@ -54,6 +54,10 @@ public class Product extends BaseEntity {
         return productLikes.getLikes();
     }
 
+    public void plusProductLikes(){
+        this.productLikes.likesCountPlus();
+    }
+
     public void setIsBestFalse() {
         this.isBest = false;
     }

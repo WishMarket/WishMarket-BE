@@ -6,10 +6,13 @@ import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.entity.BaseEntity;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -64,9 +67,11 @@ public class Funding extends BaseEntity {
     private Long fundedPrice;
 
     // 내가 친구들한테 준 펀딩 상태
+    @Enumerated(EnumType.STRING)
     private FundingStatusType fundingStatusType;
 
     // 받은 펀딩 상태
+    @Enumerated(EnumType.STRING)
     private FundedStatusType fundedStatusType;
 
     private LocalDateTime startDate;
@@ -84,7 +89,7 @@ public class Funding extends BaseEntity {
     }
 
     //받은 펀딩 상태 set
-    private void setFundedStatusType(FundedStatusType fundedStatusType) {
+    public void setFundedStatusType(FundedStatusType fundedStatusType) {
         this.fundedStatusType = fundedStatusType;
     }
 
