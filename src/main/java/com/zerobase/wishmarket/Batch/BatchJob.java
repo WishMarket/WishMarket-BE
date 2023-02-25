@@ -1,5 +1,7 @@
-package com.zerobase.wishmarket.config;
+package com.zerobase.wishmarket.Batch;
 
+import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
+import com.zerobase.wishmarket.domain.funding.service.FundingService;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.product.service.ProductService;
@@ -24,6 +26,7 @@ public class BatchJob {
     private final StepBuilderFactory stepBuilderFactory;
     private final ProductService productService;
     private final ProductRepository productRepository;
+    private final FundingService fundingService;
 
     //서버 처음 구동시, 상품 데이터 넣기
     @Bean
@@ -76,6 +79,32 @@ public class BatchJob {
             .tasklet((contribution, chunkContext) -> {
                 log.debug("===== 베스트 상품 업데이트 ====");
                 productService.updateBestProducts();
+                return RepeatStatus.FINISHED;
+            })
+            .build();
+    }
+
+    //기간이 만료된 펀딩 체크
+    @Bean
+    public Job JobToCheckFunding() {
+        return jobBuilderFactory.get("JobToCheckFunding")
+            .start(CheckFundingStep())
+            .on("FAILED")
+            .end()
+            .from(CheckFundingStep())
+            .on("*")
+            .end()
+            .end()
+            .build();
+    }
+
+    @Bean
+    public Step CheckFundingStep() {
+        return stepBuilderFactory.get("CheckFundingStep")
+            .tasklet((contribution, chunkContext) -> {
+                log.info("===== 기간이 만료된 펀딩 체크 배치 시작====");
+                fundingService.checkFundingExpired();
+                log.info("===== 기간이 만료된 펀딩 체크 배치 종료====");
                 return RepeatStatus.FINISHED;
             })
             .build();

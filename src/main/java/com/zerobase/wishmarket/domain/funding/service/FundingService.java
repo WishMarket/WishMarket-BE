@@ -32,6 +32,7 @@ import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -133,6 +134,15 @@ public class FundingService {
         Funding funding = fundingRepository.findById(fundingJoinInputForm.getFundingId())
             .orElseThrow(() -> new FundingException(FundingErrorCode.FUNDING_NOT_FOUND));
 
+
+        //종료된 펀딩인지 확인
+        if ((funding.getFundingStatusType() == FundingStatusType.SUCCESS) | (
+            funding.getFundingStatusType() == FundingStatusType.FAIL)) {
+            throw new FundingException(FundingErrorCode.FUNDING_ALREADY_END);
+        }
+
+
+
         //종료된 펀딩인지 확인
         if ((funding.getFundingStatusType() == FundingStatusType.SUCCESS) | (
             funding.getFundingStatusType() == FundingStatusType.FAIL)) {
@@ -168,6 +178,9 @@ public class FundingService {
             .fundedAt(fundingJoinInputForm.getFundedAt())
             .build();
 
+
+        fundingParticipationRepository.save(participation);
+
         fundingParticipationRepository.save(participation);
 
 
@@ -187,15 +200,25 @@ public class FundingService {
     }
 
 
-    //매 시간마다 펀딩을 기간에 맞춰 체크해줘야 하는 로직도 필요
-    //목표 기간이 지난 펀딩들 상태값을 FAIL로 변경해줘야 함
 
-    //펀딩 성공여부 확인
+    //펀딩 실패 체크
+    @Transactional
+    public void checkFundingExpired() {
+        List<Funding> fundingList = fundingRepository.findAll();
 
-    //펀딩이 성공이면(금액이 다 차면)
-    //펀딩 스테이터스값을 변경 후,
-
+        //스트림 활용
+        if (!fundingList.isEmpty()) {
+            fundingList.stream()
+                .filter(funding -> funding.getFundingStatusType() == FundingStatusType.ING) //진행중인 펀딩들중에서
+                .filter(fundingIng -> fundingIng.getEndDate().isBefore(LocalDateTime.now())) //그 중에서 펀딩 만료일이 지난 펀딩 객체들만
+                .forEach(fundingFail -> fundingFail.setFundingStatusType(FundingStatusType.FAIL)); //펀딩 상태값 '실패'로 변경
+        }
+        
+    }
     //그 외 로직 처리, (알람 등)
+   
+
+
 
 
     @Transactional
@@ -245,6 +268,8 @@ public class FundingService {
         orderRepository.save(order);
         reviewRepository.save(review);
 
+
+        log.info("##만료된 펀딩들을 실패 처리하였습니다.##");
     }
 
 
