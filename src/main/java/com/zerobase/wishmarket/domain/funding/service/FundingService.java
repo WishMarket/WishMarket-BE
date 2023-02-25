@@ -1,24 +1,32 @@
 package com.zerobase.wishmarket.domain.funding.service;
 
+import static com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode.CANNOT_BE_RECEIVED_PRODUCT;
+import static com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode.FUNDING_NOT_FOUND;
+import static com.zerobase.wishmarket.domain.product.exception.ProductErrorCode.PRODUCT_NOT_FOUND;
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
+
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
+import com.zerobase.wishmarket.domain.funding.model.entity.Order;
+import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
 import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
+import com.zerobase.wishmarket.domain.funding.repository.OrderRepository;
 import com.zerobase.wishmarket.domain.point.exception.PointErrorCode;
 import com.zerobase.wishmarket.domain.point.exception.PointException;
 import com.zerobase.wishmarket.domain.point.service.PointService;
-import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
+import com.zerobase.wishmarket.domain.product.model.entity.Review;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
-import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
+import com.zerobase.wishmarket.domain.product.repository.ReviewRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
@@ -26,6 +34,7 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,16 +49,20 @@ public class FundingService {
 
     private final UserRepository userRepository;
 
+    private final ReviewRepository reviewRepository;
+
+    private final OrderRepository orderRepository;
+
     private final PointService pointService;
 
 
     public FundingStartResponse startFunding(Long userId, FundingStartInputForm fundingStartInputForm) {
 
         Product product = productRepository.findById(fundingStartInputForm.getProductId())
-            .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+            .orElseThrow(() -> new ProductException(PRODUCT_NOT_FOUND));
 
         UserEntity user = userRepository.findByUserId(userId)
-            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
         UserEntity targetUser = userRepository.findByUserId(fundingStartInputForm.getTargetId())
             .orElseThrow(() -> new FundingException(FundingErrorCode.FUNDING_TARGET_NOT_FOUND));
@@ -123,6 +136,63 @@ public class FundingService {
         //펀딩 스테이터스값을 변경 후,
 
         //그 외 로직 처리, (알람 등)
+
+    }
+
+    //펀딩 성공여부 확인
+
+    //펀딩이 성공이면(금액이 다 차면)
+    //펀딩 스테이터스값을 변경 후,
+
+    //그 외 로직 처리, (알람 등)
+
+
+    @Transactional
+    public void receptionFunding(Long userId, FundingReceptionForm form) {
+
+        // 펀딩 Id
+        Funding funding = fundingRepository.findById(form.getFundingId())
+            .orElseThrow(() -> new FundingException(FUNDING_NOT_FOUND));
+
+        if (funding.getFundedStatusType() != FundedStatusType.BEFORE_RECEIPT) {
+            throw new FundingException(CANNOT_BE_RECEIVED_PRODUCT);
+        }
+
+        Product product = productRepository.findById(form.getProductId())
+            .orElseThrow(() -> new ProductException(PRODUCT_NOT_FOUND));
+
+        // 유저 정보 확인
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        // 배송 정보 등록
+        Order order = Order.builder()
+            .fundingId(funding.getId())
+            .productId(product.getProductId())
+            .address(form.getAddress())
+            .userId(user.getUserId())
+            .detailAddress(form.getDetailAddress())
+            .build();
+
+        // 리뷰 작성
+        Review review = Review.builder()
+            .productId(product.getProductId())
+            .userId(user.getUserId())
+            .userName(user.getName())
+            .comment(form.getComment())
+            .isRecommend(form.getIsLike())
+            .build();
+
+        // 좋아요 개수 추가
+        if (form.getIsLike()) {
+            product.plusProductLikes();
+        }
+
+        funding.setFundedStatusType(FundedStatusType.COMPLETION);
+
+        fundingRepository.save(funding);
+        orderRepository.save(order);
+        reviewRepository.save(review);
 
     }
 

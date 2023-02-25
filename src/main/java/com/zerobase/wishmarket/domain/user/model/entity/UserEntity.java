@@ -68,7 +68,7 @@ public class UserEntity extends BaseEntity {
 
     // 1 : 1 Mapping
     // 주소
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private DeliveryAddress deliveryAddress;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -80,9 +80,6 @@ public class UserEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Follow> followeeList = new ArrayList<>(); //나를 팔로우 하는 유저들의 리스트
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Funding> fundingList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<FundingParticipation> participationList = new ArrayList<>();
@@ -102,6 +99,10 @@ public class UserEntity extends BaseEntity {
             .followInfo(followInfo)
             .build();
 
+    }
+
+    public void setDeliveryAddress(DeliveryAddress deliveryAddress){
+        this.deliveryAddress = deliveryAddress;
     }
 
     public void setNickName(String nickName) {

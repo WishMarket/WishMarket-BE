@@ -29,7 +29,7 @@ public class DeliveryAddress extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "DELIVERY_ID")
-    private Long deliveryId;
+    private Long id;
 
     private Integer zipCode;
 
