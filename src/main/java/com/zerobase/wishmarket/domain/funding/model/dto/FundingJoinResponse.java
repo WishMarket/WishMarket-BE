@@ -17,6 +17,7 @@ public class FundingJoinResponse {
     private Long targetId;
     private Long targetPrice;
     private Long fundedPrice;
+    private Long participationCount;
     private Long totalFundedPrice;
     private FundingStatusType fundingStatusType;
     private LocalDateTime startDate;
@@ -30,6 +31,7 @@ public class FundingJoinResponse {
             .targetPrice(funding.getTargetPrice())
             .fundedPrice(funding.getFundedPrice())
             .totalFundedPrice(funding.getFundedPrice())
+            .participationCount(funding.getParticipationCount())
             .fundingStatusType(funding.getFundingStatusType())
             .startDate(funding.getStartDate())
             .endDate(funding.getEndDate())

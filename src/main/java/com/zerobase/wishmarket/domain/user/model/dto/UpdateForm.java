@@ -10,7 +10,7 @@ public class UpdateForm {
 
     private String nickName;
 
-    private String baseAddress;
+    private String address;
     private String detailAddress;
 
     private String phone;

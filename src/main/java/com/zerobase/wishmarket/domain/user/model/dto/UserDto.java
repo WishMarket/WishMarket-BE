@@ -22,6 +22,7 @@ public class UserDto {
     private String phone;
     private String profileImage;
     private String address;
+    private String detailAddress;
     private UserRegistrationType userRegistrationType;
     private UserStatusType userStatusType;
     private UserRolesType userRolesType;
@@ -36,7 +37,8 @@ public class UserDto {
                 .nickName(userEntity.getNickName())
                 .phone(userEntity.getPhone())
                 .profileImage(userEntity.getProfileImage())
-                .address(userEntity.getDeliveryAddress().getBaseAddress() + " " + userEntity.getDeliveryAddress().getDetailAddress())
+                .address(userEntity.getDeliveryAddress().getAddress())
+                .detailAddress(userEntity.getDeliveryAddress().getDetailAddress())
                 .userRegistrationType(userEntity.getUserRegistrationType())
                 .userStatusType(userEntity.getUserStatusType())
                 .userRolesType(userEntity.getUserRoleType())

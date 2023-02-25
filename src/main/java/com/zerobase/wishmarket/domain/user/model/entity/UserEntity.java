@@ -2,7 +2,6 @@ package com.zerobase.wishmarket.domain.user.model.entity;
 
 import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
-import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
@@ -68,7 +67,8 @@ public class UserEntity extends BaseEntity {
 
     // 1 : 1 Mapping
     // 주소
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "delivery_id")
     private DeliveryAddress deliveryAddress;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -82,9 +82,6 @@ public class UserEntity extends BaseEntity {
     private List<Follow> followeeList = new ArrayList<>(); //나를 팔로우 하는 유저들의 리스트
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Funding> fundingList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<FundingParticipation> participationList = new ArrayList<>();
 
     // 회원 가입 시 가입 정보 입력
@@ -96,11 +93,16 @@ public class UserEntity extends BaseEntity {
             .email(form.getEmail())
             .nickName(form.getNickName())
             .password(form.getPassword())
+            .pointPrice(0L)
             .userRegistrationType(userRegistrationType)
             .userStatusType(userStatusType)
             .followInfo(followInfo)
             .build();
 
+    }
+
+    public void setDeliveryAddress(DeliveryAddress deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
     }
 
     public void setNickName(String nickName) {
