@@ -38,12 +38,12 @@ public class UserAuthController {
     }
 
     @PostMapping("/sign-in/email")
-    public ResponseEntity<?> signInEmail(@RequestBody @Valid SignInForm form) {
+    public ResponseEntity<SignInResponse> signInEmail(@RequestBody @Valid SignInForm form) {
         return ResponseEntity.ok(userAuthService.signInEmail(form));
     }
 
     @PostMapping("/sign-in/google")
-    public ResponseEntity<?> signInGoogle(Model model, @LoginUserInfo OAuthUserInfo userInfo) {
+    public ResponseEntity<SignInResponse> signInGoogle(Model model, @LoginUserInfo OAuthUserInfo userInfo) {
         if (userInfo != null) {
             SignInResponse loginUserInfo = userAuthService.signInGoogle(userInfo);
             model.addAttribute("loginUserInfo", loginUserInfo);

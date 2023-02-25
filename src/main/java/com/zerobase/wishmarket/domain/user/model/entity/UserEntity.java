@@ -69,6 +69,7 @@ public class UserEntity extends BaseEntity {
     // 1 : 1 Mapping
     // 주소
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "delivery_id")
     private DeliveryAddress deliveryAddress;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -115,6 +116,10 @@ public class UserEntity extends BaseEntity {
 
     public void setProfileImage(String profileImageUrl) {
         this.profileImage = profileImageUrl;
+    }
+
+    public void setDeliveryAddress(DeliveryAddress deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
     }
 
     public void setUserStatusType(UserStatusType userStatusType) {
