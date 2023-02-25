@@ -6,25 +6,25 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
-import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
-import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
-import com.zerobase.wishmarket.domain.product.model.entity.Product;
-import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
-import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
-import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
+
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
+import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
+import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
+import com.zerobase.wishmarket.domain.funding.repository.FundingParticipationRepository;
 import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
 import com.zerobase.wishmarket.domain.point.service.PointService;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
+import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,6 +41,9 @@ class FundingServiceTest {
     private FundingRepository fundingRepository;
 
     @Mock
+    private FundingParticipationRepository fundingParticipationRepository;
+
+    @Mock
     private ProductRepository productRepository;
 
     @Mock
@@ -52,7 +55,6 @@ class FundingServiceTest {
 
     @InjectMocks
     private FundingService fundingService;
-
 
 
     //펀딩 성공
@@ -72,13 +74,6 @@ class FundingServiceTest {
             .userId(2L)
             .name("targetUser")
             .userRegistrationType(UserRegistrationType.EMAIL)
-            .build();
-
-        Product product = Product.builder()
-            .productId(999L)
-            .name("상품")
-            .price(1000L)
-            .userStatusType(UserStatusType.ACTIVE)
             .build();
 
         Product product = Product.builder()
@@ -161,6 +156,59 @@ class FundingServiceTest {
 
         //then
         assertEquals(FundingErrorCode.FUNDING_TOO_MUCH_POINT, exception.getErrorCode());
+    }
+
+    //펀딩 스케줄러를 통해 기간이 만료가 된 펀딩 상태값 테스트
+
+    @DisplayName("펀딩 스케줄러를 통해 기간이 만료가 된 펀딩 상태값 테스트")
+    @Test
+    void fundingSchedulerTest() {
+        //given
+        UserEntity user = UserEntity.builder()
+            .userId(1L)
+            .name("user")
+            .userStatusType(UserStatusType.ACTIVE)
+            .pointPrice(99999L)
+            .build();
+
+        UserEntity targetUser = UserEntity.builder()
+            .userId(2L)
+            .name("targetUser")
+            .userStatusType(UserStatusType.ACTIVE)
+            .build();
+
+        Product product = Product.builder()
+            .productId(999L)
+            .name("상품")
+            .price(1000L)
+            .build();
+
+
+        Funding funding = Funding.builder()
+            .id(1L)
+            .user(user)
+            .targetUser(targetUser)
+            .product(product)
+            .fundedPrice(10L)
+            .fundingStatusType(FundingStatusType.ING)
+            .fundedStatusType(FundedStatusType.ING)
+            .startDate(LocalDateTime.of(2023, 2, 25, 07, 10 ))
+            .endDate(LocalDateTime.now().minusHours(1))
+            .build();
+
+        List<Funding> fundingList = new ArrayList<>();
+        fundingList.add(funding);
+
+        given(fundingRepository.findAll())
+            .willReturn(fundingList);
+
+        // when
+        fundingService.checkFundingExpired();
+
+        //then
+        assertEquals(FundingStatusType.FAIL, funding.getFundingStatusType());
+
+
     }
 
 
