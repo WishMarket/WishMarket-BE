@@ -41,12 +41,11 @@ public class FollowController {
     @GetMapping
     public ResponseEntity<List<UserSearchResponse>> getSearchUser(
         @AuthenticationPrincipal Long userId,
-        @RequestParam @Nullable String email,
-        @RequestParam @Nullable String name,
-        @RequestParam @Nullable String nickName,
-        @RequestParam Integer page
+        @RequestParam("email") String email,
+        @RequestParam("name") String name,
+        @RequestParam("nickName") String nickName
     ) {
-        return ResponseEntity.ok(followService.searchUser(userId, email, name, nickName, page));
+        return ResponseEntity.ok(followService.searchUser(userId, email, name, nickName));
     }
 
     @GetMapping("/friends")

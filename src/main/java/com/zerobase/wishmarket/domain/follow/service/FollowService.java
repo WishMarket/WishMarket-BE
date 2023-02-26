@@ -117,8 +117,8 @@ public class FollowService {
 
     // 이름, 닉네임이 한글일 경우
     // 이름, 닉네임이 영어일 경우 => 대소문자 무시
-    public List<UserSearchResponse> searchUser(Long userId, String email, String name, String nickName, Integer page) {
-        Pageable limit = PageRequest.of(page, 12);
+    public List<UserSearchResponse> searchUser(Long userId, String email, String name, String nickName) {
+        Pageable limit = PageRequest.of(0, 100);
         UserEntity loginUser = userAuthRepository.findById(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
@@ -132,6 +132,7 @@ public class FollowService {
 
             return userAuthRepository.findByEmailContainsIgnoreCase(email, limit)
                 .stream()
+                .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
                 .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
                 .collect(Collectors.toList());
 
@@ -140,6 +141,7 @@ public class FollowService {
 
             return userAuthRepository.findByNameContainsIgnoreCase(name, limit)
                 .stream()
+                .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
                 .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
                 .collect(Collectors.toList());
 
@@ -148,6 +150,7 @@ public class FollowService {
 
             return userAuthRepository.findByNickNameContainsIgnoreCase(nickName, limit)
                 .stream()
+                .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
                 .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
                 .collect(Collectors.toList());
 
