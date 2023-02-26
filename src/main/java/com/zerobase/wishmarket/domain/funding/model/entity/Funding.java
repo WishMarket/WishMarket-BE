@@ -6,7 +6,6 @@ import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.entity.BaseEntity;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -43,11 +42,13 @@ public class Funding extends BaseEntity {
     private Long id;
 
     // N : 1
+    // 펀딩을 시작한 사람
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
     // N : 1
+    // 펀딩을 받는 사람
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id")
     private UserEntity targetUser;
@@ -83,6 +84,16 @@ public class Funding extends BaseEntity {
 
     public void participationPlus() {
         this.participationCount = this.participationCount + 1;
+    }
+
+    // 펀딩 시작유저 탈퇴 시 null 변경
+    public void setStartUserWithdrawal(){
+        this.user = null;
+    }
+
+    // 펀딩 대상유저 탈퇴 시 null 변경
+    public void setTargetUserWithdrawal(){
+        this.targetUser = null;
     }
 
     //펀딩된 누적 금액 업데이트
