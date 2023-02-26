@@ -1,14 +1,19 @@
 package com.zerobase.wishmarket.domain.funding.controller;
 
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingListGiveResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingJoinInputForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.service.FundingService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +43,12 @@ public class FundingController {
     @PostMapping("/reception")
     public void fundingReception(@AuthenticationPrincipal Long userId, @RequestBody FundingReceptionForm form){
         fundingService.receptionFunding(userId, form);
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<FundingListGiveResponse>> getFundingListGive(@AuthenticationPrincipal Long userId, Pageable pageable){
+        PageRequest pageRequest = PageRequest.of(0, 20);  //페이지 및 사이즈
+        return ResponseEntity.ok().body(fundingService.getFundingListGive(userId, pageRequest));
     }
 
 }
