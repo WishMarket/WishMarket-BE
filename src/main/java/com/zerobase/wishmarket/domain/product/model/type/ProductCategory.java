@@ -6,11 +6,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum ProductCategory {
-    CLOTHES(0), HOME_ELECTRONICS(1), TOY(2),
-    IT_DEVICE(3), JEWELRY(4), FURNITURE(5),
-    ETC(6)
-
-    ;
+    CLOTHES(1), HOME_ELECTRONICS(2), TOY(3),
+    IT_DEVICE(4), JEWELRY(5), FURNITURE(6),
+    ETC(7);
 
     private final int categoryCode;
 

@@ -1,69 +1,50 @@
 package com.zerobase.wishmarket.domain.product.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+
+import com.zerobase.wishmarket.domain.product.model.dto.ReviewDto;
 import com.zerobase.wishmarket.domain.product.model.entity.Review;
 import com.zerobase.wishmarket.domain.product.repository.ReviewRepository;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-
+import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class ReviewServiceTest {
-
-    @Autowired
+    @Mock
+    private ReviewRepository reviewRepository;
+    @InjectMocks
     private ReviewService reviewService;
 
-    @Autowired
-    private ReviewRepository reviewRepository;
 
     @Test
-    public void reviews() {
-        // Given
-        Review review1 = Review.builder()
-                .userId(1L)
-                .userName("유저1")
-                .comment("코멘트1")
-                .isRecommend(true)
-                .productId(1L)
-                .build();
-        Review review2 = Review.builder()
-                .userId(2L)
-                .userName("유저2")
-                .comment("코멘트2")
-                .isRecommend(true)
-                .productId(1L)
-                .build();
-        Review review3 = Review.builder()
-                .userId(3L)
-                .userName("유저3")
-                .comment("코멘트3")
-                .isRecommend(false)
-                .productId(1L)
-                .build();
+    public void testReviews() {
+        //given
+        Long productId = 1L;
+        Integer page = 1;
+        Integer size = 12;
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        List<Review> reviews = new ArrayList<>();
+        reviews.add(new Review(1L, 1L, "User1", "Comment1", true, productId));
+        reviews.add(new Review(2L, 2L, "User2", "Comment2", false, productId));
+        Page<Review> reviewPage = new PageImpl<>(reviews, pageRequest, reviews.size());
 
-        reviewRepository.save(review1);
-        reviewRepository.save(review2);
-        reviewRepository.save(review3);
+        given(reviewRepository.findAllByProductId(productId, pageRequest)).willReturn(reviewPage);
 
-        // When
-        Page<Review> result = reviewService.reviews(1L, 1);
+        //when
+        Page<ReviewDto> reviewDtoPage = reviewService.reviews(productId, pageRequest);
 
-        // Then
-        assertEquals(12, result.getSize());
-        assertEquals(0, result.getNumber());
-        assertEquals(3, result.getTotalElements());
-        assertEquals(1, result.getTotalPages());
-
-        List<Review> reviewList = result.getContent();
-        assertEquals(1L, reviewList.get(0).getUserId().longValue());
-        assertEquals("유저1", reviewList.get(0).getUserName());
-        assertEquals("코멘트1", reviewList.get(0).getComment());
-        assertTrue(reviewList.get(0).isRecommend());
-        assertEquals(1L, reviewList.get(0).getProductId().longValue());
+        //then
+        assertEquals(reviewPage.getTotalElements(), reviewDtoPage.getTotalElements());
+        assertEquals(reviewPage.getSize(), reviewDtoPage.getSize());
+        assertEquals(reviewPage.getTotalPages(), reviewDtoPage.getTotalPages());
     }
 }

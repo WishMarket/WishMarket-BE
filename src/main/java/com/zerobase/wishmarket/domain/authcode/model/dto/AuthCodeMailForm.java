@@ -15,4 +15,6 @@ public class AuthCodeMailForm {
 
     @Email
     private String email;
+
+    private String type;
 }

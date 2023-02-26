@@ -2,10 +2,10 @@ package com.zerobase.wishmarket.domain.product.service;
 
 import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
-import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductBestDto;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductCategoryDto;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
-
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
 import com.zerobase.wishmarket.domain.product.model.entity.RedisBestProducts;
@@ -13,26 +13,16 @@ import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.domain.product.repository.ProductLikesRepository;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.product.repository.RedisBestRepository;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 
 @Service
-@Configuration
 @Slf4j
 @RequiredArgsConstructor
 public class ProductService {
@@ -55,7 +45,7 @@ public class ProductService {
                     .name("product" + i)
                     .productImage("제품" + i + "파일 경로")
                     .category(category)
-                    .price(1000)
+                    .price(1000L)
                     .description("제품설명" + i)
                     .build();
                 productRepository.save(product);
@@ -81,15 +71,16 @@ public class ProductService {
     public boolean updateBestProducts() {
 
         //기존의 베스트 상품의 isBest값을 false로 바꾸기
-        /*List<Product> oldBestproducts = productRepository.findAllByBestIsTrue();
-        for(Product p : oldBestproducts){
+
+        List<Product> oldBestproducts = productRepository.findAllByIsBestIsTrue();
+        for (Product p : oldBestproducts) {
             p.setIsBestFalse();
-        }*/
+        }
 
-        //베스트 상품 삭제
-        redisBestRepository.deleteAll();
-
-        //문제의 정렬 부분
+        //지금은 정렬하여 50개의 상품을 가져오는 로직으로 마무리
+        //베스트 상품의 기준이 현재는 좋아요 수로 판별하지만
+        //실제 서비스에서는 사용자들의 클릭 수, 관심도, 좋아요 등
+        //다양한 판별기준으로 베스트 알고리즘을 짜는 방법이 있다.
         List<ProductLikes> bestProductLikes = productLikesRepository.findTop50ByOrderByLikesDesc();
 
         List<Long> ids = new ArrayList<>();
@@ -104,6 +95,7 @@ public class ProductService {
         }
 
         //redis repository에 넣기
+        //기존에 레디스값에 Set하기 때문에 기존의 레디스를 삭제할 필요가 없음
         redisBestRepository.save(RedisBestProducts.builder()
             .id(KEY_BEST_PRODUCTS)
             .products(newBestproducts)
@@ -113,89 +105,38 @@ public class ProductService {
     }
 
     //카테고리별 상품 조회
-    public Page<Product> getProductByCategory(ProductCategory category,
+    public Page<ProductCategoryDto> getProductByCategory(ProductCategory category,
         PageRequest pageRequest) {
-        Page<Product> productList = productRepository.findAllByCategory(category,
+        Page<Product> pagingProduct = productRepository.findAllByCategory(category,
             pageRequest);
-        return productList;
-    }
+        List<Product> productList = pagingProduct.getContent();
+        List<ProductCategoryDto> productCategoryDtoList = new ArrayList<>();
+        for (Product product : productList) {
+            ProductCategoryDto productCategoryDto = ProductCategoryDto.of(product);
+            productCategoryDtoList.add(productCategoryDto);
+        }
+        return new PageImpl<>(productCategoryDtoList, pageRequest,
+            pagingProduct.getTotalElements());
 
+    }
 
     //베스트 상품 조회
-    public List<Product> getBestProducts() {
+    public Page<ProductBestDto> getBestProducts(PageRequest pageRequest) {
+
         List<Product> productList = redisBestRepository.findById(KEY_BEST_PRODUCTS).get()
             .getProducts();
-        return productList;
+        List<ProductBestDto> productBestDtoList = new ArrayList<>();
+
+        //직접 페이징 처리
+        int start = pageRequest.getPageNumber() * pageRequest.getPageSize();
+        int end = Math.min(start + pageRequest.getPageSize(), productList.size());
+
+        for (Product product : productList.subList(start, end)) {
+            ProductBestDto productBestDto = ProductBestDto.of(product);
+            productBestDtoList.add(productBestDto);
+        }
+        return new PageImpl<>(productBestDtoList, pageRequest, productList.size());
     }
-
-
-    //상품 넣기
-    public void addProductData(ProductInputForm productInputForm) {
-        String saveFilename = "";
-        ProductCategory productCategory = ProductCategory.values()[productInputForm.getCategoryCode()];
-        System.out.println(productCategory);
-        //등록한 이미지가 있다면 처리
-        if (productInputForm.getImage() != null) {
-
-            String originalFilename = productInputForm.getImage().getOriginalFilename();
-            String baseLocalPath = "src/main/java/com/zerobase/wishmarket/domain/product/Images";
-            saveFilename = getNewSaveFile(baseLocalPath, originalFilename,
-                productInputForm.getCategoryCode());
-
-            try {
-                File newFile = new File(saveFilename);
-                FileCopyUtils.copy(productInputForm.getImage().getInputStream(),
-                    new FileOutputStream(newFile));
-            } catch (IOException e) {
-                log.info(e.getMessage());
-            }
-        }
-        Product product = Product.builder()
-            .name(productInputForm.getName())
-            .productImage(saveFilename)
-            .category(productCategory)
-            .price(productInputForm.getPrice())
-            .description(productInputForm.getDescription())
-            .build();
-        productRepository.save(product);
-
-        ProductLikes productLikes = ProductLikes.builder()
-            .productId(product.getProductId())
-            .likes(0)
-            .build();
-        productLikesRepository.save(productLikes);
-
-
-    }
-
-    public String getNewSaveFile(String baseLocalPath, String originalFilename, int categoryCode) {
-        ProductCategory productCategory = ProductCategory.values()[categoryCode];
-        LocalDate now = LocalDate.now();
-        String dir = String.format("%s/%s/", baseLocalPath, productCategory);
-
-        File file = new File(dir);
-        if (!file.isDirectory()) {
-            file.mkdir();   //디렉토리가 없으면 생성하기
-        }
-
-        String fileExtension = "";
-        if (originalFilename != null) {
-            int dotPos = originalFilename.lastIndexOf(".");
-            if (dotPos > -1) {
-                fileExtension = originalFilename.substring(dotPos + 1);
-            }
-        }
-
-        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-        String newFilename = String.format("%s%s", dir, uuid);
-
-        if (fileExtension.length() > 0) {
-            newFilename += "." + fileExtension;
-
-        }
-        return newFilename;
-    }
-
 
     public Page<ProductSearchDto> search(String keyword,
         PageRequest pageRequest) {

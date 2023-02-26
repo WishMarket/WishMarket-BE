@@ -20,9 +20,9 @@ public class ProductInputForm {
 
     private int categoryCode;
 
-    private int price;
+    private Long price;
 
-    private String description;
+    private MultipartFile description;
 
 
 }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
+import com.zerobase.wishmarket.domain.product.model.dto.ProductBestDto;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
@@ -56,7 +57,7 @@ class ProductServiceTest_best_category {
     //베스트 상품 조회
     @Test
     public void testBestProducts() {
-        List<Product> bestProducts = productService.getBestProducts();
+        List<ProductBestDto> bestProducts = productService.getBestProducts();
         if(bestProducts.isEmpty()){
             throw new ProductException(ProductErrorCode.BEST_PRODUCT_NOT_FOUND);
         }
@@ -71,18 +72,13 @@ class ProductServiceTest_best_category {
         List<Long> oldBestList = new ArrayList<>();
         List<Long> newBestList = new ArrayList<>();
 
-        List<Product> oldBestProducts = productService.getBestProducts();
-        for(Product product : oldBestProducts){
+        List<ProductBestDto> oldBestProducts = productService.getBestProducts();
+        for(ProductBestDto product : oldBestProducts){
             oldBestList.add(product.getProductId());
         }
 
-        try {
-            Thread.sleep(30000);  //일정 시간 뒤 베스트 상품이 변했는지 비교, 원래는 매일 자정2시에 베스트 상품이 변경됨
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
-        //베스트 상품이 변할수 있도록 Id가 30인 상품 Likes 값 조정
+        //베스트 상품이 변할수 있도록 특정 상품의 Likes 값 조정
         Optional<ProductLikes> optionalProductLikes = productLikesRepository.findByProductId(30L);
         if(optionalProductLikes.isEmpty()){
             throw new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND);
@@ -91,9 +87,13 @@ class ProductServiceTest_best_category {
         ProductLikes productLikes = optionalProductLikes.get();
         productLikes.setLikes(100);
 
+        //스케줄러 실행
+        //베스트 상품 업데이트
+        productService.updateBestProducts();
 
-        List<Product> newBestProducts = productService.getBestProducts();
-        for(Product product : newBestProducts){
+
+        List<ProductBestDto> newBestProducts = productService.getBestProducts();
+        for(ProductBestDto product : newBestProducts){
             newBestList.add(product.getProductId());
         }
 

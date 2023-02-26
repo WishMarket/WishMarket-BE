@@ -1,6 +1,7 @@
 package com.zerobase.wishmarket.domain.authcode.controller;
 
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeMailForm;
+import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeResponse;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeVerifyForm;
 import com.zerobase.wishmarket.domain.authcode.service.AuthCodeService;
 import javax.validation.Valid;
@@ -19,14 +20,12 @@ public class AuthCodeController {
     private final AuthCodeService authCodeService;
 
     @PostMapping
-    public ResponseEntity<String> authCodeMailSend(@RequestBody @Valid AuthCodeMailForm form){
-        authCodeService.sendAuthCode(form);
-        return ResponseEntity.ok("메일 전송에 성공하였습니다.");
+    public ResponseEntity<AuthCodeResponse> authCodeMailSend(@RequestBody @Valid AuthCodeMailForm form) {
+        return ResponseEntity.ok(authCodeService.sendAuthCode(form));
     }
 
     @PostMapping("/code")
-    public ResponseEntity<Void> authCodeVerify(@RequestBody @Valid AuthCodeVerifyForm form){
-        authCodeService.authCodeVerify(form);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AuthCodeResponse> authCodeVerify(@RequestBody @Valid AuthCodeVerifyForm form) {
+        return ResponseEntity.ok(authCodeService.authCodeVerify(form));
     }
 }

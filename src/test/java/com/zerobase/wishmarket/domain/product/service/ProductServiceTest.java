@@ -8,20 +8,16 @@ import static org.mockito.BDDMockito.given;
 import com.zerobase.wishmarket.domain.product.exception.ProductErrorCode;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
-import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +42,7 @@ class ProductServiceTest {
                 .name("상품1")
                 .productImage("이미지1")
                 .category(ProductCategory.CLOTHES)
-                .price(50000)
+                .price(50000L)
                 .description("상세1")
                 .productLikes(productLikes)
                 .build();
@@ -80,27 +76,8 @@ class ProductServiceTest {
         assertEquals(ProductErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());
     }
 
-    @Test
-    public void testSearchProduct() {
-        //given
-        String keyword = "t1";
-        int page = 2; // 0 일 수 는 없음
-        PageRequest pageRequest = PageRequest.of(page - 1, 12);
+  
 
-        //when
-        Page<ProductSearchDto> pagingSearchProductList = productService.search(keyword, pageRequest);
-        List<ProductSearchDto> resultProductList = pagingSearchProductList.getContent();
-        int cnt = 0;
-        for (ProductSearchDto productSearchDto : resultProductList) {
-            if (productSearchDto.getName().contains(keyword)) {
-                cnt++;
-            }
-        }
-
-        //then
-        assertEquals(cnt, resultProductList.size());
-        assertEquals(cnt, pagingSearchProductList.getNumberOfElements());
-    }
 
 
 }

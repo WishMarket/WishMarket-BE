@@ -1,6 +1,9 @@
 package com.zerobase.wishmarket.domain.user.service;
 
+import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
+import com.zerobase.wishmarket.domain.follow.repository.FollowInfoRepository;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthAttributes;
+import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +16,17 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpSession;
 import java.util.Collections;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+
     private final UserAuthRepository userAuthRepository;
+    private final FollowInfoRepository followInfoRepository;
+    private final HttpSession httpSession;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -32,9 +40,11 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
                 // 키가 되는 필드값 (Primary Key와 같은 의미)
                 .getUserInfoEndpoint().getUserNameAttributeName();
 
-        OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
+        OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName,
+                oAuth2User.getAttributes());
 
         UserEntity userEntity = saveOrUpdate(attributes);
+        httpSession.setAttribute("user", new OAuthUserInfo(userEntity));
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("USER")),
@@ -43,10 +53,23 @@ public class OAuthService implements OAuth2UserService<OAuth2UserRequest, OAuth2
     }
 
     private UserEntity saveOrUpdate(OAuthAttributes attributes) {
-        UserEntity userEntity = userAuthRepository.findByEmail(attributes.getEmail())
-                .map(entity -> entity.update(attributes.getName(), attributes.getProfileImage()))
-                .orElse(attributes.toEntity());
+        Optional<UserEntity> userEntity = userAuthRepository.findByEmail(attributes.getEmail());
 
-        return userAuthRepository.save(userEntity);
+        if (!userEntity.isPresent()) {
+            attributes.toEntity(attributes);
+
+            FollowInfo emptyFollowInfo = FollowInfo.builder()
+                    .followerCount(0L)
+                    .followCount(0L)
+                    .build();
+
+            followInfoRepository.save(emptyFollowInfo);
+        } else {
+            userEntity.map(entity -> entity.update(attributes.getName(), attributes.getProfileImage()));
+        }
+
+        return userEntity.get();
     }
+
+
 }

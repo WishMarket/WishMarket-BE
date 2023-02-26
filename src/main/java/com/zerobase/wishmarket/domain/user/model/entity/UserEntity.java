@@ -1,10 +1,16 @@
 package com.zerobase.wishmarket.domain.user.model.entity;
 
+import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
+import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
+import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.entity.BaseEntity;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,6 +18,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -59,19 +67,54 @@ public class UserEntity extends BaseEntity {
 
     // 1 : 1 Mapping
     // 주소
-    @OneToOne(mappedBy = "userEntity", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "delivery_id")
     private DeliveryAddress deliveryAddress;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = true)
+    private FollowInfo followInfo;
+
+    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Follow> followerList = new ArrayList<>(); //내가 팔로우를 하는 유저들의 리스트
+
+    @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Follow> followeeList = new ArrayList<>(); //나를 팔로우 하는 유저들의 리스트
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<FundingParticipation> participationList = new ArrayList<>();
+
     // 회원 가입 시 가입 정보 입력
-    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType, UserStatusType userStatusType) {
+    public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType,
+        UserStatusType userStatusType, FollowInfo followInfo) {
+
         return UserEntity.builder()
             .name(form.getName())
             .email(form.getEmail())
             .nickName(form.getNickName())
             .password(form.getPassword())
+            .pointPrice(0L)
             .userRegistrationType(userRegistrationType)
             .userStatusType(userStatusType)
+            .followInfo(followInfo)
             .build();
+
+    }
+
+    public void setDeliveryAddress(DeliveryAddress deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public void setProfileImage(String profileImageUrl) {
+        this.profileImage = profileImageUrl;
     }
 
     public void setUserStatusType(UserStatusType userStatusType) {
@@ -82,8 +125,34 @@ public class UserEntity extends BaseEntity {
         this.name = name;
         this.profileImage = profileImage;
         return this;
-
     }
 
+    public void hasFollowed() {
+        this.followInfo.followerCountPlus();
+    }
+
+    public void hasUnFollowed() {
+        this.followInfo.followerCountMinus();
+    }
+
+    public void hasFollowing() {
+        this.followInfo.followCountPlus();
+    }
+
+    public void hasUnFollowing() {
+        this.followInfo.followCountMinus();
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void increasePointPrice() {
+        this.pointPrice += 10000L;
+    }
+
+    public void usePointPrice(Long usePoint) {
+        this.pointPrice -= usePoint;
+    }
 
 }

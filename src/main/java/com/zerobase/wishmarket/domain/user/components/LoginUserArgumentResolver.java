@@ -2,6 +2,7 @@ package com.zerobase.wishmarket.domain.user.components;
 
 import com.zerobase.wishmarket.domain.user.annotation.LoginUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.OAuthUserInfo;
+import javax.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -9,8 +10,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
-import javax.servlet.http.HttpSession;
 
 @RequiredArgsConstructor
 @Component
@@ -29,7 +28,8 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
 
     @Override
     // resolveArgument() : 세션에서 객체를 가져와서 파라미터에 전달할 객체 생성
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+        NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         return httpSession.getAttribute("user");
     }
 }

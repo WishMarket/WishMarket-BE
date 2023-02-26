@@ -5,8 +5,6 @@ import static com.zerobase.wishmarket.domain.authcode.exception.AuthErrorCode.CA
 import com.zerobase.wishmarket.domain.authcode.exception.AuthErrorCode;
 import com.zerobase.wishmarket.domain.authcode.exception.AuthException;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,7 +14,6 @@ import javax.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -51,7 +48,6 @@ public class MailComponents {
 
 
     public void sendAuthCodeMail(String email, String authCode) {
-
 
         try {
             InputStream inputStream = resourceLoader

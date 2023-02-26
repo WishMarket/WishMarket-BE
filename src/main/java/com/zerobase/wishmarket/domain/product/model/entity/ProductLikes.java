@@ -24,8 +24,8 @@ public class ProductLikes {
 
     private int likes;
 
-
-
-
+    public void likesCountPlus() {
+        this.likes += 1L;
+    }
 
 }
