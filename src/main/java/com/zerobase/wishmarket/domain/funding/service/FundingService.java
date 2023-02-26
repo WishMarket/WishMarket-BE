@@ -8,11 +8,12 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_N
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingListGiveResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
-import com.zerobase.wishmarket.domain.funding.model.form.FundingJoinInputForm;
 import com.zerobase.wishmarket.domain.funding.model.entity.OrderEntity;
+import com.zerobase.wishmarket.domain.funding.model.form.FundingJoinInputForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
@@ -32,9 +33,12 @@ import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -171,7 +175,6 @@ public class FundingService {
             .build();
 
 
-        fundingParticipationRepository.save(participation);
 
         fundingParticipationRepository.save(participation);
 
@@ -262,6 +265,27 @@ public class FundingService {
 
 
         log.info("##만료된 펀딩들을 실패 처리하였습니다.##");
+    }
+
+
+    //펀딩 내역 (내가 친구들한테 주는 펀딩 내역들 - 참여)
+    public List<FundingListGiveResponse> getFundingListGive(Long userId, Pageable pageable){
+
+        //유저 확인
+        UserEntity user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        Page<FundingParticipation> participationList = fundingParticipationRepository.findAllByUser(user, pageable);
+
+        List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
+
+        for(FundingParticipation participation : participationList){
+            Funding funding = participation.getFunding();
+            fundingListGiveResponses.add(FundingListGiveResponse.of(participation,funding));
+        }
+
+        return fundingListGiveResponses;
+
     }
 
 
