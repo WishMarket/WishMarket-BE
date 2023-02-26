@@ -117,8 +117,11 @@ public class FollowService {
 
     // 이름, 닉네임이 한글일 경우
     // 이름, 닉네임이 영어일 경우 => 대소문자 무시
-    public List<UserSearchResponse> searchUser(Long userId, String email, String name, String nickName) {
+    public List<UserSearchResponse> searchUser(Long userId, String keyword, String type) {
         Pageable limit = PageRequest.of(0, 100);
+
+        keyword = keyword.trim();
+
         UserEntity loginUser = userAuthRepository.findById(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
@@ -127,32 +130,33 @@ public class FollowService {
             .map(follow -> follow.getFollowee().getUserId())
             .collect(Collectors.toList());
 
-        if (!email.isEmpty()) {
-            log.info("이메일 검색 : " + email);
+        switch (type.toLowerCase()) {
+            case "email":
+                log.info("이메일 검색 : " + keyword);
 
-            return userAuthRepository.findByEmailContainsIgnoreCase(email, limit)
-                .stream()
-                .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
-                .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
-                .collect(Collectors.toList());
+                return userAuthRepository.findByEmailContainsIgnoreCase(keyword, limit)
+                    .stream()
+                    .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
+                    .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
+                    .collect(Collectors.toList());
 
-        } else if (!name.isEmpty()) {
-            log.info("이름 검색 : " + name);
+            case "name":
+                log.info("이름 검색 : " + keyword);
 
-            return userAuthRepository.findByNameContainsIgnoreCase(name, limit)
-                .stream()
-                .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
-                .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
-                .collect(Collectors.toList());
+                return userAuthRepository.findByNameContainsIgnoreCase(keyword, limit)
+                    .stream()
+                    .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
+                    .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
+                    .collect(Collectors.toList());
 
-        } else if (!nickName.isEmpty()) {
-            log.info("닉네임 검색 : " + nickName);
+            case "nickname":
+                log.info("닉네임 검색 : " + keyword);
 
-            return userAuthRepository.findByNickNameContainsIgnoreCase(nickName, limit)
-                .stream()
-                .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
-                .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
-                .collect(Collectors.toList());
+                return userAuthRepository.findByNickNameContainsIgnoreCase(keyword, limit)
+                    .stream()
+                    .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
+                    .map(userEntity -> UserSearchResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
+                    .collect(Collectors.toList());
 
         }
         return null;
