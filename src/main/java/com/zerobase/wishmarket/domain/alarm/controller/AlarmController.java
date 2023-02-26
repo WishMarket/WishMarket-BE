@@ -1,6 +1,8 @@
 package com.zerobase.wishmarket.domain.alarm.controller;
 
+import com.zerobase.wishmarket.domain.alarm.model.dto.AlarmResponseDto;
 import com.zerobase.wishmarket.domain.alarm.service.AlarmService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,23 +21,19 @@ public class AlarmController {
     private final AlarmService alarmService;
 
     @GetMapping("/")
-    public ResponseEntity<?> myAlarms(@AuthenticationPrincipal Long userId) {
-
+    public ResponseEntity<List<AlarmResponseDto>> myAlarms(@AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(alarmService.getMyAlarms(userId));
     }
+
     @PutMapping("/{alarmId}/read")
-    public ResponseEntity<?> setAsRead(@AuthenticationPrincipal Long userId,
-        @PathVariable Long alarmId) {
-        return ResponseEntity.ok().body(alarmService.readAlarm(alarmId,userId));
+    public ResponseEntity<AlarmResponseDto> setAsRead(@PathVariable Long alarmId) {
+        return ResponseEntity.ok().body(alarmService.readAlarm(alarmId));
     }
 
     @DeleteMapping("/{alarmId}/delete")
-    public ResponseEntity<?> deleteAlarm(@AuthenticationPrincipal Long userId,
-        @PathVariable Long alarmId) {
-
-        return ResponseEntity.ok().body(alarmService.deleteAlarm(alarmId, userId));
+    public ResponseEntity<Void> deleteAlarm(@PathVariable Long alarmId) {
+        alarmService.deleteAlarm(alarmId);
+        return ResponseEntity.noContent().build();
     }
-
-
 
 }
