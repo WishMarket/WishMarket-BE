@@ -19,12 +19,12 @@ public class Alarm extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    String contents;
-    boolean isRead;
-    Long userId;
+    private Long id;
+    private String contents;
+    private boolean isRead;
+    private Long userId;
 
     public void setAsRead() {
-        isRead = true;
+        this.isRead = true;
     }
 }
