@@ -32,5 +32,11 @@ public class WishList extends BaseEntity {
 
     private Long productId;
 
+    private String productName;
+
+    private Long price;
+
+    private String productImage;
+
 
 }
