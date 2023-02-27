@@ -39,7 +39,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -209,6 +209,7 @@ public class FundingService {
             fundingList.stream()
                 .filter(funding -> funding.getFundingStatusType() == FundingStatusType.ING) //진행중인 펀딩들중에서
                 .filter(fundingIng -> fundingIng.getEndDate().isBefore(LocalDateTime.now())) //그 중에서 펀딩 만료일이 지난 펀딩 객체들만
+
                 .forEach(fundingFail -> {
                     fundingFail.setFundingStatusType(FundingStatusType.FAIL);//펀딩 상태값 '실패'로 변경
                     alarmService.addFundingAlarm(fundingFail);//알림보내기
@@ -270,11 +271,32 @@ public class FundingService {
 
 
     //펀딩 내역 (내가 친구들한테 주는 펀딩 내역들 - 참여)
-    public List<FundingListGiveResponse> getFundingListGive(Long userId, Pageable pageable) {
+
+    public List<FundingListGiveResponse> getFundingListGive(Long userId){
 
         //유저 확인
         UserEntity user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+
+        //페이지
+        PageRequest pageRequest = PageRequest.of(0, 20);  //페이지 및 사이즈
+
+        Page<FundingParticipation> participationList = fundingParticipationRepository.findAllByUser(user, pageRequest);
+
+        List<String> participantsNameList = new ArrayList<>();
+
+        //참여자 이름 목록
+        for(FundingParticipation p : participationList){
+            participantsNameList.add(p.getUser().getName());
+        }
+
+        List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
+
+
+        for(FundingParticipation participation : participationList){
+            Funding funding = participation.getFunding();
+            fundingListGiveResponses.add(FundingListGiveResponse.of(participation,funding, participantsNameList));
 
         Page<FundingParticipation> participationList = fundingParticipationRepository.findAllByUser(
             user, pageable);
@@ -284,6 +306,7 @@ public class FundingService {
         for (FundingParticipation participation : participationList) {
             Funding funding = participation.getFunding();
             fundingListGiveResponses.add(FundingListGiveResponse.of(participation, funding));
+
         }
 
         return fundingListGiveResponses;
