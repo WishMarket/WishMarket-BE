@@ -2,6 +2,7 @@ package com.zerobase.wishmarket.domain.funding.controller;
 
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingListGiveResponse;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingMyGiftListResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingJoinInputForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
@@ -41,13 +42,18 @@ public class FundingController {
     }
 
     @PostMapping("/reception")
-    public void fundingReception(@AuthenticationPrincipal Long userId, @RequestBody FundingReceptionForm form){
+    public void fundingReception(@AuthenticationPrincipal Long userId, @RequestBody FundingReceptionForm form) {
         fundingService.receptionFunding(userId, form);
     }
 
     @GetMapping("/history")
     public ResponseEntity<List<FundingListGiveResponse>> getFundingListGive(@AuthenticationPrincipal Long userId){
         return ResponseEntity.ok().body(fundingService.getFundingListGive(userId));
+    }
+
+    @GetMapping("/gift")
+    public ResponseEntity<List<FundingMyGiftListResponse>> getMyFundingGift(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(fundingService.getMyFundigGifyList(userId));
     }
 
 }

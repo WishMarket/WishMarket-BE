@@ -10,6 +10,7 @@ import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingListGiveResponse;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingMyGiftListResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
@@ -36,10 +37,13 @@ import com.zerobase.wishmarket.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -215,6 +219,7 @@ public class FundingService {
                     alarmService.addFundingAlarm(fundingFail);//알림보내기
                 });
         }
+
     }
     //그 외 로직 처리, (알람 등)
 
@@ -306,11 +311,38 @@ public class FundingService {
         for (FundingParticipation participation : participationList) {
             Funding funding = participation.getFunding();
             fundingListGiveResponses.add(FundingListGiveResponse.of(participation, funding));
-
         }
 
         return fundingListGiveResponses;
 
+    }
+
+    public List<FundingMyGiftListResponse> getMyFundigGifyList(Long userId) {
+        PageRequest pageRequest = PageRequest.of(0, 100);
+        UserEntity user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        List<Funding> fundingList = fundingRepository.findAllByTargetUser(user, pageRequest).stream()
+            .collect(Collectors.toList());
+
+        List<FundingMyGiftListResponse> fundingMyGiftListResponses = new ArrayList<>();
+        for (Funding funding : fundingList) {
+
+            Optional<Review> optionalReview = reviewRepository.findByUserIdAndProductId(user.getUserId(),
+                funding.getProduct().getProductId());
+
+            if (optionalReview.isPresent()) {
+                Review review = optionalReview.get();
+                List<String> participationList = funding.getParticipationList()
+                    .stream().map(fundingParticipation -> fundingParticipation.getUser().getName())
+                    .collect(Collectors.toList());
+
+                fundingMyGiftListResponses.add(
+                    FundingMyGiftListResponse.from(funding, review.getComment(), participationList)
+                );
+            }
+        }
+        return fundingMyGiftListResponses;
     }
 
 
