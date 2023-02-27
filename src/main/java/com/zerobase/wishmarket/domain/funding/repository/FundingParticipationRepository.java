@@ -14,5 +14,4 @@ public interface FundingParticipationRepository extends JpaRepository<FundingPar
 
     Page<FundingParticipation> findAllByUser(UserEntity user, Pageable pageable);
 
-
 }

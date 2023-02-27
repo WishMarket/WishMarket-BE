@@ -2,32 +2,19 @@ package com.zerobase.wishmarket.domain.user.model.entity;
 
 import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
+import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.entity.BaseEntity;
+import lombok.*;
+import org.hibernate.envers.AuditOverride;
+
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.hibernate.envers.AuditOverride;
 
 @Getter
 @Builder
@@ -71,7 +58,13 @@ public class UserEntity extends BaseEntity {
     @JoinColumn(name = "delivery_id")
     private DeliveryAddress deliveryAddress;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Funding> fundingList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "targetUser", fetch = FetchType.LAZY)
+    private List<Funding> fundingTargetList = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(nullable = true)
     private FollowInfo followInfo;
 
@@ -86,18 +79,18 @@ public class UserEntity extends BaseEntity {
 
     // 회원 가입 시 가입 정보 입력
     public static UserEntity of(SignUpForm form, UserRegistrationType userRegistrationType,
-        UserStatusType userStatusType, FollowInfo followInfo) {
+                                UserStatusType userStatusType, FollowInfo followInfo) {
 
         return UserEntity.builder()
-            .name(form.getName())
-            .email(form.getEmail())
-            .nickName(form.getNickName())
-            .password(form.getPassword())
-            .pointPrice(0L)
-            .userRegistrationType(userRegistrationType)
-            .userStatusType(userStatusType)
-            .followInfo(followInfo)
-            .build();
+                .name(form.getName())
+                .email(form.getEmail())
+                .nickName(form.getNickName())
+                .password(form.getPassword())
+                .pointPrice(0L)
+                .userRegistrationType(userRegistrationType)
+                .userStatusType(userStatusType)
+                .followInfo(followInfo)
+                .build();
 
     }
 
