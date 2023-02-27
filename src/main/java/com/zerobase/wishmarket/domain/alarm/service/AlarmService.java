@@ -5,6 +5,9 @@ import com.zerobase.wishmarket.domain.alarm.exception.AlarmException;
 import com.zerobase.wishmarket.domain.alarm.model.Alarm;
 import com.zerobase.wishmarket.domain.alarm.model.dto.AlarmResponseDto;
 import com.zerobase.wishmarket.domain.alarm.repository.AlarmRepository;
+import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
+import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
+import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
@@ -30,6 +33,7 @@ public class AlarmService {
         Alarm alarm = Alarm.builder()
             .userId(userId)
             .contents(contents)
+            .isRead(false)
             .build();
         alarmRepository.save(alarm);
     }
@@ -64,4 +68,29 @@ public class AlarmService {
         alarmRepository.deleteById(alarmId);
     }
 
+    public void addFundingAlarm(Funding funding) {
+        Long targetUserId = funding.getTargetUser().getUserId();
+        Long startUserId = funding.getUser().getUserId();
+        List<FundingParticipation> participationList = funding.getParticipationList();
+
+        if (funding.getFundingStatusType() == FundingStatusType.SUCCESS) {
+            addAlarm(targetUserId, "선물받은 펀딩이 성공하였습니다.");
+            addAlarm(startUserId, "참여하신 펀딩이 성공하였습니다.");
+            if (participationList != null) {
+                for (FundingParticipation participation : participationList) {
+                    Long participantId = participation.getUser().getUserId();
+                    addAlarm(participantId, "참여하신 펀딩이 성공하였습니다.");
+                }
+            }
+        } else if (funding.getFundingStatusType() == FundingStatusType.FAIL) {
+            addAlarm(targetUserId, "선물받은 펀딩이 실패하였습니다.");
+            addAlarm(startUserId, "참여하신 펀딩이 실패하였습니다.");
+            if (participationList != null) {
+                for (FundingParticipation participation : participationList) {
+                    Long participantId = participation.getUser().getUserId();
+                    addAlarm(participantId, "참여하신 펀딩이 실패하였습니다.");
+                }
+            }
+        }
+    }
 }

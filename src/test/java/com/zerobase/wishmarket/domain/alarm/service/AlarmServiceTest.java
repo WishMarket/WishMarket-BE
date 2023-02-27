@@ -1,5 +1,6 @@
 package com.zerobase.wishmarket.domain.alarm.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,10 +13,14 @@ import com.zerobase.wishmarket.domain.alarm.exception.AlarmException;
 import com.zerobase.wishmarket.domain.alarm.model.Alarm;
 import com.zerobase.wishmarket.domain.alarm.model.dto.AlarmResponseDto;
 import com.zerobase.wishmarket.domain.alarm.repository.AlarmRepository;
+import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
+import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
+import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -142,6 +147,64 @@ public class AlarmServiceTest {
 
         // then
         verify(alarmRepository, times(1)).deleteById(alarmId);
+    }
+
+    @Test
+    void addFundingAlarm_success() {
+        // given
+        UserEntity targetUser = UserEntity.builder().userId(1L).name("targetUser").build();
+        UserEntity startUser = UserEntity.builder().userId(2L).name("startUser").build();
+        UserEntity participant1 = UserEntity.builder().userId(3L).name("participant1").build();
+        UserEntity participant2 = UserEntity.builder().userId(4L).name("participant2").build();
+
+        Funding funding = Funding.builder()
+            .id(1L)
+            .targetUser(targetUser)
+            .user(startUser)
+            .fundingStatusType(FundingStatusType.SUCCESS)
+            .participationList(new ArrayList<>())
+            .build();
+        FundingParticipation participation1 = FundingParticipation.builder()
+            .id(3L)
+            .funding(funding)
+            .user(participant1)
+            .price(1000L)
+            .fundedAt(LocalDateTime.now())
+            .build();
+        FundingParticipation participation2 = FundingParticipation.builder()
+            .id(4L)
+            .funding(funding)
+            .user(participant2)
+            .price(2000L)
+            .fundedAt(LocalDateTime.now())
+            .build();
+        funding.getParticipationList().add(participation1);
+        funding.getParticipationList().add(participation2);
+
+        given(userAuthRepository.existsById(targetUser.getUserId())).willReturn(true);
+        given(userAuthRepository.existsById(startUser.getUserId())).willReturn(true);
+        given(userAuthRepository.existsById(participation1.getUser().getUserId())).willReturn(true);
+        given(userAuthRepository.existsById(participation2.getUser().getUserId())).willReturn(true);
+
+        // when
+        alarmService.addFundingAlarm(funding);
+
+        // then
+        ArgumentCaptor<Alarm> alarmCaptor = ArgumentCaptor.forClass(Alarm.class);
+        verify(alarmRepository, times(4)).save(alarmCaptor.capture());
+
+        List<Alarm> alarms = alarmCaptor.getAllValues();
+        assertThat(alarms.get(0).getUserId()).isEqualTo(targetUser.getUserId());
+        assertThat(alarms.get(0).getContents()).isEqualTo("선물받은 펀딩이 성공하였습니다.");
+
+        assertThat(alarms.get(1).getUserId()).isEqualTo(startUser.getUserId());
+        assertThat(alarms.get(1).getContents()).isEqualTo("참여하신 펀딩이 성공하였습니다.");
+
+        assertThat(alarms.get(2).getUserId()).isEqualTo(participant1.getUserId());
+        assertThat(alarms.get(2).getContents()).isEqualTo("참여하신 펀딩이 성공하였습니다.");
+
+        assertThat(alarms.get(3).getUserId()).isEqualTo(participant2.getUserId());
+        assertThat(alarms.get(3).getContents()).isEqualTo("참여하신 펀딩이 성공하였습니다.");
     }
 
 }
