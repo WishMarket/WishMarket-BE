@@ -33,15 +33,8 @@ public class FundingListGiveResponse {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    public static FundingListGiveResponse of(FundingParticipation participation, Funding funding){
-
-        List<String> participantsNameList = new ArrayList<>();
-
-
-        //참여자 이름 목록
-        for(FundingParticipation p : funding.getParticipationList()){
-            participantsNameList.add(p.getUser().getName());
-        }
+    public static FundingListGiveResponse of(FundingParticipation participation, Funding funding,
+        List<String> participantsNameList) {
 
         return FundingListGiveResponse.builder()
             .fundingId(participation.getId())
@@ -61,8 +54,6 @@ public class FundingListGiveResponse {
             .build();
 
     }
-
-
 
 
 }

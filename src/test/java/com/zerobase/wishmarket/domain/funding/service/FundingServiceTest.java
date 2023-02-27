@@ -1,7 +1,9 @@
 package com.zerobase.wishmarket.domain.funding.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -9,7 +11,9 @@ import static org.mockito.Mockito.verify;
 
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingListGiveResponse;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
+import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.funding.model.entity.OrderEntity;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
@@ -39,6 +43,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class FundingServiceTest {
@@ -198,7 +205,6 @@ class FundingServiceTest {
             .price(1000L)
             .build();
 
-
         Funding funding = Funding.builder()
             .id(1L)
             .user(user)
@@ -207,7 +213,7 @@ class FundingServiceTest {
             .fundedPrice(10L)
             .fundingStatusType(FundingStatusType.ING)
             .fundedStatusType(FundedStatusType.ING)
-            .startDate(LocalDateTime.of(2023, 2, 25, 07, 10 ))
+            .startDate(LocalDateTime.of(2023, 2, 25, 07, 10))
             .endDate(LocalDateTime.now().minusHours(1))
             .build();
 
@@ -222,6 +228,7 @@ class FundingServiceTest {
 
         //then
         assertEquals(FundingStatusType.FAIL, funding.getFundingStatusType());
+    }
 
     @Test
     void success_funding_reception() {
@@ -270,6 +277,80 @@ class FundingServiceTest {
         verify(reviewRepository, times(1)).save(captor3.capture());
 
     }
+
+    @Test
+    void funding_history_give_test() {
+        //given
+        UserEntity user1 = UserEntity.builder()
+            .userId(1L)
+            .name("user1")
+            .userStatusType(UserStatusType.ACTIVE)
+            .pointPrice(99999L)
+            .build();
+
+        UserEntity user2 = UserEntity.builder()
+            .userId(2L)
+            .name("user2")
+            .userStatusType(UserStatusType.ACTIVE)
+            .build();
+
+        UserEntity targetUser = UserEntity.builder()
+            .userId(3L)
+            .name("targetUser")
+            .userStatusType(UserStatusType.ACTIVE)
+            .build();
+
+
+        Product product = Product.builder()
+            .productId(5L)
+            .build();
+
+        Funding funding = Funding.builder()
+            .user(user1)
+            .targetUser(targetUser)
+            .product(product)
+            .build();
+
+
+        FundingParticipation participation1 = FundingParticipation.builder()
+            .funding(funding)
+            .user(user1)
+            .build();
+
+        FundingParticipation participation2 = FundingParticipation.builder()
+            .funding(funding)
+            .user(user2)
+            .build();
+
+        List<FundingParticipation> participationList = new ArrayList<>();
+        participationList.add(participation1);
+        participationList.add(participation2);
+
+        PageRequest pageRequest = PageRequest.of(0, 20);
+
+        Page<FundingParticipation> participationPage = new PageImpl<>(participationList,pageRequest,20);
+
+
+        List<String> nameList = new ArrayList<>();
+        nameList.add(user1.getName());
+        nameList.add(user2.getName());
+
+        given(userRepository.findByUserId(anyLong()))
+            .willReturn(Optional.of(user1));
+
+        given(fundingParticipationRepository.findAllByUser(user1, pageRequest))
+            .willReturn(participationPage);
+
+        //when
+        List<FundingListGiveResponse> result = fundingService.getFundingListGive(user1.getUserId());
+
+        //then
+        assertNotNull(result.get(0).getParticipants());
+        assertEquals(result.get(0).getParticipants(),nameList);
+        assertEquals(result.get(0).getProductId(),product.getProductId());
+
+    }
+
 
 
 }

@@ -66,7 +66,7 @@ public class UserAuthController {
         return ResponseEntity.ok(userAuthService.logout(userId, accessToken));
     }
 
-    @PatchMapping("/withdrawal")
+    @DeleteMapping("/withdrawal")
     public UserWithdrawalReturnType withdrawal(@AuthenticationPrincipal Long userId,
                                                @RequestHeader(name = "Authorization") String accessToken) {
         return userAuthService.withdrawal(userId, accessToken);
