@@ -51,7 +51,7 @@ public class WishListController {
     @GetMapping("/{userId}")
     public ResponseEntity<List<WishListResponse>> getUserWishList(@PathVariable Long userId) {
         return ResponseEntity.ok()
-            .body(wishListService.getUserWishList(userId));
+            .body(wishListService.getWishList(userId));
     }
 
 }

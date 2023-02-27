@@ -107,18 +107,5 @@ public class WishListService {
         return true;
     }
 
-    public List<WishListResponse> getUserWishList(Long id){
-
-        //위시리스트는 null값이 가능(찜목록이 없을수도 있다)
-        List<WishList> wishLists = wishListRepository.findAllByUserId(id);
-
-        List<WishListResponse> wishListResponseList = new ArrayList<>();
-        for(WishList wishList : wishLists){
-            WishListResponse wishListResponse = WishListResponse.of(wishList);
-            wishListResponseList.add(wishListResponse);
-        }
-
-        return wishListResponseList;
-    }
 
 }
