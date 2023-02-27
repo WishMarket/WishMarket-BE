@@ -33,7 +33,7 @@ public class FundingListGiveResponse {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    public static FundingListGiveResponse of(FundingParticipation participation, Funding funding,
+    public static FundingListGiveResponse from(FundingParticipation participation, Funding funding,
         List<String> participantsNameList) {
 
         return FundingListGiveResponse.builder()

@@ -298,23 +298,12 @@ public class FundingService {
 
         List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
 
-
-        for(FundingParticipation participation : participationList){
-            Funding funding = participation.getFunding();
-            fundingListGiveResponses.add(FundingListGiveResponse.of(participation,funding, participantsNameList));
-
-        Page<FundingParticipation> participationList = fundingParticipationRepository.findAllByUser(
-            user, pageable);
-
-        List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
-
         for (FundingParticipation participation : participationList) {
             Funding funding = participation.getFunding();
-            fundingListGiveResponses.add(FundingListGiveResponse.of(participation, funding));
+            fundingListGiveResponses.add(FundingListGiveResponse.from(participation, funding, participantsNameList));
         }
 
         return fundingListGiveResponses;
-
     }
 
     public List<FundingMyGiftListResponse> getMyFundigGifyList(Long userId) {
