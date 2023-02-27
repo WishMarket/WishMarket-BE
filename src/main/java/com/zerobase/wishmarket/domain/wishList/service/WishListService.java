@@ -63,6 +63,8 @@ public class WishListService {
     }
 
 
+
+
     public List<WishListResponse> getWishList(Long userId) {
 
         Optional<RedisUserWishList> redisUserWishList = redisUserWishListRepository.findById(userId);
@@ -88,8 +90,8 @@ public class WishListService {
     }
 
 
-    public boolean deleteWishList(Long userId, Long wishListId) {
-        WishList wishList = wishListRepository.findByWishListId(wishListId)
+    public boolean deleteWishList(Long userId, Long productId) {
+        WishList wishList = wishListRepository.findByUserIdAndProductId(userId, productId)
             .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
 
         RedisUserWishList redisUserWishList = redisUserWishListRepository.findById(userId)

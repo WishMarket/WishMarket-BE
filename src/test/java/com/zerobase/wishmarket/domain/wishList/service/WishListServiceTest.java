@@ -69,15 +69,21 @@ class WishListServiceTest {
 
     }
 
-    //찜목록 추가 같은 상품을 넣을시 예외처리 발생 테스트
-    @Test
-    void addWishListExceptionTest() {
 
-        Product product = Product.builder()
-            .productId(1L)
-            .name("상품")
-            .price(1000L)
-            .build();
+
+    //찜목록 삭제 테스트
+    @Test
+    void deleteWishListTest() {
+        //제품을 찜목록에 추가
+        wishListService.addWishList(3L, 1L);
+        wishListService.addWishList(3L, 2L);
+        wishListService.addWishList(3L, 3L);
+
+        //찜목록Id가 1인 찜목록 삭제, 제품Id가 1인 제품이 삭제됨
+        wishListService.deleteWishList(3L, 1L);
+
+        RedisUserWishList redisUserWishList = redisUserWishListRepository.findById(3L)
+                .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
 
         WishList wishList = WishList.builder()
             .wishListId(1L)
@@ -90,6 +96,7 @@ class WishListServiceTest {
 
         given(productRepository.findById(anyLong()))
             .willReturn(Optional.of(product));
+
 
         given(wishListRepository.findAllByUserId(anyLong()))
             .willReturn(wishLists);

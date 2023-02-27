@@ -39,11 +39,13 @@ public class WishListController {
     }
 
     //위시리스트 삭제
-    @DeleteMapping("{wishListId}")
+
+    @DeleteMapping("/{productId}")
     public ResponseEntity<Boolean> deleteWishList(@AuthenticationPrincipal Long userId,
-        @PathVariable Long wishListId) {
+        @PathVariable Long productId) {
+
         return ResponseEntity.ok()
-            .body(wishListService.deleteWishList(userId, wishListId));
+            .body(wishListService.deleteWishList(userId, productId));
 
     }
 
