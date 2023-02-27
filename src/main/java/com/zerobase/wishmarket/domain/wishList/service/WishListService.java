@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -27,7 +28,7 @@ public class WishListService {
 
     private final RedisUserWishListRepository redisUserWishListRepository;
 
-
+    @Transactional
     public WishListResponse addWishList(Long userId, Long productId) {
 
         //사용자의 찜목록에 이미 추가한 상품인지 확인
@@ -89,7 +90,7 @@ public class WishListService {
         return wishListResponseList;
     }
 
-
+    @Transactional
     public boolean deleteWishList(Long userId, Long productId) {
         WishList wishList = wishListRepository.findByUserIdAndProductId(userId, productId)
             .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
