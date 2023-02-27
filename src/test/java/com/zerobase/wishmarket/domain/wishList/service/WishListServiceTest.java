@@ -69,14 +69,14 @@ class WishListServiceTest {
     @Test
     void deleteWishListTest() {
         //제품을 찜목록에 추가
-        wishListService.addWishList(1L, 1L);
-        wishListService.addWishList(1L, 2L);
-        wishListService.addWishList(1L, 3L);
+        wishListService.addWishList(3L, 1L);
+        wishListService.addWishList(3L, 2L);
+        wishListService.addWishList(3L, 3L);
 
         //찜목록Id가 1인 찜목록 삭제, 제품Id가 1인 제품이 삭제됨
-        wishListService.deleteWishList(1L, 1L);
+        wishListService.deleteWishList(3L, 1L);
 
-        RedisUserWishList redisUserWishList = redisUserWishListRepository.findById(1L)
+        RedisUserWishList redisUserWishList = redisUserWishListRepository.findById(3L)
                 .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
 
         Assertions.assertNotEquals(1L,redisUserWishList.getWishLists().get(0).getProductId());

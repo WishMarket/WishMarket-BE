@@ -51,7 +51,8 @@ public class WishListService {
 
 
     public List<WishList> getWishList(Long userId) {
-        Optional<RedisUserWishList> redisUserWishList = redisUserWishListRepository.findById(userId);
+        Optional<RedisUserWishList> redisUserWishList = redisUserWishListRepository.findById(
+            userId);
 
         //아직 생성된 캐쉬가 없는 경우
         if (redisUserWishList.isEmpty()) {
@@ -63,8 +64,8 @@ public class WishListService {
     }
 
 
-    public boolean deleteWishList(Long userId, Long wishListId) {
-        WishList wishList = wishListRepository.findByWishListId(wishListId)
+    public boolean deleteWishList(Long userId, Long productId) {
+        WishList wishList = wishListRepository.findByUserIdAndProductId(userId, productId)
             .orElseThrow(() -> new WishListException(WishListErrorCode.WISHLIST_NOT_FOUND));
 
         RedisUserWishList redisUserWishList = redisUserWishListRepository.findById(userId)
