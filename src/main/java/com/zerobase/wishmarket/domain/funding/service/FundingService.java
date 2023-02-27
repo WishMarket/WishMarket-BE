@@ -5,6 +5,7 @@ import static com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode.
 import static com.zerobase.wishmarket.domain.product.exception.ProductErrorCode.PRODUCT_NOT_FOUND;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
+import com.zerobase.wishmarket.domain.alarm.service.AlarmService;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
@@ -61,6 +62,8 @@ public class FundingService {
 
     private final PointService pointService;
 
+    private final AlarmService alarmService;
+
 
     @Transactional
     public FundingStartResponse startFunding(Long userId,
@@ -98,7 +101,6 @@ public class FundingService {
             fundedStatusType = FundedStatusType.BEFORE_RECEIPT;
         }
 
-
         Funding savedFunding = fundingRepository.save(Funding.builder()
             .user(user)
             .targetUser(targetUser)
@@ -122,6 +124,11 @@ public class FundingService {
 
         fundingParticipationRepository.save(participation);
 
+        alarmService.addAlarm(targetUser.getUserId(), "당신을 위한 펀딩이 시작되었습니다.");
+        if (savedFunding.getFundingStatusType() == FundingStatusType.SUCCESS) {
+           alarmService.addFundingAlarm(savedFunding);
+        }
+
         return FundingStartResponse.of(savedFunding);
 
     }
@@ -137,7 +144,6 @@ public class FundingService {
         //펀딩 확인
         Funding funding = fundingRepository.findById(fundingJoinInputForm.getFundingId())
             .orElseThrow(() -> new FundingException(FundingErrorCode.FUNDING_NOT_FOUND));
-
 
         //종료된 펀딩인지 확인
         if ((funding.getFundingStatusType() == FundingStatusType.SUCCESS) | (
@@ -174,10 +180,7 @@ public class FundingService {
             .fundedAt(fundingJoinInputForm.getFundedAt())
             .build();
 
-
-
         fundingParticipationRepository.save(participation);
-
 
         //펀딩 금액 업데이트
         funding.setFundedPrice(userFundedPrice);
@@ -189,11 +192,11 @@ public class FundingService {
         if (funding.getTargetPrice().longValue() == funding.getFundedPrice().longValue()) {
             funding.setFundingStatusType(FundingStatusType.SUCCESS);
             funding.setFundedStatusType(FundedStatusType.BEFORE_RECEIPT);
+            alarmService.addFundingAlarm(funding);
         }
 
         return FundingJoinResponse.of(funding);
     }
-
 
 
     //펀딩 실패 체크
@@ -206,16 +209,14 @@ public class FundingService {
             fundingList.stream()
                 .filter(funding -> funding.getFundingStatusType() == FundingStatusType.ING) //진행중인 펀딩들중에서
                 .filter(fundingIng -> fundingIng.getEndDate().isBefore(LocalDateTime.now())) //그 중에서 펀딩 만료일이 지난 펀딩 객체들만
-                .forEach(fundingFail -> fundingFail.setFundingStatusType(FundingStatusType.FAIL)); //펀딩 상태값 '실패'로 변경
 
-
+                .forEach(fundingFail -> {
+                    fundingFail.setFundingStatusType(FundingStatusType.FAIL);//펀딩 상태값 '실패'로 변경
+                    alarmService.addFundingAlarm(fundingFail);//알림보내기
+                });
         }
-        
     }
     //그 외 로직 처리, (알람 등)
-   
-
-
 
 
     @Transactional
@@ -265,17 +266,18 @@ public class FundingService {
         orderRepository.save(order);
         reviewRepository.save(review);
 
-
         log.info("##만료된 펀딩들을 실패 처리하였습니다.##");
     }
 
 
     //펀딩 내역 (내가 친구들한테 주는 펀딩 내역들 - 참여)
+
     public List<FundingListGiveResponse> getFundingListGive(Long userId){
 
         //유저 확인
         UserEntity user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
 
         //페이지
         PageRequest pageRequest = PageRequest.of(0, 20);  //페이지 및 사이즈
@@ -295,6 +297,16 @@ public class FundingService {
         for(FundingParticipation participation : participationList){
             Funding funding = participation.getFunding();
             fundingListGiveResponses.add(FundingListGiveResponse.of(participation,funding, participantsNameList));
+
+        Page<FundingParticipation> participationList = fundingParticipationRepository.findAllByUser(
+            user, pageable);
+
+        List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
+
+        for (FundingParticipation participation : participationList) {
+            Funding funding = participation.getFunding();
+            fundingListGiveResponses.add(FundingListGiveResponse.of(participation, funding));
+
         }
 
         return fundingListGiveResponses;
