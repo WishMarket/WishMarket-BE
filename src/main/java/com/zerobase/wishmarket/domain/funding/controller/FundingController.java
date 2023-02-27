@@ -46,9 +46,8 @@ public class FundingController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<List<FundingListGiveResponse>> getFundingListGive(@AuthenticationPrincipal Long userId, Pageable pageable){
-        PageRequest pageRequest = PageRequest.of(0, 20);  //페이지 및 사이즈
-        return ResponseEntity.ok().body(fundingService.getFundingListGive(userId, pageRequest));
+    public ResponseEntity<List<FundingListGiveResponse>> getFundingListGive(@AuthenticationPrincipal Long userId){
+        return ResponseEntity.ok().body(fundingService.getFundingListGive(userId));
     }
 
 }
