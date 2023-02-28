@@ -37,7 +37,7 @@ public class UserController {
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<UserInfoResponse> userInfoUpdate(@AuthenticationPrincipal Long userId, @RequestBody UpdateForm form) {
+    public ResponseEntity<UserInfoResponse> userInfoUpdate(@AuthenticationPrincipal Long userId, UpdateForm form) {
         return ResponseEntity.ok(userService.userInfoUpdate(userId, form));
     }
 }
