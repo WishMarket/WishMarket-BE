@@ -21,7 +21,7 @@ public class PointService {
         UserEntity user = userAuthRepository.findById(userId)
             .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-        user.increasePointPrice();
+        user.increasePointPrice(10000L);
         userAuthRepository.save(user);
 
         return PointResponseDto.builder()
@@ -41,4 +41,13 @@ public class PointService {
         user.usePointPrice(inputPoint);
         userAuthRepository.save(user);
     }
+
+    public void refundPoint(Long userId, Long refundingPoint) {
+        UserEntity user = userAuthRepository.findById(userId)
+            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
+
+        user.increasePointPrice(refundingPoint);
+        userAuthRepository.save(user);
+    }
+
 }

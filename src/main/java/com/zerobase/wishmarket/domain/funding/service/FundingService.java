@@ -217,6 +217,12 @@ public class FundingService {
                 .forEach(fundingFail -> {
                     fundingFail.setFundingStatusType(FundingStatusType.FAIL);//펀딩 상태값 '실패'로 변경
                     alarmService.addFundingAlarm(fundingFail);//알림보내기
+
+                    //금액 돌려주기
+                    List<FundingParticipation> participationList = fundingFail.getParticipationList();
+                    for(FundingParticipation participation : participationList){
+                        pointService.refundPoint(participation.getUser().getUserId(),participation.getPrice());
+                    }
                 });
         }
 
