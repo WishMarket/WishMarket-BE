@@ -35,7 +35,7 @@ public class WishListService {
         List<WishList> userWishList = wishListRepository.findAllByUserId(userId);
 
         Product product = productRepository.findById(productId)
-            .orElseThrow(()-> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+            .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
         if (!userWishList.isEmpty()) {
             for (WishList ws : userWishList) {
@@ -60,21 +60,24 @@ public class WishListService {
             .wishLists(userWishList)
             .build());
 
-        return WishListResponse.of(userWishList.get(userWishList.size()-1));
+        return WishListResponse.of(userWishList.get(userWishList.size() - 1));
     }
-
-
 
 
     public List<WishListResponse> getWishList(Long userId) {
 
-        Optional<RedisUserWishList> redisUserWishList = redisUserWishListRepository.findById(userId);
+        Optional<RedisUserWishList> redisUserWishList = redisUserWishListRepository.findById(
+            userId);
         List<WishListResponse> wishListResponseList = new ArrayList<>();
 
         //아직 생성된 캐쉬가 없는 경우
         if (redisUserWishList.isEmpty()) {
             List<WishList> wishLists = wishListRepository.findAllByUserId(userId);
-            for(WishList wishList : wishLists){
+            //찜목록이 비어있는 경우
+            if (wishLists == null) {
+                return wishListResponseList;
+            }
+            for (WishList wishList : wishLists) {
                 WishListResponse wishListResponse = WishListResponse.of(wishList);
                 wishListResponseList.add(wishListResponse);
             }
@@ -83,7 +86,11 @@ public class WishListService {
 
         //캐쉬가 있는 경우
         List<WishList> wishLists = redisUserWishList.get().getWishLists();
-        for(WishList wishList : wishLists){
+        //찜목록이 비어있는 경우
+        if (wishLists == null) {
+            return wishListResponseList;
+        }
+        for (WishList wishList : wishLists) {
             WishListResponse wishListResponse = WishListResponse.of(wishList);
             wishListResponseList.add(wishListResponse);
         }
