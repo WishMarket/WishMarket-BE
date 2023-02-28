@@ -8,6 +8,7 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_N
 import com.zerobase.wishmarket.domain.alarm.service.AlarmService;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingDetailResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingListGiveResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingMyGiftListResponse;
@@ -297,6 +298,7 @@ public class FundingService {
 
         log.info("##만료된 펀딩들을 실패 처리하였습니다.##");
     }
+    
 
     //펀딩 내역 (내가 친구들한테 주는 펀딩 내역들 - 참여)
 
@@ -306,10 +308,6 @@ public class FundingService {
         UserEntity user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
-        int nameListSize = 20;
-
-        List<FundingParticipation> participationList =
-            fundingParticipationRepository.findAllByUser(user);
 
         List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
 
@@ -331,6 +329,7 @@ public class FundingService {
 
         return fundingListGiveResponses;
     }
+    
 
     public List<FundingMyGiftListResponse> getMyFundigGifyList(Long userId) {
         PageRequest pageRequest = PageRequest.of(0, 100);
@@ -362,5 +361,38 @@ public class FundingService {
         return fundingMyGiftListResponses;
     }
 
+
+    //펀딩 상세조회
+    public FundingDetailResponse getFundingDetail(Long userId, Long fundingId) {
+
+        UserEntity user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        Funding funding = fundingRepository.findById(fundingId)
+            .orElseThrow(() -> new FundingException(FUNDING_NOT_FOUND));
+
+        Long userFundedPrice = 0L;
+        int nameListSize = 20;
+
+        //유저가 참여한 펀딩이라면 펀딩한 금액 표출, 아니라면 0원 표출
+        Optional<FundingParticipation> participation = fundingParticipationRepository.findByFundingAndUser(funding,user);
+        if(participation.isPresent()){
+            userFundedPrice = participation.get().getPrice();
+        }
+
+        //해당 펀딩에 참여한 유저 이름 목록
+        List<String> participantsNameList = new ArrayList<>();
+
+        for(FundingParticipation p : funding.getParticipationList()){
+            //참여자 이름은 20명까지만
+            if(participantsNameList.size() <= nameListSize) {
+                participantsNameList.add(p.getUser().getName());
+            }
+        }
+
+
+        return FundingDetailResponse.from(funding,participantsNameList,userFundedPrice);
+
+    }
 
 }
