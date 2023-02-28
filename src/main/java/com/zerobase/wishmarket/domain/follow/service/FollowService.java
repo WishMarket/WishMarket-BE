@@ -107,12 +107,17 @@ public class FollowService {
 
     // https://bcp0109.tistory.com/304
     // 1 + N 문제 https://incheol-jung.gitbook.io/docs/q-and-a/spring/n+1
-    public List<UserFollowersResponse> getMyFollowerList(Long userId, Pageable pageable) {
+    public Page<UserFollowersResponse> getMyFollowerList(Long userId, Pageable pageable) {
         // 내가 팔로우한 유저 ID
-        return followQueryRepository.findByFollows(userId, pageable).stream()
-            .map(UserFollowersResponse::from)
-            .collect(Collectors.toList());
+        Page<UserFollowersResponse> byFollows = followQueryRepository.findByFollows(userId, pageable);
+        System.out.println(byFollows.getTotalPages());
 
+        System.out.println("총 개수 : " + byFollows.getTotalElements());
+        System.out.println(byFollows.getSize());
+        if(byFollows.getTotalElements() % byFollows.getSize() != 0){
+            System.out.println("마지막 페이지 입니다");
+        }
+        return followQueryRepository.findByFollows(userId, pageable);
     }
 
     // 이름, 닉네임이 한글일 경우
