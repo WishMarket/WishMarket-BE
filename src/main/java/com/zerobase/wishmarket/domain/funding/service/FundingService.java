@@ -156,12 +156,6 @@ public class FundingService {
             throw new FundingException(FundingErrorCode.FUNDING_ALREADY_END);
         }
 
-        //이미 참여한 펀딩인지 확인
-        fundingParticipationRepository.findByFundingAndUser(funding, user)
-            .ifPresent(p -> {
-                throw new FundingException(FundingErrorCode.FUNDING_ALREADY_PARTICIPATION);
-            });
-
         //펀딩 참여 금액 확인
         Long userFundedPrice = fundingJoinInputForm.getFundedPrice();
 
@@ -175,6 +169,28 @@ public class FundingService {
         //펀딩하려는 금액(포인트)이 남은 펀딩 금액보다 많은 경우
         if (userFundedPrice > (funding.getTargetPrice() - funding.getFundedPrice())) {
             throw new FundingException(FundingErrorCode.FUNDING_TOO_MUCH_POINT);
+        }
+
+        //이미 참여한 펀딩일 경우, 값 수정
+        Optional<FundingParticipation> checkParticipation = fundingParticipationRepository.findByFundingAndUser(
+            funding, user);
+        if (checkParticipation.isPresent()) {
+            FundingParticipation p = checkParticipation.get();
+            p.setPriceUpdate(userFundedPrice);
+            p.setFundedAt(fundingJoinInputForm.getFundedAt());
+
+            //펀딩 금액 업데이트
+            funding.setFundedPrice(userFundedPrice);
+
+            //펀딩 성공여부 확인
+            if (funding.getTargetPrice().longValue() == funding.getFundedPrice().longValue()) {
+                funding.setFundingStatusType(FundingStatusType.SUCCESS);
+                funding.setFundedStatusType(FundedStatusType.BEFORE_RECEIPT);
+                alarmService.addFundingAlarm(funding);
+            }
+
+            return FundingJoinResponse.of(funding);
+
         }
 
         //펀딩 참여 리스트 추가
@@ -220,6 +236,12 @@ public class FundingService {
                 .forEach(fundingFail -> {
                     fundingFail.setFundingStatusType(FundingStatusType.FAIL);//펀딩 상태값 '실패'로 변경
                     alarmService.addFundingAlarm(fundingFail);//알림보내기
+
+                    //금액 돌려주기
+                    List<FundingParticipation> participationList = fundingFail.getParticipationList();
+                    for(FundingParticipation participation : participationList){
+                        pointService.refundPoint(participation.getUser().getUserId(),participation.getPrice());
+                    }
                 });
         }
 
@@ -276,6 +298,7 @@ public class FundingService {
 
         log.info("##만료된 펀딩들을 실패 처리하였습니다.##");
     }
+    
 
     //펀딩 내역 (내가 친구들한테 주는 펀딩 내역들 - 참여)
 
@@ -285,29 +308,28 @@ public class FundingService {
         UserEntity user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
-        //페이지
-        PageRequest pageRequest = PageRequest.of(0, 20);  //페이지 및 사이즈
-
-        Page<FundingParticipation> participationList = fundingParticipationRepository.findAllByUser(
-            user, pageRequest);
-
-        List<String> participantsNameList = new ArrayList<>();
-
-        //참여자 이름 목록
-        for (FundingParticipation p : participationList) {
-            participantsNameList.add(p.getUser().getName());
-        }
 
         List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
 
         for (FundingParticipation participation : participationList) {
+            List<String> participantsNameList = new ArrayList<>();
+
             Funding funding = participation.getFunding();
+
+            for (FundingParticipation p : funding.getParticipationList()) {
+                //참여자 이름은 20명까지만
+                if (participantsNameList.size() <= nameListSize) {
+                    participantsNameList.add(p.getUser().getName());
+                }
+            }
+
             fundingListGiveResponses.add(
                 FundingListGiveResponse.from(participation, funding, participantsNameList));
         }
 
         return fundingListGiveResponses;
     }
+    
 
     public List<FundingMyGiftListResponse> getMyFundigGifyList(Long userId) {
         PageRequest pageRequest = PageRequest.of(0, 100);
