@@ -8,6 +8,7 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_N
 import com.zerobase.wishmarket.domain.alarm.service.AlarmService;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingDetailResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingListGiveResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingMyGiftListResponse;
@@ -130,7 +131,7 @@ public class FundingService {
 
         alarmService.addAlarm(targetUser.getUserId(), "당신을 위한 펀딩이 시작되었습니다.");
         if (savedFunding.getFundingStatusType() == FundingStatusType.SUCCESS) {
-           alarmService.addFundingAlarm(savedFunding);
+            alarmService.addFundingAlarm(savedFunding);
         }
 
         return FundingStartResponse.of(savedFunding);
@@ -211,8 +212,10 @@ public class FundingService {
         //스트림 활용
         if (!fundingList.isEmpty()) {
             fundingList.stream()
-                .filter(funding -> funding.getFundingStatusType() == FundingStatusType.ING) //진행중인 펀딩들중에서
-                .filter(fundingIng -> fundingIng.getEndDate().isBefore(LocalDateTime.now())) //그 중에서 펀딩 만료일이 지난 펀딩 객체들만
+                .filter(funding -> funding.getFundingStatusType()
+                    == FundingStatusType.ING) //진행중인 펀딩들중에서
+                .filter(fundingIng -> fundingIng.getEndDate()
+                    .isBefore(LocalDateTime.now())) //그 중에서 펀딩 만료일이 지난 펀딩 객체들만
 
                 .forEach(fundingFail -> {
                     fundingFail.setFundingStatusType(FundingStatusType.FAIL);//펀딩 상태값 '실패'로 변경
@@ -274,25 +277,24 @@ public class FundingService {
         log.info("##만료된 펀딩들을 실패 처리하였습니다.##");
     }
 
-
     //펀딩 내역 (내가 친구들한테 주는 펀딩 내역들 - 참여)
 
-    public List<FundingListGiveResponse> getFundingListGive(Long userId){
+    public List<FundingListGiveResponse> getFundingListGive(Long userId) {
 
         //유저 확인
         UserEntity user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
-
         //페이지
         PageRequest pageRequest = PageRequest.of(0, 20);  //페이지 및 사이즈
 
-        Page<FundingParticipation> participationList = fundingParticipationRepository.findAllByUser(user, pageRequest);
+        Page<FundingParticipation> participationList = fundingParticipationRepository.findAllByUser(
+            user, pageRequest);
 
         List<String> participantsNameList = new ArrayList<>();
 
         //참여자 이름 목록
-        for(FundingParticipation p : participationList){
+        for (FundingParticipation p : participationList) {
             participantsNameList.add(p.getUser().getName());
         }
 
@@ -300,7 +302,8 @@ public class FundingService {
 
         for (FundingParticipation participation : participationList) {
             Funding funding = participation.getFunding();
-            fundingListGiveResponses.add(FundingListGiveResponse.from(participation, funding, participantsNameList));
+            fundingListGiveResponses.add(
+                FundingListGiveResponse.from(participation, funding, participantsNameList));
         }
 
         return fundingListGiveResponses;
@@ -311,13 +314,15 @@ public class FundingService {
         UserEntity user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
-        List<Funding> fundingList = fundingRepository.findAllByTargetUser(user, pageRequest).stream()
+        List<Funding> fundingList = fundingRepository.findAllByTargetUser(user, pageRequest)
+            .stream()
             .collect(Collectors.toList());
 
         List<FundingMyGiftListResponse> fundingMyGiftListResponses = new ArrayList<>();
         for (Funding funding : fundingList) {
 
-            Optional<Review> optionalReview = reviewRepository.findByUserIdAndProductId(user.getUserId(),
+            Optional<Review> optionalReview = reviewRepository.findByUserIdAndProductId(
+                user.getUserId(),
                 funding.getProduct().getProductId());
 
             if (optionalReview.isPresent()) {
@@ -334,5 +339,38 @@ public class FundingService {
         return fundingMyGiftListResponses;
     }
 
+
+    //펀딩 상세조회
+    public FundingDetailResponse getFundingDetail(Long userId, Long fundingId) {
+
+        UserEntity user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        Funding funding = fundingRepository.findById(fundingId)
+            .orElseThrow(() -> new FundingException(FUNDING_NOT_FOUND));
+
+        Long userFundedPrice = 0L;
+        int nameListSize = 20;
+
+        //유저가 참여한 펀딩이라면 펀딩한 금액 표출, 아니라면 0원 표출
+        Optional<FundingParticipation> participation = fundingParticipationRepository.findByFundingAndUser(funding,user);
+        if(participation.isPresent()){
+            userFundedPrice = participation.get().getPrice();
+        }
+
+        //해당 펀딩에 참여한 유저 이름 목록
+        List<String> participantsNameList = new ArrayList<>();
+
+        for(FundingParticipation p : funding.getParticipationList()){
+            //참여자 이름은 20명까지만
+            if(participantsNameList.size() <= nameListSize) {
+                participantsNameList.add(p.getUser().getName());
+            }
+        }
+
+
+        return FundingDetailResponse.from(funding,participantsNameList,userFundedPrice);
+
+    }
 
 }
