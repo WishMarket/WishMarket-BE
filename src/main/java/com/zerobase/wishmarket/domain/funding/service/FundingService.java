@@ -301,13 +301,16 @@ public class FundingService {
     
 
     //펀딩 내역 (내가 친구들한테 주는 펀딩 내역들 - 참여)
-
     public List<FundingListGiveResponse> getFundingListGive(Long userId) {
 
         //유저 확인
         UserEntity user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
+        int nameListSize = 20;
+
+        List<FundingParticipation> participationList =
+            fundingParticipationRepository.findAllByUser(user);
 
         List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
 
