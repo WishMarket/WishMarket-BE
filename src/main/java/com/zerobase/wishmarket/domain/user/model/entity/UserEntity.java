@@ -52,6 +52,8 @@ public class UserEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserStatusType userStatusType;
 
+    private boolean influence;
+
     // 1 : 1 Mapping
     // 주소
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

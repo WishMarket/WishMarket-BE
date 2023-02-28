@@ -12,6 +12,7 @@ import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
 import com.zerobase.wishmarket.domain.follow.repository.FollowQueryRepository;
 import com.zerobase.wishmarket.domain.follow.repository.FollowRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.dto.InfluencerResponse;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
@@ -165,5 +166,11 @@ public class FollowService {
 
         }
         return null;
+    }
+
+    public List<InfluencerResponse> getInfluencerList(){
+        return userAuthRepository.findAllByInfluenceIsTrueRandom().stream()
+            .map(InfluencerResponse::from)
+            .collect(Collectors.toList());
     }
 }
