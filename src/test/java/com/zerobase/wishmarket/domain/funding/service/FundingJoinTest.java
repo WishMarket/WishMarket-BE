@@ -2,13 +2,16 @@ package com.zerobase.wishmarket.domain.funding.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.zerobase.wishmarket.domain.alarm.service.AlarmService;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingJoinInputForm;
@@ -52,6 +55,9 @@ class FundingJoinTest {
     @Mock
     private PointService pointService;
 
+    @Mock
+    private AlarmService alarmService;
+
     @InjectMocks
     private FundingService fundingService;
 
@@ -91,6 +97,7 @@ class FundingJoinTest {
             .fundedPrice(0L)
             .fundingStatusType(FundingStatusType.ING)
             .fundedStatusType(FundedStatusType.ING)
+            .participationCount(1L)
             .build();
 
 
@@ -181,77 +188,6 @@ class FundingJoinTest {
 
     }
 
-
-    //이미 참여한 펀딩인 경우
-    @DisplayName("이미 참여한 펀딩이라 펀딩 참여 실패")
-    @Test
-    void joinFundingAlreadyParticipationFundingTest() {
-        //given
-        UserEntity user = UserEntity.builder()
-            .userId(1L)
-            .name("user")
-            .userStatusType(UserStatusType.ACTIVE)
-            .pointPrice(1000L)
-            .build();
-
-        UserEntity targetUser = UserEntity.builder()
-            .userId(2L)
-            .name("targetUser")
-            .userRegistrationType(UserRegistrationType.EMAIL)
-            .build();
-
-        Product product = Product.builder()
-            .productId(1L)
-            .name("상품")
-            .price(100000L)
-            .build();
-
-
-        Funding funding = Funding.builder()
-            .id(1L)
-            .user(user)
-            .targetUser(targetUser)
-            .product(product)
-            .targetPrice(product.getPrice())
-            .fundedPrice(0L)
-            .fundingStatusType(FundingStatusType.ING)
-            .fundedStatusType(FundedStatusType.ING)
-            .build();
-
-        FundingParticipation participation = FundingParticipation.builder()
-            .id(1L)
-            .funding(funding)
-            .user(user)
-            .price(1000L)
-            .build();
-
-
-        FundingJoinInputForm fundingJoinInputForm = FundingJoinInputForm.builder()
-            .fundingId(1L)
-            .fundedPrice(100L)
-            .fundedAt(LocalDateTime.now())
-            .build();
-
-        given(userRepository.findByUserId(anyLong()))
-            .willReturn(Optional.of(user));
-
-        given(fundingRepository.findById(anyLong()))
-            .willReturn(Optional.of(funding));
-
-        given(fundingParticipationRepository.findByFundingAndUser(funding,user))
-            .willReturn(Optional.of(participation));
-
-
-        //when
-        FundingException exception = assertThrows(FundingException.class,
-            () -> fundingService.joinFunding(user.getUserId(), fundingJoinInputForm));
-
-        //then
-        assertEquals(FundingErrorCode.FUNDING_ALREADY_PARTICIPATION, exception.getErrorCode());
-
-    }
-
-    //참여하는데 포인트가 부족한 경우
 
 
     //참여하는데 펀딩 포인트가 상품가격보다 큰 경우
@@ -350,6 +286,7 @@ class FundingJoinTest {
             .fundedPrice(0L)
             .fundingStatusType(FundingStatusType.ING)
             .fundedStatusType(FundedStatusType.ING)
+            .participationCount(1L)
             .build();
 
 
@@ -378,6 +315,73 @@ class FundingJoinTest {
     }
 
 
+    @Test
+    void funding_join_duplication_test(){
+
+        //given
+        UserEntity user1 = UserEntity.builder()
+            .userId(1L)
+            .name("user1")
+            .userStatusType(UserStatusType.ACTIVE)
+            .pointPrice(99999L)
+            .build();
+
+
+        UserEntity targetUser = UserEntity.builder()
+            .userId(3L)
+            .name("targetUser")
+            .userStatusType(UserStatusType.ACTIVE)
+            .build();
+
+
+        Product product = Product.builder()
+            .productId(5L)
+            .build();
+
+        Funding funding = Funding.builder()
+            .id(1L)
+            .user(user1)
+            .targetUser(targetUser)
+            .product(product)
+            .participationCount(1L)
+            .fundedPrice(100L)
+            .targetPrice(100000L)
+            .fundedPrice(0L)
+            .build();
+
+
+        FundingParticipation participation = FundingParticipation.builder()
+            .funding(funding)
+            .user(user1)
+            .price(100L)
+            .fundedAt(LocalDateTime.of(2022,02,22,12,10))
+            .build();
+
+        FundingJoinInputForm fundingJoinInputForm = FundingJoinInputForm.builder()
+            .fundingId(1L)
+            .fundedPrice(100L)
+            .fundedAt(LocalDateTime.now())
+            .build();
+
+
+        given(userRepository.findByUserId(anyLong()))
+            .willReturn(Optional.of(user1));
+
+        given(fundingRepository.findById(anyLong()))
+            .willReturn(Optional.of(funding));
+
+        given(fundingParticipationRepository.findByFundingAndUser(any(),any()))
+            .willReturn(Optional.of(participation));
+
+
+        //when
+        FundingJoinResponse result = fundingService.joinFunding(user1.getUserId(),fundingJoinInputForm);
+
+        //then
+        assertEquals(participation.getPrice(),funding.getFundedPrice()+fundingJoinInputForm.getFundedPrice());
+        assertEquals(result.getParticipationCount(),1);
+
+    }
 
 
 }

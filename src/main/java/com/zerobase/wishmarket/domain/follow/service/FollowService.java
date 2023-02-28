@@ -12,6 +12,7 @@ import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
 import com.zerobase.wishmarket.domain.follow.repository.FollowQueryRepository;
 import com.zerobase.wishmarket.domain.follow.repository.FollowRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
+import com.zerobase.wishmarket.domain.user.model.dto.InfluencerResponse;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
@@ -107,12 +108,17 @@ public class FollowService {
 
     // https://bcp0109.tistory.com/304
     // 1 + N 문제 https://incheol-jung.gitbook.io/docs/q-and-a/spring/n+1
-    public List<UserFollowersResponse> getMyFollowerList(Long userId, Pageable pageable) {
+    public Page<UserFollowersResponse> getMyFollowerList(Long userId, Pageable pageable) {
         // 내가 팔로우한 유저 ID
-        return followQueryRepository.findByFollows(userId, pageable).stream()
-            .map(UserFollowersResponse::from)
-            .collect(Collectors.toList());
+        Page<UserFollowersResponse> byFollows = followQueryRepository.findByFollows(userId, pageable);
+        System.out.println(byFollows.getTotalPages());
 
+        System.out.println("총 개수 : " + byFollows.getTotalElements());
+        System.out.println(byFollows.getSize());
+        if(byFollows.getTotalElements() % byFollows.getSize() != 0){
+            System.out.println("마지막 페이지 입니다");
+        }
+        return followQueryRepository.findByFollows(userId, pageable);
     }
 
     // 이름, 닉네임이 한글일 경우
@@ -160,5 +166,11 @@ public class FollowService {
 
         }
         return null;
+    }
+
+    public List<InfluencerResponse> getInfluencerList(){
+        return userAuthRepository.findAllByInfluenceIsTrueRandom().stream()
+            .map(InfluencerResponse::from)
+            .collect(Collectors.toList());
     }
 }

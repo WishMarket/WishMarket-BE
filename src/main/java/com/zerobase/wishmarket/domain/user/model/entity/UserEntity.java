@@ -52,6 +52,8 @@ public class UserEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserStatusType userStatusType;
 
+    private boolean influence;
+
     // 1 : 1 Mapping
     // 주소
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -140,8 +142,8 @@ public class UserEntity extends BaseEntity {
         this.password = password;
     }
 
-    public void increasePointPrice() {
-        this.pointPrice += 10000L;
+    public void increasePointPrice(Long point) {
+        this.pointPrice += point;
     }
 
     public void usePointPrice(Long usePoint) {

@@ -37,7 +37,7 @@ public class FundingListGiveResponse {
         List<String> participantsNameList) {
 
         return FundingListGiveResponse.builder()
-            .fundingId(participation.getId())
+            .fundingId(funding.getId())
             .targetId(participation.getId())
             .targetName(funding.getTargetUser().getName())
             .productId(funding.getProduct().getProductId())
