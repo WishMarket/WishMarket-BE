@@ -15,9 +15,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Entity
@@ -39,4 +41,12 @@ public class FundingParticipation {
     private Long price;
 
     private LocalDateTime fundedAt;
+
+    public void setPriceUpdate(Long price) {
+        this.price += price;
+    }
+
+    public void setFundedAt(LocalDateTime dateTime){
+        this.fundedAt = dateTime;
+    }
 }

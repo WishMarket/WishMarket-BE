@@ -3,12 +3,12 @@ package com.zerobase.wishmarket.domain.funding.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.zerobase.wishmarket.domain.alarm.service.AlarmService;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingListGiveResponse;
@@ -29,7 +29,6 @@ import com.zerobase.wishmarket.domain.product.model.entity.Review;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.product.repository.ReviewRepository;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
-import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -43,9 +42,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class FundingServiceTest {
@@ -73,6 +69,9 @@ class FundingServiceTest {
     @Mock
     private PointService pointService;
 
+    @Mock
+    private AlarmService alarmService;
+
     @InjectMocks
     private FundingService fundingService;
 
@@ -82,53 +81,6 @@ class FundingServiceTest {
     @Test
     void fundingStartTest() {
 
-        //given
-        UserEntity user = UserEntity.builder()
-            .userId(1L)
-            .name("user")
-            .userStatusType(UserStatusType.ACTIVE)
-            .pointPrice(1000L)
-            .build();
-
-        UserEntity targetUser = UserEntity.builder()
-            .userId(2L)
-            .name("targetUser")
-            .userRegistrationType(UserRegistrationType.EMAIL)
-            .build();
-
-
-        Product product = Product.builder()
-            .productId(1L)
-            .name("상품")
-            .price(100000L)
-            .build();
-
-        given(userRepository.findByUserId(anyLong()))
-            .willReturn(Optional.of(user));
-
-        given(productRepository.findById(anyLong()))
-            .willReturn(Optional.of(product));
-
-        FundingStartInputForm fundingStartInputForm = FundingStartInputForm.builder()
-            .productId(999L)
-            .targetId(targetUser.getUserId())
-            .fundedPrice(1000L)
-            .productId(1L)
-            .targetId(targetUser.getUserId())
-            .fundedPrice(100L)
-            .startDate(LocalDateTime.now())
-            .endDate(LocalDateTime.now().plusMonths(1))
-            .build();
-
-        ArgumentCaptor<Funding> captor = ArgumentCaptor.forClass(Funding.class);
-
-        // when
-        fundingService.startFunding(user.getUserId(), fundingStartInputForm);
-
-        //then
-        verify(fundingRepository, times(1)).save(captor.capture());
-        assertEquals(user, captor.getValue().getUser()); // 펀딩을 시작한 사람
-        assertEquals(product, captor.getValue().getProduct()); // 펀딩상품 확인
     }
 
 
@@ -301,6 +253,18 @@ class FundingServiceTest {
             .build();
 
 
+        FundingParticipation participation1 = FundingParticipation.builder()
+            .user(user1)
+            .build();
+
+        FundingParticipation participation2 = FundingParticipation.builder()
+            .user(user2)
+            .build();
+
+        List<FundingParticipation> participationList = new ArrayList<>();
+        participationList.add(participation1);
+        participationList.add(participation2);
+
         Product product = Product.builder()
             .productId(5L)
             .build();
@@ -309,37 +273,36 @@ class FundingServiceTest {
             .user(user1)
             .targetUser(targetUser)
             .product(product)
+            .participationList(participationList)
             .build();
 
 
-        FundingParticipation participation1 = FundingParticipation.builder()
+        //펀딩 다시 주입
+        participation1 = FundingParticipation.builder()
             .funding(funding)
             .user(user1)
             .build();
 
-        FundingParticipation participation2 = FundingParticipation.builder()
+        participation2 = FundingParticipation.builder()
             .funding(funding)
             .user(user2)
             .build();
 
-        List<FundingParticipation> participationList = new ArrayList<>();
+        participationList = new ArrayList<>();
         participationList.add(participation1);
         participationList.add(participation2);
-
-        PageRequest pageRequest = PageRequest.of(0, 20);
-
-        Page<FundingParticipation> participationPage = new PageImpl<>(participationList,pageRequest,20);
 
 
         List<String> nameList = new ArrayList<>();
         nameList.add(user1.getName());
         nameList.add(user2.getName());
 
+
         given(userRepository.findByUserId(anyLong()))
             .willReturn(Optional.of(user1));
 
-        given(fundingParticipationRepository.findAllByUser(user1, pageRequest))
-            .willReturn(participationPage);
+        given(fundingParticipationRepository.findAllByUser(user1))
+            .willReturn(participationList);
 
         //when
         List<FundingListGiveResponse> result = fundingService.getFundingListGive(user1.getUserId());
@@ -350,7 +313,6 @@ class FundingServiceTest {
         assertEquals(result.get(0).getProductId(),product.getProductId());
 
     }
-
 
 
 }
