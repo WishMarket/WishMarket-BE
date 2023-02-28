@@ -46,6 +46,8 @@ public class UserInfoResponse {
                 .email(userEntity.getEmail())
                 .nickName(userEntity.getNickName())
                 .phone(userEntity.getPhone())
+                .address("")
+                .detailAddress("")
                 .profileImage(userEntity.getProfileImage())
                 .userRegistrationType(userEntity.getUserRegistrationType())
                 .userStatusType(userEntity.getUserStatusType())
