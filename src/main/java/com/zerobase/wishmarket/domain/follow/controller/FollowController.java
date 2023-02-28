@@ -3,6 +3,7 @@ package com.zerobase.wishmarket.domain.follow.controller;
 import com.zerobase.wishmarket.domain.follow.model.dto.UserFollowersResponse;
 import com.zerobase.wishmarket.domain.follow.model.dto.UserSearchResponse;
 import com.zerobase.wishmarket.domain.follow.service.FollowService;
+import com.zerobase.wishmarket.domain.user.model.dto.InfluencerResponse;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -50,5 +51,10 @@ public class FollowController {
     @GetMapping("/friends")
     public ResponseEntity<List<UserFollowersResponse>> getMyFollowerList(@AuthenticationPrincipal Long userId, Pageable pageable) {
         return ResponseEntity.ok(followService.getMyFollowerList(userId, pageable));
+    }
+
+    @GetMapping("/influence")
+    public ResponseEntity<List<InfluencerResponse>> getInfluencerList(){
+        return ResponseEntity.ok(followService.getInfluencerList());
     }
 }
