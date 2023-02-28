@@ -48,7 +48,7 @@ public class FollowController {
     }
 
     @GetMapping("/friends")
-    public ResponseEntity<List<UserFollowersResponse>> getMyFollowerList(@AuthenticationPrincipal Long userId, Pageable pageable) {
+    public ResponseEntity<Page<UserFollowersResponse>> getMyFollowerList(@AuthenticationPrincipal Long userId, Pageable pageable) {
         return ResponseEntity.ok(followService.getMyFollowerList(userId, pageable));
     }
 }
