@@ -3,7 +3,7 @@ package com.zerobase.wishmarket.domain.user.controller;
 
 import com.zerobase.wishmarket.domain.user.model.dto.ChangePwdForm;
 import com.zerobase.wishmarket.domain.user.model.dto.UpdateForm;
-import com.zerobase.wishmarket.domain.user.model.dto.UserDto;
+import com.zerobase.wishmarket.domain.user.model.dto.UserInfoResponse;
 import com.zerobase.wishmarket.domain.user.model.type.UserPasswordChangeReturnType;
 import com.zerobase.wishmarket.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +14,6 @@ import javax.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,9 +27,8 @@ public class UserController {
 
 
     @GetMapping("/detail")
-    public ResponseEntity<?> userDetail(@AuthenticationPrincipal Long userId) {
-        UserDto userInfo = userService.userDetail(userId);
-        return ResponseEntity.ok(userInfo);
+    public ResponseEntity<UserInfoResponse> userDetail(@AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(userService.userDetail(userId));
     }
 
     @PatchMapping("/password")
@@ -40,7 +37,7 @@ public class UserController {
     }
 
     @PatchMapping("/update")
-    public ResponseEntity<UserDto> userInfoUpdate(@AuthenticationPrincipal Long userId, @RequestBody UpdateForm form) {
+    public ResponseEntity<UserInfoResponse> userInfoUpdate(@AuthenticationPrincipal Long userId, @RequestBody UpdateForm form) {
         return ResponseEntity.ok(userService.userInfoUpdate(userId, form));
     }
 }

@@ -7,7 +7,7 @@ import com.zerobase.wishmarket.common.util.S3Util;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.dto.ChangePwdForm;
 import com.zerobase.wishmarket.domain.user.model.dto.UpdateForm;
-import com.zerobase.wishmarket.domain.user.model.dto.UserDto;
+import com.zerobase.wishmarket.domain.user.model.dto.UserInfoResponse;
 import com.zerobase.wishmarket.domain.user.model.entity.DeliveryAddress;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserPasswordChangeReturnType;
@@ -32,12 +32,12 @@ public class UserService {
 
     private static final String PROFILE_IMAGES = "profile_images";
 
-    public UserDto userDetail(Long userId) {
+    public UserInfoResponse userDetail(Long userId) {
         Optional<UserEntity> userInfo = userRepository.findByUserId(userId);
         if (!userInfo.isPresent()) {
             throw new UserException(USER_NOT_FOUND);
         } else {
-            return UserDto.from(userInfo.get());
+            return UserInfoResponse.from(userInfo.get());
         }
     }
 
@@ -57,7 +57,7 @@ public class UserService {
         }
     }
 
-    public UserDto userInfoUpdate(Long userId, UpdateForm form) {
+    public UserInfoResponse userInfoUpdate(Long userId, UpdateForm form) {
 
         Optional<UserEntity> user = userRepository.findByUserId(userId);
         if (!user.isPresent()) {
@@ -100,7 +100,7 @@ public class UserService {
 
             UserEntity updateUser = userRepository.save(user.get());
 
-            return UserDto.from(userRepository.save(updateUser));
+            return UserInfoResponse.from(userRepository.save(updateUser));
 
         }
     }
