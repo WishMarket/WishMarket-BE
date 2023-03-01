@@ -11,8 +11,6 @@ import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.service.FundingService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,6 +60,11 @@ public class FundingController {
     public ResponseEntity<FundingDetailResponse> getFundingDetail(@AuthenticationPrincipal Long userId,
         @PathVariable Long fundingId){
         return ResponseEntity.ok().body(fundingService.getFundingDetail(userId,fundingId));
+    }
+
+    @GetMapping("/main")
+    public ResponseEntity<List<FundingDetailResponse>> getFundingMain(@AuthenticationPrincipal Long userId){
+        return ResponseEntity.ok().body(fundingService.getFundingMain(userId));
     }
 
 }
