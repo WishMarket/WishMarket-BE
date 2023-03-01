@@ -22,7 +22,7 @@ public class FundingDetailResponse {
     private String targetUserName;
     private String targetUserProfileImageUrl;
     private Long targetPrice;
-    private Long fundedPrice;
+    private Long myFundedPrice;
     private Long totalFundedPrice;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
@@ -41,7 +41,7 @@ public class FundingDetailResponse {
             .targetUserName(funding.getTargetUser().getName())
             .targetUserProfileImageUrl(funding.getTargetUser().getProfileImage())
             .targetPrice(funding.getTargetPrice())
-            .fundedPrice(userFundedPrice)      //조회한 유저가 해당 펀딩에 펀딩을 했다면, 금액이 보여야 함
+            .myFundedPrice(userFundedPrice)      //조회한 유저가 해당 펀딩에 펀딩을 했다면, 금액이 보여야 함
             .totalFundedPrice(funding.getFundedPrice())
             .startDate(funding.getStartDate())
             .endDate(funding.getEndDate())
