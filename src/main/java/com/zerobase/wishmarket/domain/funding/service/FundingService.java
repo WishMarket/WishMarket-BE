@@ -70,7 +70,7 @@ public class FundingService {
 
     private final AlarmService alarmService;
 
-    private final int FUNDING_NAMELISE_SIZE = 20;
+    private final int FUNDING_NAMELIST_SIZE = 20;
 
 
     @Transactional
@@ -324,7 +324,7 @@ public class FundingService {
 
             for (FundingParticipation p : funding.getParticipationList()) {
                 //참여자 이름은 20명까지만
-                if (participantsNameList.size() <= FUNDING_NAMELISE_SIZE) {
+                if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
                     participantsNameList.add(p.getUser().getName());
                 }
             }
@@ -391,7 +391,7 @@ public class FundingService {
 
         for (FundingParticipation p : funding.getParticipationList()) {
             //참여자 이름은 20명까지만
-            if (participantsNameList.size() <= FUNDING_NAMELISE_SIZE) {
+            if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
                 participantsNameList.add(p.getUser().getName());
             }
         }
@@ -400,7 +400,8 @@ public class FundingService {
 
     }
 
-    //메인 페이지, 인플루언서 타겟 펀딩 조회
+    //로그인한 경우
+    //메인 페이지, 인플루언서 타겟 펀딩 조회,
     //보여주기위함
     public List<FundingDetailResponse> getFundingMain(Long userId) {
 
@@ -409,8 +410,8 @@ public class FundingService {
 
         List<FundingDetailResponse> detailResponseList = new ArrayList<>();
 
-        //무작위 인기유저 목록
-        List<UserEntity> influenceUserList = userAuthRepository.findAllByInfluenceIsTrueRandom();
+        //무작위 인기유저 11명 목록
+        List<UserEntity> influenceUserList = userAuthRepository.findAllByInfluenceIsTrueRandomEleven();
 
         //인기유저가 타겟인 펀딩 목록
         List<Funding> influenceFundingList = new ArrayList<>();
@@ -438,7 +439,7 @@ public class FundingService {
 
             for (FundingParticipation p : funding.getParticipationList()) {
                 //참여자 이름은 20명까지만
-                if (participantsNameList.size() <= FUNDING_NAMELISE_SIZE) {
+                if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
                     participantsNameList.add(p.getUser().getName());
                 }
             }
@@ -448,5 +449,42 @@ public class FundingService {
 
         return detailResponseList;
     }
+
+    //로그인하지 않은 경우
+    //메인 페이지, 인플루언서 타겟 펀딩 조회,
+    //보여주기위함
+    public List<FundingDetailResponse> getFundingMain() {
+
+        List<FundingDetailResponse> detailResponseList = new ArrayList<>();
+
+        //무작위 인기유저 11명 목록
+        List<UserEntity> influenceUserList = userAuthRepository.findAllByInfluenceIsTrueRandomEleven();
+
+        //인기유저가 타겟인 펀딩 목록
+        List<Funding> influenceFundingList = new ArrayList<>();
+
+        //인기유저 펀딩이 무조건 존재한다고 가정
+        for(UserEntity influenceUser : influenceUserList){
+            influenceFundingList.add(fundingRepository.findByTargetUser(influenceUser));
+        }
+
+        for(Funding funding : influenceFundingList){
+
+            //해당 펀딩에 참여한 유저 이름 목록
+            List<String> participantsNameList = new ArrayList<>();
+
+            for (FundingParticipation p : funding.getParticipationList()) {
+                //참여자 이름은 20명까지만
+                if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
+                    participantsNameList.add(p.getUser().getName());
+                }
+            }
+
+            detailResponseList.add(FundingDetailResponse.from(funding, participantsNameList, 0L));
+        }
+
+        return detailResponseList;
+    }
+
 
 }

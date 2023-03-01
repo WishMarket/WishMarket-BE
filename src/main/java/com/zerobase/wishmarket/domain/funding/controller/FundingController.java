@@ -64,6 +64,9 @@ public class FundingController {
 
     @GetMapping("/main")
     public ResponseEntity<List<FundingDetailResponse>> getFundingMain(@AuthenticationPrincipal Long userId){
+        if(userId == null){
+            return ResponseEntity.ok().body(fundingService.getFundingMain());
+        }
         return ResponseEntity.ok().body(fundingService.getFundingMain(userId));
     }
 
