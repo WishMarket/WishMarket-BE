@@ -54,7 +54,7 @@ public class FollowController {
     }
 
     @GetMapping("/influence")
-    public ResponseEntity<List<InfluencerResponse>> getInfluencerList(){
-        return ResponseEntity.ok(followService.getInfluencerList());
+    public ResponseEntity<List<InfluencerResponse>> getInfluenceList(@AuthenticationPrincipal Long userId){
+        return ResponseEntity.ok(followService.getInfluencerList(userId));
     }
 }
