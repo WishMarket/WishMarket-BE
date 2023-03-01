@@ -350,14 +350,20 @@ public class FundingService {
                 user.getUserId(),
                 funding.getProduct().getProductId());
 
+            List<String> participationList = funding.getParticipationList().stream()
+                .map(fundingParticipation -> fundingParticipation.getUser().getName())
+                .collect(Collectors.toList());
+
+            // 리뷰가 존재하면 completion
             if (optionalReview.isPresent()) {
                 Review review = optionalReview.get();
-                List<String> participationList = funding.getParticipationList()
-                    .stream().map(fundingParticipation -> fundingParticipation.getUser().getName())
-                    .collect(Collectors.toList());
 
                 fundingMyGiftListResponses.add(
                     FundingMyGiftListResponse.from(funding, review.getComment(), participationList)
+                );
+            }else{
+                fundingMyGiftListResponses.add(
+                    FundingMyGiftListResponse.from(funding, "", participationList)
                 );
             }
         }
