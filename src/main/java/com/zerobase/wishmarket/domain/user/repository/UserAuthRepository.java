@@ -34,4 +34,12 @@ public interface UserAuthRepository extends JpaRepository<UserEntity, Long> {
         + "order by RAND() limit 4", nativeQuery = true)
     List<UserEntity> findAllByInfluenceIsTrueRandom();
 
+    @Query(value =
+        "SELECT * "
+            + "FROM user_entity user "
+            + "where user.influence=true "
+            + "order by RAND() limit 11", nativeQuery = true)
+    List<UserEntity> findAllByInfluenceIsTrueRandomEleven();
+
+
 }
