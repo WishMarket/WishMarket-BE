@@ -34,6 +34,7 @@ import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.product.repository.ReviewRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
+import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,9 +43,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,9 +64,13 @@ public class FundingService {
 
     private final OrderRepository orderRepository;
 
+    private final UserAuthRepository userAuthRepository;
+
     private final PointService pointService;
 
     private final AlarmService alarmService;
+
+    private final int FUNDING_NAMELIST_SIZE = 20;
 
 
     @Transactional
@@ -239,8 +242,9 @@ public class FundingService {
 
                     //금액 돌려주기
                     List<FundingParticipation> participationList = fundingFail.getParticipationList();
-                    for(FundingParticipation participation : participationList){
-                        pointService.refundPoint(participation.getUser().getUserId(),participation.getPrice());
+                    for (FundingParticipation participation : participationList) {
+                        pointService.refundPoint(participation.getUser().getUserId(),
+                            participation.getPrice());
                     }
                 });
         }
@@ -307,7 +311,6 @@ public class FundingService {
         UserEntity user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
-        int nameListSize = 20;
 
         List<FundingParticipation> participationList =
             fundingParticipationRepository.findAllByUser(user);
@@ -321,7 +324,7 @@ public class FundingService {
 
             for (FundingParticipation p : funding.getParticipationList()) {
                 //참여자 이름은 20명까지만
-                if (participantsNameList.size() <= nameListSize) {
+                if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
                     participantsNameList.add(p.getUser().getName());
                 }
             }
@@ -332,7 +335,7 @@ public class FundingService {
 
         return fundingListGiveResponses;
     }
-    
+
 
     public List<FundingMyGiftListResponse> getMyFundigGifyList(Long userId) {
         PageRequest pageRequest = PageRequest.of(0, 100);
@@ -375,27 +378,113 @@ public class FundingService {
             .orElseThrow(() -> new FundingException(FUNDING_NOT_FOUND));
 
         Long userFundedPrice = 0L;
-        int nameListSize = 20;
 
         //유저가 참여한 펀딩이라면 펀딩한 금액 표출, 아니라면 0원 표출
-        Optional<FundingParticipation> participation = fundingParticipationRepository.findByFundingAndUser(funding,user);
-        if(participation.isPresent()){
+        Optional<FundingParticipation> participation = fundingParticipationRepository.findByFundingAndUser(
+            funding, user);
+        if (participation.isPresent()) {
             userFundedPrice = participation.get().getPrice();
         }
 
         //해당 펀딩에 참여한 유저 이름 목록
         List<String> participantsNameList = new ArrayList<>();
 
-        for(FundingParticipation p : funding.getParticipationList()){
+        for (FundingParticipation p : funding.getParticipationList()) {
             //참여자 이름은 20명까지만
-            if(participantsNameList.size() <= nameListSize) {
+            if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
                 participantsNameList.add(p.getUser().getName());
             }
         }
 
-
-        return FundingDetailResponse.from(funding,participantsNameList,userFundedPrice);
+        return FundingDetailResponse.from(funding, participantsNameList, userFundedPrice);
 
     }
+
+    //로그인한 경우
+    //메인 페이지, 인플루언서 타겟 펀딩 조회,
+    //보여주기위함
+    public List<FundingDetailResponse> getFundingMain(Long userId) {
+
+        UserEntity user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        List<FundingDetailResponse> detailResponseList = new ArrayList<>();
+
+        //무작위 인기유저 11명 목록
+        List<UserEntity> influenceUserList = userAuthRepository.findAllByInfluenceIsTrueRandomEleven();
+
+        //인기유저가 타겟인 펀딩 목록
+        List<Funding> influenceFundingList = new ArrayList<>();
+
+        //인기유저 펀딩이 무조건 존재한다고 가정
+        for(UserEntity influenceUser : influenceUserList){
+            influenceFundingList.add(fundingRepository.findByTargetUser(influenceUser));
+        }
+
+        for(Funding funding : influenceFundingList){
+
+            //유저가 참여한 금액
+            Long userFundedPrice = 0L;
+
+            //유저가 참여한 펀딩이라면 펀딩한 금액 표출, 아니라면 0원 표출
+            Optional<FundingParticipation> participation = fundingParticipationRepository.findByFundingAndUser(
+                funding, user);
+            if (participation.isPresent()) {
+                userFundedPrice = participation.get().getPrice();
+            }
+
+
+            //해당 펀딩에 참여한 유저 이름 목록
+            List<String> participantsNameList = new ArrayList<>();
+
+            for (FundingParticipation p : funding.getParticipationList()) {
+                //참여자 이름은 20명까지만
+                if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
+                    participantsNameList.add(p.getUser().getName());
+                }
+            }
+
+            detailResponseList.add(FundingDetailResponse.from(funding, participantsNameList, userFundedPrice));
+        }
+
+        return detailResponseList;
+    }
+
+    //로그인하지 않은 경우
+    //메인 페이지, 인플루언서 타겟 펀딩 조회,
+    //보여주기위함
+    public List<FundingDetailResponse> getFundingMain() {
+
+        List<FundingDetailResponse> detailResponseList = new ArrayList<>();
+
+        //무작위 인기유저 11명 목록
+        List<UserEntity> influenceUserList = userAuthRepository.findAllByInfluenceIsTrueRandomEleven();
+
+        //인기유저가 타겟인 펀딩 목록
+        List<Funding> influenceFundingList = new ArrayList<>();
+
+        //인기유저 펀딩이 무조건 존재한다고 가정
+        for(UserEntity influenceUser : influenceUserList){
+            influenceFundingList.add(fundingRepository.findByTargetUser(influenceUser));
+        }
+
+        for(Funding funding : influenceFundingList){
+
+            //해당 펀딩에 참여한 유저 이름 목록
+            List<String> participantsNameList = new ArrayList<>();
+
+            for (FundingParticipation p : funding.getParticipationList()) {
+                //참여자 이름은 20명까지만
+                if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
+                    participantsNameList.add(p.getUser().getName());
+                }
+            }
+
+            detailResponseList.add(FundingDetailResponse.from(funding, participantsNameList, 0L));
+        }
+
+        return detailResponseList;
+    }
+
 
 }
