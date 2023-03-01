@@ -3,13 +3,13 @@ package com.zerobase.wishmarket.domain.user.repository;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
-import java.util.List;
-import java.util.Optional;
-import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface UserAuthRepository extends JpaRepository<UserEntity, Long> {
 
@@ -27,11 +27,13 @@ public interface UserAuthRepository extends JpaRepository<UserEntity, Long> {
 
     Page<UserEntity> findByNickNameContainsIgnoreCase(String nickName, Pageable pageable);
 
+    Optional<UserEntity> findByUserRegistrationType(UserRegistrationType userRegistration);
+
     @Query(value =
-        "SELECT * "
-        + "FROM user_entity user "
-        + "where user.influence=true "
-        + "order by RAND() limit 4", nativeQuery = true)
+            "SELECT * "
+                    + "FROM user_entity user "
+                    + "where user.influence=true "
+                    + "order by RAND() limit 4", nativeQuery = true)
     List<UserEntity> findAllByInfluenceIsTrueRandom();
 
 }
