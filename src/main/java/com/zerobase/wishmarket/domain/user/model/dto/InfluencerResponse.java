@@ -18,14 +18,16 @@ public class InfluencerResponse {
     private String email;
     private String nickName;
     private String profileImageUrl;
+    private Boolean isFriend;
 
-    public static InfluencerResponse from(UserEntity userEntity) {
+    public static InfluencerResponse of(UserEntity userEntity, boolean isFriend) {
         return InfluencerResponse.builder()
             .userId(userEntity.getUserId())
             .name(userEntity.getName())
             .email(userEntity.getEmail())
             .nickName(userEntity.getNickName())
             .profileImageUrl(userEntity.getProfileImage())
+            .isFriend(isFriend)
             .build();
     }
 }
