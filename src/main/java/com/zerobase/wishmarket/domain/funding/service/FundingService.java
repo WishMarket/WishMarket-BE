@@ -298,7 +298,7 @@ public class FundingService {
 
         log.info("##만료된 펀딩들을 실패 처리하였습니다.##");
     }
-    
+
 
     //펀딩 내역 (내가 친구들한테 주는 펀딩 내역들 - 참여)
     public List<FundingListGiveResponse> getFundingListGive(Long userId) {
