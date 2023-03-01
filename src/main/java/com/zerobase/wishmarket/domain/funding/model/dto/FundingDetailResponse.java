@@ -20,6 +20,7 @@ public class FundingDetailResponse {
     private String productImageUrl;
     private Long targetUserId;
     private String targetUserName;
+    private String targetUserProfileImageUrl;
     private Long targetPrice;
     private Long fundedPrice;
     private Long totalFundedPrice;
@@ -38,6 +39,7 @@ public class FundingDetailResponse {
             .productImageUrl(funding.getProduct().getProductImage())
             .targetUserId(funding.getTargetUser().getUserId())
             .targetUserName(funding.getTargetUser().getName())
+            .targetUserProfileImageUrl(funding.getTargetUser().getProfileImage())
             .targetPrice(funding.getTargetPrice())
             .fundedPrice(userFundedPrice)      //조회한 유저가 해당 펀딩에 펀딩을 했다면, 금액이 보여야 함
             .totalFundedPrice(funding.getFundedPrice())
