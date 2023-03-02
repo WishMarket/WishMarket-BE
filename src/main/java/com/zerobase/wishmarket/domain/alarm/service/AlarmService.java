@@ -4,26 +4,34 @@ import com.zerobase.wishmarket.domain.alarm.exception.AlarmErrorCode;
 import com.zerobase.wishmarket.domain.alarm.exception.AlarmException;
 import com.zerobase.wishmarket.domain.alarm.model.Alarm;
 import com.zerobase.wishmarket.domain.alarm.model.dto.AlarmResponseDto;
+import com.zerobase.wishmarket.domain.alarm.model.type.AlarmMessage;
 import com.zerobase.wishmarket.domain.alarm.repository.AlarmRepository;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
 import com.zerobase.wishmarket.domain.user.exception.UserErrorCode;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class AlarmService {
 
+    public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
     private final AlarmRepository alarmRepository;
-
     private final UserAuthRepository userAuthRepository;
+    private final static Long DEFAULT_TIMEOUT = 3600000L;
 
+    //알람 생성 기본로직
     public void addAlarm(Long userId, String contents) {
         boolean exist = userAuthRepository.existsById(userId);
         if (!exist) {
@@ -35,9 +43,10 @@ public class AlarmService {
             .isRead(false)
             .build();
         alarmRepository.save(alarm);
+        sendUnreadCount(alarm.getUserId());
     }
 
-    @Cacheable(value = "alarms", key = "'user_' + #userId")
+    //내 알람
     public List<AlarmResponseDto> getMyAlarms(Long userId) {
         List<Alarm> alarmsList = alarmRepository.findAllByUserId(userId);
         if (alarmsList.isEmpty()) {
@@ -49,24 +58,28 @@ public class AlarmService {
             .collect(Collectors.toList());
     }
 
-    public AlarmResponseDto readAlarm(Long alarmId) {
+    //알람 읽음 처리
+    public void readAlarm(Long alarmId) {
         Alarm alarm = alarmRepository.findById(alarmId)
             .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_NOT_FOUND));
 
         alarm.setAsRead();
         alarmRepository.save(alarm);
 
-        return AlarmResponseDto.of(alarm);
+        sendUnreadCount(alarm.getUserId());
     }
 
+    //알람 삭제
     public void deleteAlarm(Long alarmId) {
-        boolean result = alarmRepository.existsById(alarmId);
-        if (!result) {
-            throw new AlarmException(AlarmErrorCode.ALARM_NOT_FOUND);
-        }
+        Alarm alarm = alarmRepository.findById(alarmId)
+            .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_NOT_FOUND));
+
         alarmRepository.deleteById(alarmId);
+
+        sendUnreadCount(alarm.getUserId());
     }
 
+    //펀딩 관련 알람보내기
     public void addFundingAlarm(Funding funding) {
         Long targetUserId = funding.getTargetUser().getUserId();
         Long startUserId = funding.getUser().getUserId();
@@ -74,25 +87,58 @@ public class AlarmService {
 
         switch (funding.getFundingStatusType()) {
             case SUCCESS:
-            addAlarm(targetUserId, "선물받은 펀딩이 성공하였습니다.");
-            addAlarm(startUserId, "참여하신 펀딩이 성공하였습니다.");
-            if (participationList != null) {
-                for (FundingParticipation participation : participationList) {
-                    addAlarm(participation.getUser().getUserId(), "참여하신 펀딩이 성공하였습니다.");
+                addAlarm(targetUserId, AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_TARGET.getMessage());
+                addAlarm(startUserId,
+                    AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_PARTICIPANT.getMessage());
+                if (participationList != null) {
+                    for (FundingParticipation participation : participationList) {
+                        addAlarm(participation.getUser().getUserId(),
+                            AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_PARTICIPANT.getMessage());
+                    }
                 }
-            }
-            break;
+                break;
 
             case FAIL:
-            addAlarm(targetUserId, "선물받은 펀딩이 실패하였습니다.");
-            addAlarm(startUserId, "참여하신 펀딩이 실패하였습니다.");
-            if (participationList != null) {
-                for (FundingParticipation participation : participationList) {
-                    addAlarm(participation.getUser().getUserId(), "참여하신 펀딩이 실패하였습니다.");
+                addAlarm(targetUserId, AlarmMessage.FUNDING_FAIL_ALARM_FOR_TARGET.getMessage());
+                addAlarm(startUserId, AlarmMessage.FUNDING_FAIL_ALARM_FOR_PARTICIPANT.getMessage());
+                if (participationList != null) {
+                    for (FundingParticipation participation : participationList) {
+                        addAlarm(participation.getUser().getUserId(),
+                            AlarmMessage.FUNDING_FAIL_ALARM_FOR_PARTICIPANT.getMessage());
+                    }
                 }
-            }
-            break;
+                break;
         }
     }
 
+    //SseEmitter연결
+    public SseEmitter addSseEmitter(Long userId) {
+        SseEmitter sseEmitter = new SseEmitter(DEFAULT_TIMEOUT);
+        try {
+            sseEmitter.send(SseEmitter.event().name("connect"));
+        } catch (IOException exception) {
+            throw new AlarmException(AlarmErrorCode.ALARM_CONNECTION_ERROR);
+        }
+        sseEmitters.put(userId, sseEmitter);
+        sseEmitter.onCompletion(() -> sseEmitters.remove(userId));
+        sseEmitter.onTimeout(() -> sseEmitters.remove(userId));
+        sseEmitter.onError((e) -> sseEmitters.remove(userId));
+        System.out.println("SseEmitter 생성 userId: " + userId);
+        return sseEmitter;
+    }
+
+    public int countUnreadAlarms(Long userId) {
+        return alarmRepository.countByUserIdAndIsReadFalse(userId);
+    }
+
+    private void sendUnreadCount(Long userId) {
+        if(sseEmitters.containsKey(userId)){
+            SseEmitter sseEmitter = sseEmitters.get(userId);
+            try{
+                sseEmitter.send(SseEmitter.event().name("alarm").data(countUnreadAlarms(userId)));
+            }catch (Exception e){
+                sseEmitters.remove(userId);
+            }
+        }
+    }
 }
