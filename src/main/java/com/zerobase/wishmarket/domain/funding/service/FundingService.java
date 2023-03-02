@@ -343,6 +343,7 @@ public class FundingService {
     }
 
     //친구(특정 유저의) 펀딩 내역
+    //PR 재요청
     public List<FundingListFriendResponse> getFundingListFriend(Long userId, Long friendId) {
         //유저 확인
         UserEntity user = userRepository.findByUserId(userId)
