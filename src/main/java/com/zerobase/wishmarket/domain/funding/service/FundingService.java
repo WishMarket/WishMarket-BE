@@ -316,12 +316,9 @@ public class FundingService {
         List<FundingParticipation> participationList =
             fundingParticipationRepository.findAllByUser(user);
 
-        //펀딩 내역이 없는 경우
-        if(participationList.isEmpty()){
-            return null;
-        }
-
         List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
+
+
 
         for (FundingParticipation participation : participationList) {
             List<String> participantsNameList = new ArrayList<>();
@@ -343,7 +340,6 @@ public class FundingService {
     }
 
     //친구(특정 유저의) 펀딩 내역
-    //PR 재요청
     public List<FundingListFriendResponse> getFundingListFriend(Long userId, Long friendId) {
         //유저 확인
         UserEntity user = userRepository.findByUserId(userId)
@@ -357,13 +353,8 @@ public class FundingService {
         List<FundingParticipation> participationList =
             fundingParticipationRepository.findAllByUser(friend);
 
-        //펀딩 내역이 없는 경우
-        if(participationList.isEmpty()){
-            return null;
-        }
-
-
         List<FundingListFriendResponse> fundingListFriendResponses = new ArrayList<>();
+
 
         for (FundingParticipation participation : participationList) {
             List<String> participantsNameList = new ArrayList<>();
