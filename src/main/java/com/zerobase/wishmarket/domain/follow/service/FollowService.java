@@ -168,9 +168,20 @@ public class FollowService {
         return null;
     }
 
-    public List<InfluencerResponse> getInfluencerList(){
+    public List<InfluencerResponse> getInfluencerList(Long userId){
+
+        UserEntity loginUser = userAuthRepository.findById(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        // 내가 팔로우한 유저 ID
+        List<Long> myFriendList = loginUser.getFollowerList().stream()
+            .map(follow -> follow.getFollowee().getUserId())
+            .collect(Collectors.toList());
+
+
         return userAuthRepository.findAllByInfluenceIsTrueRandom().stream()
-            .map(InfluencerResponse::from)
+            .filter(userEntity -> !Objects.equals(userEntity.getUserId(), userId))
+            .map(userEntity -> InfluencerResponse.of(userEntity, myFriendList.contains(userEntity.getUserId())))
             .collect(Collectors.toList());
     }
 }

@@ -8,26 +8,29 @@ import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.follow.repository.FollowInfoRepository;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
-import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
-import com.zerobase.wishmarket.domain.user.annotation.LoginUserInfo;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.dto.*;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.model.type.UserWithdrawalReturnType;
+import com.zerobase.wishmarket.domain.user.oauth.*;
 import com.zerobase.wishmarket.domain.user.repository.UserAuthRepository;
 import com.zerobase.wishmarket.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -42,6 +45,8 @@ import static com.zerobase.wishmarket.exception.CommonErrorCode.*;
 @RequiredArgsConstructor
 @Service
 public class UserAuthService {
+
+    private final InMemoryProviderCustom inMemoryProviderCustom;
 
     private final UserAuthRepository userAuthRepository;
     private final FollowInfoRepository followInfoRepository;
@@ -128,13 +133,18 @@ public class UserAuthService {
                 .build();
     }
 
-    @Transactional
-    public SignInResponse signInGoogle(@LoginUserInfo OAuthUserInfo userInfo) {
-        UserEntity user = userAuthRepository.findByEmailAndUserRegistrationType(
-                        userInfo.getEmail(),
-                        UserRegistrationType.GOOGLE
-                )
-                .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
+    public SignInResponse signInSocial(String providerName, String code) {
+        // 프론트에서 전달받은 provider 이름으로 inMemoryProviderCustom 에서 OauthProvider 가져오기
+        OauthProvider provider = inMemoryProviderCustom.findByProviderName(providerName);
+
+        // Authorization Code 를 통해 OAuth Access Token 가져오기
+        OauthTokenResponse tokenResponse = getToken(code, provider);
+
+        // Access Token 을 활용해 유저 정보 가져오기
+        OAuthUserProfile oAuthUserProfile = getUserProfile(providerName, tokenResponse, provider);
+
+        // 유저 정보 데이터베이스에 저장
+        UserEntity user = saveOrUpdate(oAuthUserProfile);
 
         TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(user.getUserId());
 
@@ -156,37 +166,6 @@ public class UserAuthService {
                 .refreshToken(tokenSetDto.getRefreshToken())
                 .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
                 .build();
-    }
-
-    @Transactional
-    public SignInResponse signInNaver(@LoginUserInfo OAuthUserInfo userInfo) {
-        UserEntity user = userAuthRepository.findByEmailAndUserRegistrationType(
-                        userInfo.getEmail(),
-                        UserRegistrationType.NAVER
-                )
-                .orElseThrow(() -> new UserException(EMAIL_NOT_FOUND));
-
-        TokenSetDto tokenSetDto = jwtProvider.generateTokenSet(user.getUserId());
-
-        // 작성된 날짜에서 현재 날짜를 빼고 밀리초로 나누면 지나간 시간(초)이 계산
-        long expirationSeconds = (tokenSetDto.getRefreshTokenExpiredAt().getTime() - new Date().getTime()) / 1000;
-
-        // redis에 refresh토큰 저장
-        redisClient.put(
-                REFRESH_TOKEN_PREFIX + user.getUserId(),
-                tokenSetDto.getRefreshToken(),
-                TimeUnit.SECONDS,
-                expirationSeconds);
-
-        return SignInResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
-                .accessTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getAccessToken())))
-                .refreshToken(tokenSetDto.getRefreshToken())
-                .refreshTokenExpiredAt(String.valueOf(jwtProvider.getExpiredDate(tokenSetDto.getRefreshToken())))
-                .build();
-
     }
 
     @Transactional
@@ -370,6 +349,55 @@ public class UserAuthService {
 
     private boolean checkInvalidPassword(String password) {
         return !Pattern.matches("^.{8,}$", password);
+    }
+
+    private UserEntity saveOrUpdate(OAuthUserProfile userProfile) {
+        UserEntity userEntity = userAuthRepository.findByUserRegistrationType(userProfile.getUserRegistrationType())
+                .map(entity -> entity.update(
+                        userProfile.getEmail(), userProfile.getProfileImageUrl()))
+                .orElseGet(userProfile::toEntity);
+        return userAuthRepository.save(userEntity);
+    }
+
+    private OauthTokenResponse getToken(String code, OauthProvider provider) {
+        return WebClient.create()
+                .post()
+                .uri(provider.getTokenUrl())
+                .headers(header -> {
+                    header.setBasicAuth(provider.getClientId(), provider.getClientSecret());
+                    header.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                    header.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+                    header.setAcceptCharset(Collections.singletonList(StandardCharsets.UTF_8));
+                })
+                .bodyValue(tokenRequest(code, provider))
+                .retrieve()
+                .bodyToMono(OauthTokenResponse.class)
+                .block();
+    }
+
+    private MultiValueMap<String, String> tokenRequest(String code, OauthProvider provider) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("code", code);
+        formData.add("grant_type", "authorization_code");
+        formData.add("redirect_uri", provider.getRedirectUrl());
+        return formData;
+    }
+
+    private OAuthUserProfile getUserProfile(String providerName, OauthTokenResponse tokenResponse, OauthProvider provider) {
+        Map<String, Object> userAttributes = getUserAttributes(provider, tokenResponse);
+        return OauthAttributes.extract(providerName, userAttributes);
+    }
+
+    // OAuth 서버에서 유저 정보 map으로 가져오기
+    private Map<String, Object> getUserAttributes(OauthProvider provider, OauthTokenResponse tokenResponse) {
+        return WebClient.create()
+                .get()
+                .uri(provider.getUserInfoUrl())
+                .headers(header -> header.setBearerAuth(tokenResponse.getAccessToken()))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .block();
     }
 
 }

@@ -1,13 +1,11 @@
 package com.zerobase.wishmarket.domain.user.controller;
 
-import com.zerobase.wishmarket.domain.user.annotation.LoginUserInfo;
 import com.zerobase.wishmarket.domain.user.model.dto.*;
 import com.zerobase.wishmarket.domain.user.model.type.UserWithdrawalReturnType;
 import com.zerobase.wishmarket.domain.user.service.UserAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -42,27 +40,15 @@ public class UserAuthController {
         return ResponseEntity.ok(userAuthService.signInEmail(form));
     }
 
-    @PostMapping("/sign-in/google")
-    public ResponseEntity<SignInResponse> signInGoogle(Model model, @LoginUserInfo OAuthUserInfo userInfo) {
-        if (userInfo != null) {
-            SignInResponse loginUserInfo = userAuthService.signInGoogle(userInfo);
-            model.addAttribute("loginUserInfo", loginUserInfo);
-        }
-        return ResponseEntity.ok(userAuthService.signInGoogle(userInfo));
+    @GetMapping("/sign-in/social/{provider}")
+    public ResponseEntity<SignInResponse> login(@PathVariable String provider, @RequestParam String code) {
+        return ResponseEntity.ok(userAuthService.signInSocial(provider, code));
     }
 
-    @PostMapping("/sign-in/naver")
-    public ResponseEntity<SignInResponse> signInNaver(Model model, @LoginUserInfo OAuthUserInfo userInfo) {
-        if (userInfo != null) {
-            SignInResponse loginUserInfo = userAuthService.signInNaver(userInfo);
-            model.addAttribute("loginUserInfo", loginUserInfo);
-        }
-        return ResponseEntity.ok(userAuthService.signInNaver(userInfo));
-    }
 
     @PostMapping("/logout")
     public ResponseEntity<LogoutResponse> logout(@AuthenticationPrincipal Long userId,
-                       @RequestHeader(name = "Authorization") String accessToken) {
+                                                 @RequestHeader(name = "Authorization") String accessToken) {
         return ResponseEntity.ok(userAuthService.logout(userId, accessToken));
     }
 
