@@ -266,9 +266,9 @@ public class UserAuthService {
         }
 
         // 만료 되지 않은 Access Token이면 에러
-        if (!jwtProvider.isExpiredToken(accessToken)) {
-            throw new GlobalException(NOT_EXPIRED_ACCESS_TOKEN);
-        }
+//        if (!jwtProvider.isExpiredToken(accessToken)) {
+//            throw new GlobalException(NOT_EXPIRED_ACCESS_TOKEN);
+//        }
 
         Long userId = Long.valueOf(jwtProvider.getUserId(accessToken));
 
