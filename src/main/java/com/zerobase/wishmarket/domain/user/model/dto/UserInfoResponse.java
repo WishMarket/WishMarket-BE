@@ -21,6 +21,7 @@ public class UserInfoResponse {
     private String email;
     private String nickName;
     private String phone;
+    private Long pointPrice;
     private String profileImage;
     private String address;
     private String detailAddress;
@@ -46,6 +47,7 @@ public class UserInfoResponse {
                 .email(userEntity.getEmail())
                 .nickName(userEntity.getNickName())
                 .phone(userEntity.getPhone())
+                .pointPrice(userEntity.getPointPrice())
                 .address("")
                 .detailAddress("")
                 .profileImage(userEntity.getProfileImage())

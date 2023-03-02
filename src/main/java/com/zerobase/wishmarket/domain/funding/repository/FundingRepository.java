@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface FundingRepository extends JpaRepository<Funding, Long> {
 
     Page<Funding> findAllByTargetUser(UserEntity targetUser, Pageable pageable);
+
+    Funding findByTargetUser(UserEntity targetUser);
 }

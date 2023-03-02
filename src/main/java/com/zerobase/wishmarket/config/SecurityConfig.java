@@ -45,6 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
 //            .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+
                 .mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/sign-in/social/**",
                         "/login/**", "/api/auth/email-check", "/api/auth/email-auth/**", "/api/user/password",
@@ -53,6 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 // logout 요청시 홈으로 이동 - 기본 logout url = "/logout"
                 .logout().logoutSuccessUrl("/");
+
 
         // JWT filter 적용
         http
