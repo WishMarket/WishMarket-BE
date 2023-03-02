@@ -54,7 +54,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // logout 요청시 홈으로 이동 - 기본 logout url = "/logout"
                 .logout().logoutSuccessUrl("/");
 
->>>>>>> dev
 
         // JWT filter 적용
         http

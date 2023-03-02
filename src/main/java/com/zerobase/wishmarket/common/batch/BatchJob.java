@@ -1,6 +1,5 @@
-package com.zerobase.wishmarket.Batch;
+package com.zerobase.wishmarket.common.batch;
 
-import com.zerobase.wishmarket.domain.funding.repository.FundingRepository;
 import com.zerobase.wishmarket.domain.funding.service.FundingService;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;

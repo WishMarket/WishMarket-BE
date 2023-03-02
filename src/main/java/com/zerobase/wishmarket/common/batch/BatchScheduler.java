@@ -1,4 +1,4 @@
-package com.zerobase.wishmarket.Batch;
+package com.zerobase.wishmarket.common.batch;
 
 import java.util.HashMap;
 import java.util.Map;
