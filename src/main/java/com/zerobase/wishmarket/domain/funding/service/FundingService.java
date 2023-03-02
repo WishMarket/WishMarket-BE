@@ -11,6 +11,7 @@ import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingDetailResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingJoinResponse;
+import com.zerobase.wishmarket.domain.funding.model.dto.FundingListFriendResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingListGiveResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingMyGiftListResponse;
 import com.zerobase.wishmarket.domain.funding.model.dto.FundingStartResponse;
@@ -312,9 +313,13 @@ public class FundingService {
         UserEntity user = userRepository.findByUserId(userId)
             .orElseThrow(() -> new UserException(USER_NOT_FOUND));
 
-
         List<FundingParticipation> participationList =
             fundingParticipationRepository.findAllByUser(user);
+
+        //펀딩 내역이 없는 경우
+        if(participationList.isEmpty()){
+            return null;
+        }
 
         List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
 
@@ -335,6 +340,58 @@ public class FundingService {
         }
 
         return fundingListGiveResponses;
+    }
+
+    //친구(특정 유저의) 펀딩 내역
+    //PR 재요청
+    public List<FundingListFriendResponse> getFundingListFriend(Long userId, Long friendId) {
+        //유저 확인
+        UserEntity user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        //친구(특정 유저) 확인
+        UserEntity friend = userRepository.findByUserId(friendId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        //친구가 참여한 모든 펀딩 참여 목록
+        List<FundingParticipation> participationList =
+            fundingParticipationRepository.findAllByUser(friend);
+
+        //펀딩 내역이 없는 경우
+        if(participationList.isEmpty()){
+            return null;
+        }
+
+
+        List<FundingListFriendResponse> fundingListFriendResponses = new ArrayList<>();
+
+        for (FundingParticipation participation : participationList) {
+            List<String> participantsNameList = new ArrayList<>();
+
+            Funding funding = participation.getFunding();
+
+            for (FundingParticipation p : funding.getParticipationList()) {
+                //참여자 이름은 20명까지만
+                if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
+                    participantsNameList.add(p.getUser().getName());
+                }
+            }
+
+            //친구가 참여한 펀딩에 나도 참여한 경우, 금액 표출
+            Long myFundingPrice = 0L;
+
+            Optional<FundingParticipation> myParticipation = fundingParticipationRepository.findByFundingAndUser(funding,user);
+            if(myParticipation.isPresent()){
+                myFundingPrice = myParticipation.get().getPrice();
+            }
+
+
+            fundingListFriendResponses.add(
+                FundingListFriendResponse.from(participation, funding, myFundingPrice, participantsNameList));
+        }
+
+        return fundingListFriendResponses;
+
     }
 
 
@@ -424,11 +481,11 @@ public class FundingService {
         List<Funding> influenceFundingList = new ArrayList<>();
 
         //인기유저 펀딩이 무조건 존재한다고 가정
-        for(UserEntity influenceUser : influenceUserList){
+        for (UserEntity influenceUser : influenceUserList) {
             influenceFundingList.add(fundingRepository.findByTargetUser(influenceUser));
         }
 
-        for(Funding funding : influenceFundingList){
+        for (Funding funding : influenceFundingList) {
 
             //유저가 참여한 금액
             Long userFundedPrice = 0L;
@@ -440,7 +497,6 @@ public class FundingService {
                 userFundedPrice = participation.get().getPrice();
             }
 
-
             //해당 펀딩에 참여한 유저 이름 목록
             List<String> participantsNameList = new ArrayList<>();
 
@@ -451,7 +507,8 @@ public class FundingService {
                 }
             }
 
-            detailResponseList.add(FundingDetailResponse.from(funding, participantsNameList, userFundedPrice));
+            detailResponseList.add(
+                FundingDetailResponse.from(funding, participantsNameList, userFundedPrice));
         }
 
         return detailResponseList;
@@ -471,11 +528,11 @@ public class FundingService {
         List<Funding> influenceFundingList = new ArrayList<>();
 
         //인기유저 펀딩이 무조건 존재한다고 가정
-        for(UserEntity influenceUser : influenceUserList){
+        for (UserEntity influenceUser : influenceUserList) {
             influenceFundingList.add(fundingRepository.findByTargetUser(influenceUser));
         }
 
-        for(Funding funding : influenceFundingList){
+        for (Funding funding : influenceFundingList) {
 
             //해당 펀딩에 참여한 유저 이름 목록
             List<String> participantsNameList = new ArrayList<>();
