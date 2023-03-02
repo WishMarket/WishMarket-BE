@@ -52,6 +52,7 @@ public class FundingController {
         return ResponseEntity.ok().body(fundingService.getFundingListGive(userId));
     }
 
+    //PR 재요청
     @GetMapping("/history/{friendId}")
     public ResponseEntity<List<FundingListFriendResponse>> getFundingListFriend(@AuthenticationPrincipal Long userId, @PathVariable Long friendId){
         return ResponseEntity.ok().body(fundingService.getFundingListFriend(userId,friendId));

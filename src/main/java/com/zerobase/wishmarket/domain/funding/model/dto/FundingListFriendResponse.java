@@ -14,6 +14,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class FundingListFriendResponse {
 
+    //PR 재요청
+
     private Long fundingId;
     private Long targetId;
     private String targetName;
