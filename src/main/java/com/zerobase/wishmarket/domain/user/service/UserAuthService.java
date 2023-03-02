@@ -291,7 +291,7 @@ public class UserAuthService {
         ReissueResponse reissueResponse = ReissueResponse.builder()
                 .email(user.getEmail())
                 .name(user.getName())
-                .accessToken(tokenSetDto.getAccessToken())
+                .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
                 .accessTokenExpiredAt(String.valueOf(tokenSetDto.getAccessTokenExpiredAt()))
                 .build();
 
@@ -306,7 +306,7 @@ public class UserAuthService {
             reissueResponse = ReissueResponse.builder()
                     .email(user.getEmail())
                     .name(user.getName())
-                    .accessToken(tokenSetDto.getAccessToken())
+                    .accessToken(ACCESS_TOKEN_PREFIX + tokenSetDto.getAccessToken())
                     .accessTokenExpiredAt(String.valueOf(tokenSetDto.getAccessTokenExpiredAt()))
                     .refreshToken(tokenSetDto.getRefreshToken())
                     .refreshTokenExpiredAt(String.valueOf(tokenSetDto.getRefreshTokenExpiredAt()))
