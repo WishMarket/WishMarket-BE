@@ -37,9 +37,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'io.springfox:springfox-boot-starter:3.0.0'
-
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'net.minidev:json-smart'
 
     // s3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
@@ -60,12 +61,10 @@ dependencies {
 
     implementation 'org.springframework.data:spring-data-envers'
     implementation 'io.springfox:springfox-swagger-ui:3.0.0'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     implementation 'org.apache.commons:commons-lang3'
 
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
-
 
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
@@ -84,7 +83,7 @@ dependencies {
     implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
