@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     List<Alarm> findAllByUserId(Long userId);
 
+    int countByUserIdAndIsReadFalse(Long userId);
 }

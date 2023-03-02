@@ -12,6 +12,7 @@ import com.zerobase.wishmarket.domain.alarm.exception.AlarmErrorCode;
 import com.zerobase.wishmarket.domain.alarm.exception.AlarmException;
 import com.zerobase.wishmarket.domain.alarm.model.Alarm;
 import com.zerobase.wishmarket.domain.alarm.model.dto.AlarmResponseDto;
+import com.zerobase.wishmarket.domain.alarm.model.type.AlarmMessage;
 import com.zerobase.wishmarket.domain.alarm.repository.AlarmRepository;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
@@ -104,10 +105,6 @@ public class AlarmServiceTest {
     public void readAlarmTest_success() {
         //given
         Long userId = 1L;
-        UserEntity.builder()
-            .userId(userId)
-            .build();
-
         Long alarmId = 1L;
         Alarm alarm = Alarm.builder()
             .id(alarmId)
@@ -118,11 +115,12 @@ public class AlarmServiceTest {
         given(alarmRepository.findById(alarmId)).willReturn(Optional.of(alarm));
 
         // when
-        AlarmResponseDto readAlarm = alarmService.readAlarm(alarmId);
+       alarmService.readAlarm(alarmId);
 
         // then
-        assertTrue(readAlarm.isRead());
-        assertEquals(alarm.getContents(), readAlarm.getContents());
+        verify(alarmRepository, times(1)).findById(alarmId);
+        verify(alarmRepository, times(1)).save(alarm);
+        assertTrue(alarm.isRead());
     }
 
     @Test
@@ -140,7 +138,14 @@ public class AlarmServiceTest {
     public void deleteAlarmTest() {
         // given
         Long alarmId = 1L;
-        given(alarmRepository.existsById(alarmId)).willReturn(true);
+        Long userId = 1L;
+        Alarm alarm = Alarm.builder()
+            .id(alarmId)
+            .userId(userId)
+            .contents("testAlarm")
+            .isRead(false)
+            .build();
+        given(alarmRepository.findById(alarmId)).willReturn(Optional.of(alarm));
 
         // when
         alarmService.deleteAlarm(alarmId);
@@ -195,16 +200,16 @@ public class AlarmServiceTest {
 
         List<Alarm> alarms = alarmCaptor.getAllValues();
         assertThat(alarms.get(0).getUserId()).isEqualTo(targetUser.getUserId());
-        assertThat(alarms.get(0).getContents()).isEqualTo("선물받은 펀딩이 성공하였습니다.");
+        assertThat(alarms.get(0).getContents()).isEqualTo(AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_TARGET.getMessage());
 
         assertThat(alarms.get(1).getUserId()).isEqualTo(startUser.getUserId());
-        assertThat(alarms.get(1).getContents()).isEqualTo("참여하신 펀딩이 성공하였습니다.");
+        assertThat(alarms.get(1).getContents()).isEqualTo(AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_PARTICIPANT.getMessage());
 
         assertThat(alarms.get(2).getUserId()).isEqualTo(participant1.getUserId());
-        assertThat(alarms.get(2).getContents()).isEqualTo("참여하신 펀딩이 성공하였습니다.");
+        assertThat(alarms.get(2).getContents()).isEqualTo(AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_PARTICIPANT.getMessage());
 
         assertThat(alarms.get(3).getUserId()).isEqualTo(participant2.getUserId());
-        assertThat(alarms.get(3).getContents()).isEqualTo("참여하신 펀딩이 성공하였습니다.");
+        assertThat(alarms.get(3).getContents()).isEqualTo(AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_PARTICIPANT.getMessage());
     }
 
 }
