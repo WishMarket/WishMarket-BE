@@ -5,6 +5,7 @@ import static com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode.
 import static com.zerobase.wishmarket.domain.product.exception.ProductErrorCode.PRODUCT_NOT_FOUND;
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
+import com.zerobase.wishmarket.domain.alarm.model.type.AlarmMessage;
 import com.zerobase.wishmarket.domain.alarm.service.AlarmService;
 import com.zerobase.wishmarket.domain.funding.exception.FundingErrorCode;
 import com.zerobase.wishmarket.domain.funding.exception.FundingException;
@@ -132,7 +133,7 @@ public class FundingService {
 
         fundingParticipationRepository.save(participation);
 
-        alarmService.addAlarm(targetUser.getUserId(), "당신을 위한 펀딩이 시작되었습니다.");
+        alarmService.addAlarm(targetUser.getUserId(), AlarmMessage.FUNDING_START_ALARM_FOR_TARGET.getMessage());
         if (savedFunding.getFundingStatusType() == FundingStatusType.SUCCESS) {
             alarmService.addFundingAlarm(savedFunding);
         }
