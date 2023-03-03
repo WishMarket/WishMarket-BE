@@ -1,6 +1,5 @@
 package com.zerobase.wishmarket.domain.user.service;
 
-
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 import com.zerobase.wishmarket.common.util.S3Util;
@@ -65,32 +64,50 @@ public class UserService {
         } else {
 
             String imageFileName = "";
-            if (form.getProfileImage() != null) {
+            if (!form.getProfileImage().isEmpty()) {
                 imageFileName = s3Util.upload(PROFILE_IMAGES, String.valueOf(userId), form.getProfileImage());
                 user.get().setProfileImage(imageFileName);
             }
 
-            if (form.getPhone() != null) {
+            if (!form.getPhone().isEmpty()) {
                 user.get().setPhone(form.getPhone());
             }
 
-            if (form.getNickName() != null) {
+            if (!form.getNickName().isEmpty()) {
                 user.get().setNickName(form.getNickName());
             }
 
-            if (form.getAddress() != null && form.getDetailAddress() != null) {
+            if (!form.getAddress().isEmpty()) {
                 Optional<DeliveryAddress> deliveryAddress =
                     deliveryAddressRepository.findByUserEntity(user.get());
 
                 if (!deliveryAddress.isPresent()) {
                     DeliveryAddress newDeliveryAddress = DeliveryAddress.builder()
                         .address(form.getAddress())
-                        .detailAddress(form.getDetailAddress())
                         .userEntity(user.get())
                         .build();
                     user.get().setDeliveryAddress(deliveryAddressRepository.save(newDeliveryAddress));
                 } else {
                     deliveryAddress.get().setAddress(form.getAddress());
+                    deliveryAddress.get().setDetailAddress(deliveryAddress.get().getDetailAddress());
+                    DeliveryAddress updateAddress = deliveryAddressRepository.save(deliveryAddress.get());
+                    user.get().setDeliveryAddress(updateAddress);
+                }
+
+            }
+
+            if (!form.getDetailAddress().isEmpty()) {
+                Optional<DeliveryAddress> deliveryAddress =
+                        deliveryAddressRepository.findByUserEntity(user.get());
+
+                if (!deliveryAddress.isPresent()) {
+                    DeliveryAddress newDeliveryAddress = DeliveryAddress.builder()
+                            .detailAddress(form.getDetailAddress())
+                            .userEntity(user.get())
+                            .build();
+                    user.get().setDeliveryAddress(deliveryAddressRepository.save(newDeliveryAddress));
+                } else {
+                    deliveryAddress.get().setAddress(deliveryAddress.get().getAddress());
                     deliveryAddress.get().setDetailAddress(form.getDetailAddress());
                     DeliveryAddress updateAddress = deliveryAddressRepository.save(deliveryAddress.get());
                     user.get().setDeliveryAddress(updateAddress);
