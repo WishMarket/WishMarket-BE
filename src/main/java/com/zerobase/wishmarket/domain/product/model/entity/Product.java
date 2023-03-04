@@ -1,7 +1,7 @@
 package com.zerobase.wishmarket.domain.product.model.entity;
 
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
-import com.zerobase.wishmarket.entity.BaseEntity;
+import com.zerobase.wishmarket.common.entity.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;

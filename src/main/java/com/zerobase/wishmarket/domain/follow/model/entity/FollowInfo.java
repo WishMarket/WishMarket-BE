@@ -1,6 +1,6 @@
 package com.zerobase.wishmarket.domain.follow.model.entity;
 
-import com.zerobase.wishmarket.entity.BaseEntity;
+import com.zerobase.wishmarket.common.entity.BaseEntity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
