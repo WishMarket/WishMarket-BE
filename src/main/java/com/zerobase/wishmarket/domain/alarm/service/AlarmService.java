@@ -29,7 +29,6 @@ public class AlarmService {
     public static Map<Long, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
     private final AlarmRepository alarmRepository;
     private final UserAuthRepository userAuthRepository;
-    private final static Long DEFAULT_TIMEOUT = 3600000L;
 
     //알람 생성 기본로직
     public void addAlarm(Long userId, String contents) {
@@ -49,9 +48,6 @@ public class AlarmService {
     //내 알람
     public List<AlarmResponseDto> getMyAlarms(Long userId) {
         List<Alarm> alarmsList = alarmRepository.findAllByUserId(userId);
-        if (alarmsList.isEmpty()) {
-            throw new AlarmException(AlarmErrorCode.ALARM_IS_EMPTY);
-        }
 
         return alarmsList.stream()
             .map(AlarmResponseDto::of)
@@ -113,7 +109,7 @@ public class AlarmService {
 
     //SseEmitter연결
     public SseEmitter addSseEmitter(Long userId) {
-        SseEmitter sseEmitter = new SseEmitter(DEFAULT_TIMEOUT);
+        SseEmitter sseEmitter = new SseEmitter();
         try {
             sseEmitter.send(SseEmitter.event().name("connect"));
         } catch (IOException exception) {
