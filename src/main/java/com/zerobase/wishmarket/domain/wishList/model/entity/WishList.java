@@ -1,6 +1,6 @@
 package com.zerobase.wishmarket.domain.wishList.model.entity;
 
-import com.zerobase.wishmarket.entity.BaseEntity;
+import com.zerobase.wishmarket.common.entity.BaseEntity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;

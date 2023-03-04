@@ -44,7 +44,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .authorizeRequests()
-//            .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .mvcMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/sign-in/social/**",
                         "/login/**", "/api/auth/email-check", "/api/auth/email-auth/**", "/api/user/password",

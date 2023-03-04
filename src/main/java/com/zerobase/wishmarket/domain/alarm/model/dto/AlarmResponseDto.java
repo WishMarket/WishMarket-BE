@@ -1,6 +1,6 @@
 package com.zerobase.wishmarket.domain.alarm.model.dto;
 
-import com.zerobase.wishmarket.domain.alarm.model.Alarm;
+import com.zerobase.wishmarket.domain.alarm.model.entity.Alarm;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package com.zerobase.wishmarket.domain.product.service;
 
-import com.zerobase.wishmarket.common.util.S3Util;
-import com.zerobase.wishmarket.domain.product.model.ProductInputForm;
+import com.zerobase.wishmarket.common.component.S3Component;
+import com.zerobase.wishmarket.domain.product.model.form.ProductInputForm;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.product.model.entity.ProductLikes;
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
@@ -26,7 +26,7 @@ public class ProductAddService {
 
     private final ProductLikesRepository productLikesRepository;
 
-    private final S3Util s3Util;
+    private final S3Component s3Util;
 
     private static final String PRODUCTS_DIRECTORY = "products";
 

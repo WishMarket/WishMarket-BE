@@ -10,7 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import com.zerobase.wishmarket.domain.alarm.exception.AlarmErrorCode;
 import com.zerobase.wishmarket.domain.alarm.exception.AlarmException;
-import com.zerobase.wishmarket.domain.alarm.model.Alarm;
+import com.zerobase.wishmarket.domain.alarm.model.entity.Alarm;
 import com.zerobase.wishmarket.domain.alarm.model.dto.AlarmResponseDto;
 import com.zerobase.wishmarket.domain.alarm.model.type.AlarmMessage;
 import com.zerobase.wishmarket.domain.alarm.repository.AlarmRepository;

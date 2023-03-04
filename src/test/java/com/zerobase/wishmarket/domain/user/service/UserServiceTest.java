@@ -1,13 +1,12 @@
 package com.zerobase.wishmarket.domain.user.service;
 
 
-import com.zerobase.wishmarket.domain.user.model.dto.ChangePwdForm;
-import com.zerobase.wishmarket.domain.user.model.dto.UpdateForm;
+import com.zerobase.wishmarket.domain.user.model.form.ChangePwdForm;
+import com.zerobase.wishmarket.domain.user.model.form.UpdateForm;
 import com.zerobase.wishmarket.domain.user.model.dto.UserDto;
 import com.zerobase.wishmarket.domain.user.model.entity.DeliveryAddress;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
-import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;

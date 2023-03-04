@@ -12,11 +12,11 @@ import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_N
 import static com.zerobase.wishmarket.exception.CommonErrorCode.EXPIRED_KEY;
 
 import com.zerobase.wishmarket.common.redis.RedisClient;
-import com.zerobase.wishmarket.domain.authcode.components.MailComponents;
+import com.zerobase.wishmarket.common.component.MailComponents;
 import com.zerobase.wishmarket.domain.authcode.exception.AuthException;
-import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeMailForm;
+import com.zerobase.wishmarket.domain.authcode.model.form.AuthCodeMailForm;
 import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeResponse;
-import com.zerobase.wishmarket.domain.authcode.model.dto.AuthCodeVerifyForm;
+import com.zerobase.wishmarket.domain.authcode.model.form.AuthCodeVerifyForm;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;

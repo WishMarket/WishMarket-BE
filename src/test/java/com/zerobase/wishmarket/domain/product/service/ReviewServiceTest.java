@@ -3,9 +3,10 @@ package com.zerobase.wishmarket.domain.product.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
-import com.zerobase.wishmarket.domain.product.model.dto.ReviewDto;
-import com.zerobase.wishmarket.domain.product.model.entity.Review;
-import com.zerobase.wishmarket.domain.product.repository.ReviewRepository;
+import com.zerobase.wishmarket.domain.review.model.dto.ReviewDto;
+import com.zerobase.wishmarket.domain.review.model.entity.Review;
+import com.zerobase.wishmarket.domain.review.repository.ReviewRepository;
+import com.zerobase.wishmarket.domain.review.service.ReviewService;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
