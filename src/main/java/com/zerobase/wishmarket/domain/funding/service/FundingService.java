@@ -134,7 +134,8 @@ public class FundingService {
 
         fundingParticipationRepository.save(participation);
 
-        alarmService.addAlarm(targetUser.getUserId(), AlarmMessage.FUNDING_START_ALARM_FOR_TARGET.getMessage());
+        alarmService.addAlarm(targetUser.getUserId(),
+            AlarmMessage.FUNDING_START_ALARM_FOR_TARGET.getMessage());
         if (savedFunding.getFundingStatusType() == FundingStatusType.SUCCESS) {
             alarmService.addFundingAlarm(savedFunding);
         }
@@ -318,8 +319,6 @@ public class FundingService {
 
         List<FundingListGiveResponse> fundingListGiveResponses = new ArrayList<>();
 
-
-
         for (FundingParticipation participation : participationList) {
             List<String> participantsNameList = new ArrayList<>();
 
@@ -355,11 +354,15 @@ public class FundingService {
 
         List<FundingListFriendResponse> fundingListFriendResponses = new ArrayList<>();
 
-
         for (FundingParticipation participation : participationList) {
             List<String> participantsNameList = new ArrayList<>();
 
             Funding funding = participation.getFunding();
+
+            //진행중인 펀딩만 조회
+            if (funding.getFundingStatusType() != FundingStatusType.ING) {
+                continue;
+            }
 
             for (FundingParticipation p : funding.getParticipationList()) {
                 //참여자 이름은 20명까지만
@@ -371,14 +374,15 @@ public class FundingService {
             //친구가 참여한 펀딩에 나도 참여한 경우, 금액 표출
             Long myFundingPrice = 0L;
 
-            Optional<FundingParticipation> myParticipation = fundingParticipationRepository.findByFundingAndUser(funding,user);
-            if(myParticipation.isPresent()){
+            Optional<FundingParticipation> myParticipation = fundingParticipationRepository.findByFundingAndUser(
+                funding, user);
+            if (myParticipation.isPresent()) {
                 myFundingPrice = myParticipation.get().getPrice();
             }
 
-
             fundingListFriendResponses.add(
-                FundingListFriendResponse.from(participation, funding, myFundingPrice, participantsNameList));
+                FundingListFriendResponse.from(participation, funding, myFundingPrice,
+                    participantsNameList));
         }
 
         return fundingListFriendResponses;
@@ -413,7 +417,7 @@ public class FundingService {
                 fundingMyGiftListResponses.add(
                     FundingMyGiftListResponse.from(funding, review.getComment(), participationList)
                 );
-            }else{
+            } else {
                 fundingMyGiftListResponses.add(
                     FundingMyGiftListResponse.from(funding, "", participationList)
                 );
@@ -473,7 +477,12 @@ public class FundingService {
 
         //인기유저 펀딩이 무조건 존재한다고 가정
         for (UserEntity influenceUser : influenceUserList) {
-            influenceFundingList.add(fundingRepository.findByTargetUser(influenceUser));
+            //인기유저의 진행중인 펀딩 목록 중 무작위 선택
+            List<Funding> influenceUserFundingList = fundingRepository.findAllByTargetUserAndFundingStatusType(
+                influenceUser, FundingStatusType.ING);
+            int ranNum = (int)(Math.random() * (influenceUserFundingList.size()));
+
+            influenceFundingList.add(influenceUserFundingList.get(ranNum));
         }
 
         for (Funding funding : influenceFundingList) {
@@ -520,7 +529,13 @@ public class FundingService {
 
         //인기유저 펀딩이 무조건 존재한다고 가정
         for (UserEntity influenceUser : influenceUserList) {
-            influenceFundingList.add(fundingRepository.findByTargetUser(influenceUser));
+
+            //인기유저의 진행중인 펀딩 목록 중 무작위 선택
+            List<Funding> influenceUserFundingList = fundingRepository.findAllByTargetUserAndFundingStatusType(
+                influenceUser, FundingStatusType.ING);
+            int ranNum = (int)(Math.random() * (influenceUserFundingList.size()));
+
+            influenceFundingList.add(influenceUserFundingList.get(ranNum));
         }
 
         for (Funding funding : influenceFundingList) {
