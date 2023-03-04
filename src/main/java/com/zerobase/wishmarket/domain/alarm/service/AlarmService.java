@@ -83,24 +83,23 @@ public class AlarmService {
 
         switch (funding.getFundingStatusType()) {
             case SUCCESS:
-                addAlarm(targetUserId, AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_TARGET.getMessage());
-                addAlarm(startUserId,
-                    AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_PARTICIPANT.getMessage());
+                addAlarm(targetUserId, AlarmMessage.SUCCESS_TARGET.name());
+                addAlarm(startUserId, AlarmMessage.SUCCESS_PARTICIPANT.name());
                 if (participationList != null) {
                     for (FundingParticipation participation : participationList) {
                         addAlarm(participation.getUser().getUserId(),
-                            AlarmMessage.FUNDING_SUCCESS_ALARM_FOR_PARTICIPANT.getMessage());
+                            AlarmMessage.SUCCESS_PARTICIPANT.name());
                     }
                 }
                 break;
 
             case FAIL:
-                addAlarm(targetUserId, AlarmMessage.FUNDING_FAIL_ALARM_FOR_TARGET.getMessage());
-                addAlarm(startUserId, AlarmMessage.FUNDING_FAIL_ALARM_FOR_PARTICIPANT.getMessage());
+                addAlarm(targetUserId, AlarmMessage.FAIL_FUNDING.name());
+                addAlarm(startUserId, AlarmMessage.FAIL_FUNDING.name());
                 if (participationList != null) {
                     for (FundingParticipation participation : participationList) {
                         addAlarm(participation.getUser().getUserId(),
-                            AlarmMessage.FUNDING_FAIL_ALARM_FOR_PARTICIPANT.getMessage());
+                            AlarmMessage.FAIL_FUNDING.name());
                     }
                 }
                 break;
