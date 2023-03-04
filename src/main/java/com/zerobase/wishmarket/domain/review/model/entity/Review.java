@@ -1,14 +1,10 @@
-package com.zerobase.wishmarket.domain.follow.model.entity;
+package com.zerobase.wishmarket.domain.review.model.entity;
 
-import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.common.entity.BaseEntity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,23 +12,26 @@ import lombok.NoArgsConstructor;
 import org.hibernate.envers.AuditOverride;
 
 @Getter
-@Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @AuditOverride(forClass = BaseEntity.class)
 @Entity
-public class Follow extends BaseEntity {
+
+public class Review extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn
-    private UserEntity follower; // 팔로우를 하는 사람
+    private Long userId;
 
-    @ManyToOne
-    @JoinColumn
-    private UserEntity followee; // 팔로우를 받는 사람
+    private String userName;
+
+    private String comment;
+
+    private boolean isRecommend;
+
+    private Long productId;
 
 }

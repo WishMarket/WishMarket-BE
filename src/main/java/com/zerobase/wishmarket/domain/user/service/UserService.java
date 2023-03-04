@@ -2,10 +2,10 @@ package com.zerobase.wishmarket.domain.user.service;
 
 import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
-import com.zerobase.wishmarket.common.util.S3Util;
+import com.zerobase.wishmarket.common.component.S3Component;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
-import com.zerobase.wishmarket.domain.user.model.dto.ChangePwdForm;
-import com.zerobase.wishmarket.domain.user.model.dto.UpdateForm;
+import com.zerobase.wishmarket.domain.user.model.form.ChangePwdForm;
+import com.zerobase.wishmarket.domain.user.model.form.UpdateForm;
 import com.zerobase.wishmarket.domain.user.model.dto.UserInfoResponse;
 import com.zerobase.wishmarket.domain.user.model.entity.DeliveryAddress;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
@@ -26,7 +26,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final S3Util s3Util;
+    private final S3Component s3Util;
     private final DeliveryAddressRepository deliveryAddressRepository;
 
     private static final String PROFILE_IMAGES = "profile_images";

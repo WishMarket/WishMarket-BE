@@ -4,11 +4,11 @@ import com.zerobase.wishmarket.domain.follow.model.entity.Follow;
 import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.entity.FundingParticipation;
-import com.zerobase.wishmarket.domain.user.model.dto.SignUpForm;
+import com.zerobase.wishmarket.domain.user.model.form.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
 import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
-import com.zerobase.wishmarket.entity.BaseEntity;
+import com.zerobase.wishmarket.common.entity.BaseEntity;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;
 

@@ -4,7 +4,7 @@ import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.funding.model.type.FundingStatusType;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
-import com.zerobase.wishmarket.entity.BaseEntity;
+import com.zerobase.wishmarket.common.entity.BaseEntity;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.persistence.CascadeType;
