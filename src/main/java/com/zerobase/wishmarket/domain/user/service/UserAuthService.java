@@ -305,6 +305,17 @@ public class UserAuthService {
         // 4. Refresh Token의 남은 만료기간이 15일 미만일 시 Refresh Token도 재발급
         if (refreshExpireTime - now < ACCESS_REFRESH_TOKEN_REISSUE_TIME) {
             tokenSetDto = jwtProvider.generateTokenSet(user.getUserId());
+
+            // 작성된 날짜에서 현재 날짜를 빼고 밀리초로 나누면 지나간 시간(초)이 계산
+            long expirationSeconds = (tokenSetDto.getRefreshTokenExpiredAt().getTime() - new Date().getTime()) / 1000;
+
+            // redis에 refresh토큰 저장
+            redisClient.put(
+                REFRESH_TOKEN_PREFIX + user.getUserId(),
+                tokenSetDto.getRefreshToken(),
+                TimeUnit.SECONDS,
+                expirationSeconds);
+
             reissueResponse = ReissueResponse.builder()
                     .email(user.getEmail())
                     .name(user.getName())
