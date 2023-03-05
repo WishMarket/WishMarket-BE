@@ -14,5 +14,4 @@ public class UpdateForm {
     private String detailAddress;
 
     private String phone;
-    private MultipartFile profileImage;
 }

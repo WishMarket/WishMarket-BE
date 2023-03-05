@@ -1,23 +1,25 @@
 package com.zerobase.wishmarket.domain.user.service;
 
-import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
-
 import com.zerobase.wishmarket.common.component.S3Component;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
-import com.zerobase.wishmarket.domain.user.model.form.ChangePwdForm;
-import com.zerobase.wishmarket.domain.user.model.form.UpdateForm;
 import com.zerobase.wishmarket.domain.user.model.dto.UserInfoResponse;
 import com.zerobase.wishmarket.domain.user.model.entity.DeliveryAddress;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
+import com.zerobase.wishmarket.domain.user.model.form.ChangePwdForm;
+import com.zerobase.wishmarket.domain.user.model.form.UpdateForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserPasswordChangeReturnType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.repository.DeliveryAddressRepository;
 import com.zerobase.wishmarket.domain.user.repository.UserRepository;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
+
+import static com.zerobase.wishmarket.domain.user.exception.UserErrorCode.USER_NOT_FOUND;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -44,7 +46,7 @@ public class UserService {
 
         String encodePassword = passwordEncoder.encode(form.getPassword());
         Optional<UserEntity> user = userRepository.findByEmailAndUserRegistrationType(form.getEmail(),
-            UserRegistrationType.EMAIL);
+                UserRegistrationType.EMAIL);
 
         if (!user.isPresent()) {
             return UserPasswordChangeReturnType.CHANGE_PASSWORD_FAIL;
@@ -56,18 +58,12 @@ public class UserService {
         }
     }
 
-    public UserInfoResponse userInfoUpdate(Long userId, UpdateForm form) {
+    public UserInfoResponse updateUserInfo(Long userId, UpdateForm form) {
 
         Optional<UserEntity> user = userRepository.findByUserId(userId);
         if (!user.isPresent()) {
             throw new UserException(USER_NOT_FOUND);
         } else {
-
-            String imageFileName = "";
-            if (!form.getProfileImage().isEmpty()) {
-                imageFileName = s3Util.upload(PROFILE_IMAGES, String.valueOf(userId), form.getProfileImage());
-                user.get().setProfileImage(imageFileName);
-            }
 
             if (!form.getPhone().isEmpty()) {
                 user.get().setPhone(form.getPhone());
@@ -79,13 +75,13 @@ public class UserService {
 
             if (!form.getAddress().isEmpty()) {
                 Optional<DeliveryAddress> deliveryAddress =
-                    deliveryAddressRepository.findByUserEntity(user.get());
+                        deliveryAddressRepository.findByUserEntity(user.get());
 
                 if (!deliveryAddress.isPresent()) {
                     DeliveryAddress newDeliveryAddress = DeliveryAddress.builder()
-                        .address(form.getAddress())
-                        .userEntity(user.get())
-                        .build();
+                            .address(form.getAddress())
+                            .userEntity(user.get())
+                            .build();
                     user.get().setDeliveryAddress(deliveryAddressRepository.save(newDeliveryAddress));
                 } else {
                     deliveryAddress.get().setAddress(form.getAddress());
@@ -113,6 +109,27 @@ public class UserService {
                     user.get().setDeliveryAddress(updateAddress);
                 }
 
+            }
+
+            UserEntity updateUser = userRepository.save(user.get());
+
+            return UserInfoResponse.from(userRepository.save(updateUser));
+
+        }
+    }
+
+    public UserInfoResponse updateUserProfileImage(Long userId, MultipartFile profileImage) {
+
+        Optional<UserEntity> user = userRepository.findByUserId(userId);
+        if (!user.isPresent()) {
+            throw new UserException(USER_NOT_FOUND);
+        } else {
+
+            String imageFileName = "";
+            System.out.println(profileImage.isEmpty());
+            if (!profileImage.isEmpty()) {
+                imageFileName = s3Util.upload(PROFILE_IMAGES, String.valueOf(userId), profileImage);
+                user.get().setProfileImage(imageFileName);
             }
 
             UserEntity updateUser = userRepository.save(user.get());
