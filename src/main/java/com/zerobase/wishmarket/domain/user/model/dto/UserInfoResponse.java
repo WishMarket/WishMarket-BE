@@ -7,7 +7,6 @@ import com.zerobase.wishmarket.domain.user.model.type.UserStatusType;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Getter
 @Builder
@@ -22,7 +21,7 @@ public class UserInfoResponse {
     private String nickName;
     private String phone;
     private Long pointPrice;
-    private String profileImage;
+    private String profileImageUrl;
     private String address;
     private String detailAddress;
     private UserRegistrationType userRegistrationType;
@@ -50,7 +49,7 @@ public class UserInfoResponse {
                 .pointPrice(userEntity.getPointPrice())
                 .address("")
                 .detailAddress("")
-                .profileImage(userEntity.getProfileImage())
+                .profileImageUrl(userEntity.getProfileImage())
                 .userRegistrationType(userEntity.getUserRegistrationType())
                 .userStatusType(userEntity.getUserStatusType())
                 .userRolesType(userEntity.getUserRoleType())
