@@ -367,7 +367,7 @@ public class UserAuthService {
     private UserEntity saveOrUpdate(OAuthUserProfile userProfile) {
         UserEntity userEntity = userAuthRepository.findByUserRegistrationType(userProfile.getUserRegistrationType())
                 .map(entity -> entity.update(
-                        userProfile.getEmail(), userProfile.getProfileImageUrl()))
+                        userProfile.getName(), userProfile.getProfileImageUrl()))
                 .orElseGet(userProfile::toEntity);
         return userAuthRepository.save(userEntity);
     }
