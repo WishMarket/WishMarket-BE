@@ -9,12 +9,11 @@ public enum OauthAttributes {
     GITHUB("github") {
         @Override
         public OAuthUserProfile of(Map<String, Object> attributes) {
-            Map<String, Object> response = (Map<String, Object>) attributes.get("response");
             return OAuthUserProfile.builder()
                     .userRegistrationType(UserRegistrationType.valueOf("GITHUB"))
-                    .email((String) response.get("email"))
-                    .name((String) response.get("name"))
-                    .profileImageUrl((String) response.get("avatar_url"))
+                    .email((String) attributes.get("email"))
+                    .name((String) attributes.get("name"))
+                    .profileImageUrl((String) attributes.get("avatar_url"))
                     .build();
         }
     },
