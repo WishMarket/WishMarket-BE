@@ -6,6 +6,17 @@ import java.util.Arrays;
 import java.util.Map;
 
 public enum OauthAttributes {
+    GITHUB("github") {
+        @Override
+        public OAuthUserProfile of(Map<String, Object> attributes) {
+            return OAuthUserProfile.builder()
+                    .userRegistrationType(UserRegistrationType.valueOf("GITHUB"))
+                    .email((String) attributes.get("email"))
+                    .name((String) attributes.get("name"))
+                    .profileImageUrl((String) attributes.get("avatar_url"))
+                    .build();
+        }
+    },
     NAVER("naver") {
         @Override
         public OAuthUserProfile of(Map<String, Object> attributes) {
@@ -15,17 +26,6 @@ public enum OauthAttributes {
                               .email((String) response.get("email"))
                               .name((String) response.get("name"))
                               .profileImageUrl((String) response.get("profile_image"))
-                              .build();
-        }
-    },
-    GOOGLE("google") {
-        @Override
-        public OAuthUserProfile of(Map<String, Object> attributes) {
-            return OAuthUserProfile.builder()
-                              .userRegistrationType(UserRegistrationType.valueOf("GOOGLE"))
-                              .email((String) attributes.get("email"))
-                              .name((String) attributes.get("name"))
-                              .profileImageUrl((String) attributes.get("picture"))
                               .build();
         }
     };
