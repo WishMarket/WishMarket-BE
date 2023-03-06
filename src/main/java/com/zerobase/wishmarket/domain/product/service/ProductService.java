@@ -15,6 +15,7 @@ import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.product.repository.RedisBestRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,11 +35,10 @@ public class ProductService {
     private final RedisBestRepository redisBestRepository;
 
     private static final String KEY_BEST = "BEST_PRODUCTS";
-    private static final Long KEY_BEST_PRODUCTS = 1L;
 
 
-    //임시로 제품 정보 넣기, Batch로 서버 시작시 데이터 저장, 추후 변경
-    public void addProduct() {
+    //임시로 제품 정보 넣기
+    /*public void addProduct() {
         for (ProductCategory category : ProductCategory.values()) {
             for (int i = 1; i < 21; i++) {
                 Product product = Product.builder()
@@ -64,11 +64,11 @@ public class ProductService {
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
             productLikes.setLikes(10);
         }
-    }
+    }*/
 
 
     //베스트 상품 N개 업데이트
-    public boolean updateBestProducts() {
+    public void updateBestProducts() {
 
         //기존의 베스트 상품의 isBest값을 false로 바꾸기
 
@@ -84,8 +84,8 @@ public class ProductService {
         List<ProductLikes> bestProductLikes = productLikesRepository.findTop50ByOrderByLikesDesc();
 
         List<Long> ids = new ArrayList<>();
-        for (int i = 0; i < bestProductLikes.size(); i++) {
-            ids.add(bestProductLikes.get(i).getProductId());
+        for (ProductLikes bestProductLike : bestProductLikes) {
+            ids.add(bestProductLike.getProductId());
         }
 
         //새로운 베스트 상품의 isBest값을 true로 바꾸기
@@ -97,11 +97,10 @@ public class ProductService {
         //redis repository에 넣기
         //기존에 레디스값에 Set하기 때문에 기존의 레디스를 삭제할 필요가 없음
         redisBestRepository.save(RedisBestProducts.builder()
-            .id(KEY_BEST_PRODUCTS)
+            .id(KEY_BEST)
             .products(newBestproducts)
             .build());
 
-        return true;
     }
 
     //카테고리별 상품 조회
@@ -109,12 +108,15 @@ public class ProductService {
         PageRequest pageRequest) {
         Page<Product> pagingProduct = productRepository.findAllByCategory(category,
             pageRequest);
+
         List<Product> productList = pagingProduct.getContent();
         List<ProductCategoryDto> productCategoryDtoList = new ArrayList<>();
+
         for (Product product : productList) {
             ProductCategoryDto productCategoryDto = ProductCategoryDto.of(product);
             productCategoryDtoList.add(productCategoryDto);
         }
+
         return new PageImpl<>(productCategoryDtoList, pageRequest,
             pagingProduct.getTotalElements());
 
@@ -123,9 +125,17 @@ public class ProductService {
     //베스트 상품 조회
     public Page<ProductBestDto> getBestProducts(PageRequest pageRequest) {
 
-        List<Product> productList = redisBestRepository.findById(KEY_BEST_PRODUCTS).get()
-            .getProducts();
         List<ProductBestDto> productBestDtoList = new ArrayList<>();
+
+        List<Product> productList;
+
+        Optional<RedisBestProducts> optionalRedisBestProducts = redisBestRepository.findById(KEY_BEST);
+        if(optionalRedisBestProducts.isPresent()){
+            productList = optionalRedisBestProducts.get().getProducts();
+        } else {
+            //베스트 상품 값이 없으면 빈 값 반환
+            return new PageImpl<>(productBestDtoList, pageRequest, 0);
+        }
 
         //직접 페이징 처리
         int start = pageRequest.getPageNumber() * pageRequest.getPageSize();
@@ -135,6 +145,7 @@ public class ProductService {
             ProductBestDto productBestDto = ProductBestDto.of(product);
             productBestDtoList.add(productBestDto);
         }
+
         return new PageImpl<>(productBestDtoList, pageRequest, productList.size());
     }
 
