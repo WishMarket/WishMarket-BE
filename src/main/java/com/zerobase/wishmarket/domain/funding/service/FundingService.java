@@ -120,8 +120,8 @@ public class FundingService {
             .participationCount(1L)
             .fundingStatusType(fundingStatusType)
             .fundedStatusType(fundedStatusType)
-            .startDate(fundingStartInputForm.getStartZoneDate())
-            .endDate(fundingStartInputForm.getEndZoneDate())
+            .startDate(fundingStartInputForm.getStartZoneDate().plusHours(9))
+            .endDate(fundingStartInputForm.getEndZoneDate().plusHours(9))
             .build());
 
         FundingParticipation participation = FundingParticipation.builder()
@@ -140,10 +140,10 @@ public class FundingService {
 
         //로그 수정
         log.info("#####################펀딩 시작한 날짜####################");
-        log.info(fundingStartInputForm.getStartZoneDate().toString());
+        log.info(savedFunding.getStartDate().toString());
 
         log.info("#####################펀딩 종료 날짜####################");
-        log.info(fundingStartInputForm.getEndZoneDate().toString());
+        log.info(savedFunding.getEndDate().toString());
 
         return FundingStartResponse.of(savedFunding);
 
