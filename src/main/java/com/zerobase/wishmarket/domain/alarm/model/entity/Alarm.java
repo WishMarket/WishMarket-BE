@@ -21,10 +21,10 @@ public class Alarm extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String contents;
-    private boolean isRead;
+    private boolean alarmStatus;
     private Long userId;
 
     public void setAsRead() {
-        this.isRead = true;
+        this.alarmStatus = true;
     }
 }

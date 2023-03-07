@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
@@ -39,7 +40,7 @@ public class AlarmService {
         Alarm alarm = Alarm.builder()
             .userId(userId)
             .contents(contents)
-            .isRead(false)
+            .alarmStatus(false)
             .build();
         alarmRepository.save(alarm);
         sendUnreadCount(alarm.getUserId());
@@ -55,6 +56,7 @@ public class AlarmService {
     }
 
     //알람 읽음 처리
+    @Transactional
     public void readAlarm(Long alarmId) {
         Alarm alarm = alarmRepository.findById(alarmId)
             .orElseThrow(() -> new AlarmException(AlarmErrorCode.ALARM_NOT_FOUND));
@@ -123,7 +125,7 @@ public class AlarmService {
     }
 
     public int countUnreadAlarms(Long userId) {
-        return alarmRepository.countByUserIdAndIsReadFalse(userId);
+        return alarmRepository.countByUserIdAndAlarmStatusFalse(userId);
     }
 
     private void sendUnreadCount(Long userId) {

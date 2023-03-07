@@ -19,7 +19,7 @@ public class AlarmResponseDto {
         return AlarmResponseDto.builder()
             .id(alarm.getId())
             .contents(alarm.getContents())
-            .isRead(alarm.isRead())
+            .isRead(alarm.isAlarmStatus())
             .build();
     }
 }
