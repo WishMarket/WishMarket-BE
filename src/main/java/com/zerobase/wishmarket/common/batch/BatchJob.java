@@ -28,7 +28,7 @@ public class BatchJob {
     private final FundingService fundingService;
 
     //서버 처음 구동시, 상품 데이터 넣기
-    @Bean
+    /*@Bean
     public Job JobToInputProduct() {
         return jobBuilderFactory.get("JobToInputProduct")
             .start(InputProductStep())
@@ -55,7 +55,7 @@ public class BatchJob {
                 return RepeatStatus.FINISHED;
             })
             .build();
-    }
+    }*/
 
 
     //Best 상품 초기화
