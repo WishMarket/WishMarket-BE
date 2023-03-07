@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token)) {
                 // Redis 에 해당 Token 의 로그아웃 여부 확인
                 String isLogout = (String) redisTemplate.opsForValue().get(ACCESS_TOKEN_BLACK_LIST_PREFIX + token);
-                System.out.println(isLogout);
+                System.out.println("로그아웃 : " + isLogout);
                 if (ObjectUtils.isEmpty(isLogout)) {
                     // 토큰이 유효하면 토큰으로부터 유저 정보를 받아옵니다.
                     Authentication authentication = jwtProvider.getAuthentication(token);
@@ -84,6 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String resolveTokenFromRequest(HttpServletRequest request) {
         String token = request.getHeader(TOKEN_HEADER);
 
+        log.info("헤더 포함된 토큰 : " + token);
         if (!ObjectUtils.isEmpty(token) && token.startsWith(ACCESS_TOKEN_PREFIX)) {
             return token.substring(ACCESS_TOKEN_PREFIX.length());
         }
