@@ -34,4 +34,6 @@ public class Review extends BaseEntity {
 
     private Long productId;
 
+    private Long fundingId;
+
 }
