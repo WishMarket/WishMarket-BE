@@ -14,7 +14,7 @@ import org.springframework.data.redis.core.RedisHash;
 public class RedisBestProducts {
 
     @Id
-    private Long id;
+    private String id;
 
     private List<Product> products;
 
