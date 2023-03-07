@@ -137,6 +137,8 @@ public class FundingService {
             alarmService.addFundingAlarm(savedFunding);
         }
 
+
+        //로그 수정
         log.info("#####################펀딩 시작한 날짜####################");
         log.info(fundingStartInputForm.getStartZoneDate().toString());
 
