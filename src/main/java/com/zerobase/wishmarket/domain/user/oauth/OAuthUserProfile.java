@@ -1,5 +1,6 @@
 package com.zerobase.wishmarket.domain.user.oauth;
 
+import com.zerobase.wishmarket.domain.follow.model.entity.FollowInfo;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.type.UserRegistrationType;
 import com.zerobase.wishmarket.domain.user.model.type.UserRolesType;
@@ -22,7 +23,7 @@ public class OAuthUserProfile {
         this.profileImageUrl = profileImageUrl;
     }
 
-    public UserEntity toEntity() {
+    public UserEntity toEntity(FollowInfo followInfo) {
         return UserEntity.builder()
                 .userRegistrationType(userRegistrationType)
                 .email(email)
@@ -32,6 +33,7 @@ public class OAuthUserProfile {
                 .profileImage(profileImageUrl)
                 .userRoleType(UserRolesType.USER)
                 .userStatusType(UserStatusType.ACTIVE)
+                .followInfo(followInfo)
                 .build();
     }
 }

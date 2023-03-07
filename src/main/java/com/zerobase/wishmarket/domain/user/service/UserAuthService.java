@@ -9,7 +9,10 @@ import com.zerobase.wishmarket.domain.follow.repository.FollowInfoRepository;
 import com.zerobase.wishmarket.domain.funding.model.entity.Funding;
 import com.zerobase.wishmarket.domain.funding.model.type.FundedStatusType;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
-import com.zerobase.wishmarket.domain.user.model.dto.*;
+import com.zerobase.wishmarket.domain.user.model.dto.LogoutResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.ReissueResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignInResponse;
+import com.zerobase.wishmarket.domain.user.model.dto.SignUpEmailResponse;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
 import com.zerobase.wishmarket.domain.user.model.form.SignInForm;
 import com.zerobase.wishmarket.domain.user.model.form.SignUpForm;
@@ -311,10 +314,10 @@ public class UserAuthService {
 
             // redis에 refresh토큰 저장
             redisClient.put(
-                REFRESH_TOKEN_PREFIX + user.getUserId(),
-                tokenSetDto.getRefreshToken(),
-                TimeUnit.SECONDS,
-                expirationSeconds);
+                    REFRESH_TOKEN_PREFIX + user.getUserId(),
+                    tokenSetDto.getRefreshToken(),
+                    TimeUnit.SECONDS,
+                    expirationSeconds);
 
             reissueResponse = ReissueResponse.builder()
                     .email(user.getEmail())
@@ -365,11 +368,24 @@ public class UserAuthService {
     }
 
     private UserEntity saveOrUpdate(OAuthUserProfile userProfile) {
-        UserEntity userEntity = userAuthRepository.findByUserRegistrationType(userProfile.getUserRegistrationType())
-                .map(entity -> entity.update(
-                        userProfile.getName(), userProfile.getProfileImageUrl()))
-                .orElseGet(userProfile::toEntity);
-        return userAuthRepository.save(userEntity);
+        Optional<UserEntity> userEntity = userAuthRepository.findByUserRegistrationType(userProfile.getUserRegistrationType());
+
+        if (!userEntity.isPresent()) {
+            FollowInfo emptyFollowInfo = FollowInfo.builder()
+                    .followerCount(0L)
+                    .followCount(0L)
+                    .build();
+
+            followInfoRepository.save(emptyFollowInfo);
+            UserEntity newUser = userProfile.toEntity(emptyFollowInfo);
+
+            return userAuthRepository.save(newUser);
+        } else {
+            userEntity.map(entity -> entity.update(userProfile.getName(), userProfile.getProfileImageUrl()));
+
+            return userAuthRepository.save(userEntity.get());
+        }
+
     }
 
     private OauthTokenResponse getToken(String code, OauthProvider provider) {
