@@ -58,6 +58,11 @@ public class FundingController {
         return ResponseEntity.ok().body(fundingService.getFundingListFriend(userId,friendId));
     }
 
+    @GetMapping("/history/target/{friendId}")
+    public ResponseEntity<List<FundingListFriendResponse>> getTargetFundingListFriend(@AuthenticationPrincipal Long userId, @PathVariable Long friendId){
+        return ResponseEntity.ok().body(fundingService.getTargetFundingListFriend(userId,friendId));
+    }
+
     @GetMapping("/gift")
     public ResponseEntity<List<FundingMyGiftListResponse>> getMyFundingGift(@AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok(fundingService.getMyFundigGifyList(userId));
