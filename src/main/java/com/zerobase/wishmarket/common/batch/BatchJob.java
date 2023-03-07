@@ -51,7 +51,7 @@ public class BatchJob {
                     contribution.setExitStatus(ExitStatus.FAILED);
                 }
 
-                productService.addProduct();
+//                productService.addProduct();
                 return RepeatStatus.FINISHED;
             })
             .build();
