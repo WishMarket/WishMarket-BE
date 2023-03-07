@@ -30,8 +30,8 @@ import com.zerobase.wishmarket.domain.point.exception.PointException;
 import com.zerobase.wishmarket.domain.point.service.PointService;
 import com.zerobase.wishmarket.domain.product.exception.ProductException;
 import com.zerobase.wishmarket.domain.product.model.entity.Product;
-import com.zerobase.wishmarket.domain.review.model.entity.Review;
 import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
+import com.zerobase.wishmarket.domain.review.model.entity.Review;
 import com.zerobase.wishmarket.domain.review.repository.ReviewRepository;
 import com.zerobase.wishmarket.domain.user.exception.UserException;
 import com.zerobase.wishmarket.domain.user.model.entity.UserEntity;
@@ -120,8 +120,8 @@ public class FundingService {
             .participationCount(1L)
             .fundingStatusType(fundingStatusType)
             .fundedStatusType(fundedStatusType)
-            .startDate(fundingStartInputForm.getStartDate())
-            .endDate(fundingStartInputForm.getEndDate())
+            .startDate(fundingStartInputForm.getStartZoneDate())
+            .endDate(fundingStartInputForm.getEndZoneDate())
             .build());
 
         FundingParticipation participation = FundingParticipation.builder()
@@ -138,10 +138,10 @@ public class FundingService {
         }
 
         log.info("#####################펀딩 시작한 날짜####################");
-        log.info(fundingStartInputForm.getStartDate().toString());
+        log.info(fundingStartInputForm.getStartZoneDate().toString());
 
         log.info("#####################펀딩 종료 날짜####################");
-        log.info(fundingStartInputForm.getEndDate().toString());
+        log.info(fundingStartInputForm.getEndZoneDate().toString());
 
         return FundingStartResponse.of(savedFunding);
 
