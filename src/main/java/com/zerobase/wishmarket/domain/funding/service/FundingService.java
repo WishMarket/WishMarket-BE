@@ -335,7 +335,7 @@ public class FundingService {
         return fundingListGiveResponses;
     }
 
-    //친구(특정 유저의) 펀딩 내역
+    //친구(특정 유저가 참여중인) 펀딩 내역
     public List<FundingListFriendResponse> getFundingListFriend(Long userId, Long friendId) {
         //유저 확인
         UserEntity user = userRepository.findByUserId(userId)
@@ -380,6 +380,55 @@ public class FundingService {
             fundingListFriendResponses.add(
                 FundingListFriendResponse.from(participation, funding, myFundingPrice,
                     participantsNameList));
+        }
+
+        return fundingListFriendResponses;
+
+    }
+
+    //친구(특정 유저가 타겟인) 펀딩 내역
+    public List<FundingListFriendResponse> getTargetFundingListFriend(Long userId, Long friendId) {
+
+        //유저 확인
+        UserEntity user = userRepository.findByUserId(userId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        //친구(특정 유저) 확인
+        UserEntity friend = userRepository.findByUserId(friendId)
+            .orElseThrow(() -> new UserException(USER_NOT_FOUND));
+
+        List<FundingListFriendResponse> fundingListFriendResponses = new ArrayList<>();
+
+        //친구가 타겟인 모든 펀딩 목록
+        List<Funding> fundingList = fundingRepository.findAllByTargetUserAndFundingStatusType(
+            friend, FundingStatusType.ING);
+
+
+        for(Funding funding : fundingList){
+            List<String> participantsNameList = new ArrayList<>();
+
+            for(FundingParticipation participation : funding.getParticipationList()){
+                //참여자 이름은 20명까지만
+                if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
+                    participantsNameList.add(participation.getUser().getName());
+                }
+            }
+
+            //친구가 참여한 펀딩에 나도 참여한 경우, 금액 표출
+            Long myFundingPrice = 0L;
+
+            Optional<FundingParticipation> myParticipation = fundingParticipationRepository.findByFundingAndUser(
+                funding, user);
+
+            if (myParticipation.isPresent()) {
+                myFundingPrice = myParticipation.get().getPrice();
+            }
+
+            fundingListFriendResponses.add(
+                FundingListFriendResponse.from(funding, myFundingPrice,
+                    participantsNameList));
+
+
         }
 
         return fundingListFriendResponses;
@@ -477,7 +526,7 @@ public class FundingService {
             //인기유저의 진행중인 펀딩 목록 중 무작위 선택
             List<Funding> influenceUserFundingList = fundingRepository.findAllByTargetUserAndFundingStatusType(
                 influenceUser, FundingStatusType.ING);
-            int ranNum = (int)(Math.random() * (influenceUserFundingList.size()));
+            int ranNum = (int) (Math.random() * (influenceUserFundingList.size()));
 
             influenceFundingList.add(influenceUserFundingList.get(ranNum));
         }
@@ -530,7 +579,7 @@ public class FundingService {
             //인기유저의 진행중인 펀딩 목록 중 무작위 선택
             List<Funding> influenceUserFundingList = fundingRepository.findAllByTargetUserAndFundingStatusType(
                 influenceUser, FundingStatusType.ING);
-            int ranNum = (int)(Math.random() * (influenceUserFundingList.size()));
+            int ranNum = (int) (Math.random() * (influenceUserFundingList.size()));
 
             influenceFundingList.add(influenceUserFundingList.get(ranNum));
         }
