@@ -23,7 +23,8 @@ public class BatchScheduler {
     private final BatchJob batchJob;
 
     //베스트 상품, 매일 자정 2시 업데이트
-    @Scheduled(cron = "* 0 2 * * *")
+    //스케줄러 시간 잠시 수정
+    @Scheduled(cron = "0 30 22 * * *")
     public void updateBest() {
         Map<String, JobParameter> confMap = new HashMap<>();
         confMap.put("time", new JobParameter(System.currentTimeMillis()));
