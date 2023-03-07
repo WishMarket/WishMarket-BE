@@ -34,12 +34,35 @@ public class FundingListFriendResponse {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    public static FundingListFriendResponse from(FundingParticipation participation, Funding funding,
+    public static FundingListFriendResponse from(FundingParticipation participation,
+        Funding funding,
         Long myFundingPrice, List<String> participantsNameList) {
 
         return FundingListFriendResponse.builder()
             .fundingId(funding.getId())
             .targetId(participation.getId())
+            .targetName(funding.getTargetUser().getName())
+            .productId(funding.getProduct().getProductId())
+            .productName(funding.getProduct().getName())
+            .productImagerUrl(funding.getProduct().getProductImage())
+            .price(funding.getProduct().getPrice())
+            .fundedPrice(funding.getFundedPrice())
+            .myFundingPrice(myFundingPrice)
+            .participants(participantsNameList)
+            .participantsNumber(funding.getParticipationCount())
+            .fundStatus(funding.getFundingStatusType())
+            .startDate(funding.getStartDate())
+            .endDate(funding.getEndDate())
+            .build();
+
+    }
+
+    public static FundingListFriendResponse from(Funding funding,
+        Long myFundingPrice, List<String> participantsNameList) {
+
+        return FundingListFriendResponse.builder()
+            .fundingId(funding.getId())
+            .targetId(funding.getTargetUser().getUserId())
             .targetName(funding.getTargetUser().getName())
             .productId(funding.getProduct().getProductId())
             .productName(funding.getProduct().getName())
