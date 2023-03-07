@@ -137,6 +137,12 @@ public class FundingService {
             alarmService.addFundingAlarm(savedFunding);
         }
 
+        log.info("#####################펀딩 시작한 날짜####################");
+        log.info(fundingStartInputForm.getStartDate().toString());
+
+        log.info("#####################펀딩 종료 날짜####################");
+        log.info(fundingStartInputForm.getEndDate().toString());
+
         return FundingStartResponse.of(savedFunding);
 
     }
