@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String token = this.resolveTokenFromRequest(request);
-
+            log.info("전달되는 토큰 : " + token);
             if (StringUtils.hasText(token) && this.jwtProvider.isValidationToken(token)) {
                 // Redis 에 해당 Token 의 로그아웃 여부 확인
                 String isLogout = (String) redisTemplate.opsForValue().get(ACCESS_TOKEN_BLACK_LIST_PREFIX + token);
