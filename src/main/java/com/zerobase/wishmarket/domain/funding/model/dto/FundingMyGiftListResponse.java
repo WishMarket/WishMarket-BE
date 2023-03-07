@@ -26,6 +26,7 @@ public class FundingMyGiftListResponse {
     private Long participantsNumber;
 
     private FundedStatusType fundedStatusType;
+    private FundingStatusType fundingStatusType;
     private String review;
 
     private LocalDateTime startDate;
@@ -42,6 +43,7 @@ public class FundingMyGiftListResponse {
             .participantsNumber(funding.getParticipationCount())
             .fundedPrice(funding.getFundedPrice())
             .fundedStatusType(funding.getFundedStatusType())
+            .fundingStatusType(funding.getFundingStatusType())
             .review(review)
             .startDate(funding.getStartDate())
             .endDate(funding.getEndDate())
