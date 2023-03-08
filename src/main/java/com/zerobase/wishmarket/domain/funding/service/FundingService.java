@@ -137,14 +137,6 @@ public class FundingService {
             alarmService.addFundingAlarm(savedFunding);
         }
 
-
-        //로그 수정
-        log.info("#####################펀딩 시작한 날짜####################");
-        log.info(savedFunding.getStartDate().toString());
-
-        log.info("#####################펀딩 종료 날짜####################");
-        log.info(savedFunding.getEndDate().toString());
-
         return FundingStartResponse.of(savedFunding);
 
     }
