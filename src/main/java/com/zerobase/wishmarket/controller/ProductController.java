@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api("상품 API")
+@Api(tags = {"상품 API"})
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor

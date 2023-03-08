@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api("위시리스트 API")
+@Api(tags = {"위시리스트 API"})
 @RestController
 @RequestMapping("/api/wishlist")
 @RequiredArgsConstructor

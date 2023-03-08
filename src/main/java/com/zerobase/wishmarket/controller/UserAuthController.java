@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@Api("회원 인증 API")
+@Api(tags = {"회원 인증 API"})
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
