@@ -6,6 +6,7 @@ import com.zerobase.wishmarket.domain.product.model.dto.ProductDetailDto;
 import com.zerobase.wishmarket.domain.product.model.dto.ProductSearchDto;
 import com.zerobase.wishmarket.domain.product.model.type.ProductCategory;
 import com.zerobase.wishmarket.domain.product.service.ProductService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api("상품 API")
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor

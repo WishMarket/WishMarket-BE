@@ -7,6 +7,7 @@ import com.zerobase.wishmarket.domain.user.model.form.SignInForm;
 import com.zerobase.wishmarket.domain.user.model.form.SignUpForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserWithdrawalReturnType;
 import com.zerobase.wishmarket.domain.user.service.UserAuthService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Api("회원 인증 API")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

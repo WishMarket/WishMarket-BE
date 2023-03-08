@@ -10,6 +10,7 @@ import com.zerobase.wishmarket.domain.funding.model.form.FundingJoinInputForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingReceptionForm;
 import com.zerobase.wishmarket.domain.funding.model.form.FundingStartInputForm;
 import com.zerobase.wishmarket.domain.funding.service.FundingService;
+import io.swagger.annotations.Api;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api("펀딩 API")
 @RequiredArgsConstructor
 @RequestMapping("/api/funding")
 @RestController

@@ -6,6 +6,7 @@ import com.zerobase.wishmarket.domain.user.model.form.ChangePwdForm;
 import com.zerobase.wishmarket.domain.user.model.form.UpdateForm;
 import com.zerobase.wishmarket.domain.user.model.type.UserPasswordChangeReturnType;
 import com.zerobase.wishmarket.domain.user.service.UserService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
+@Api("회원 정보 API")
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
