@@ -1,13 +1,9 @@
 package com.zerobase.wishmarket.common.batch;
 
 import com.zerobase.wishmarket.domain.funding.service.FundingService;
-import com.zerobase.wishmarket.domain.product.model.entity.Product;
-import com.zerobase.wishmarket.domain.product.repository.ProductRepository;
 import com.zerobase.wishmarket.domain.product.service.ProductService;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -24,7 +20,6 @@ public class BatchJob {
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final ProductService productService;
-    private final ProductRepository productRepository;
     private final FundingService fundingService;
 
     //서버 처음 구동시, 상품 데이터 넣기
@@ -63,11 +58,11 @@ public class BatchJob {
     public Job JobToUpdateBestProduct() {
         return jobBuilderFactory.get("JobToUpdateBestProduct")
             .start(UpdateBestProductStep())
-            .on("FAILED")
-            .end()
+                .on("FAILED")
+                .end()
             .from(UpdateBestProductStep())
-            .on("*")
-            .end()
+                .on("*")
+                .end()
             .end()
             .build();
     }
