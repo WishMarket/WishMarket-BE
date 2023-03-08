@@ -120,8 +120,8 @@ public class FundingService {
             .participationCount(1L)
             .fundingStatusType(fundingStatusType)
             .fundedStatusType(fundedStatusType)
-            .startDate(fundingStartInputForm.getStartZoneDate().plusHours(9))
-            .endDate(fundingStartInputForm.getEndZoneDate().plusHours(9))
+            .startDate(fundingStartInputForm.getStartDate())
+            .endDate(fundingStartInputForm.getEndDate())
             .build());
 
         FundingParticipation participation = FundingParticipation.builder()
