@@ -18,12 +18,12 @@ public class FundingStartInputForm {
     private Long targetId;
     private Long fundedPrice;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm", timezone = "GMT+9")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "GMT+9")
     private LocalDateTime startDate;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm", timezone = "GMT+9")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "GMT+9")
     private LocalDateTime endDate;
 
 
