@@ -4,6 +4,7 @@ import com.zerobase.wishmarket.domain.follow.model.dto.UserFollowersResponse;
 import com.zerobase.wishmarket.domain.follow.model.dto.UserSearchResponse;
 import com.zerobase.wishmarket.domain.follow.service.FollowService;
 import com.zerobase.wishmarket.domain.user.model.dto.InfluencerResponse;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
+@Api("팔로우 API")
 @RequiredArgsConstructor
 @RequestMapping("/api/follow")
 @RestController
