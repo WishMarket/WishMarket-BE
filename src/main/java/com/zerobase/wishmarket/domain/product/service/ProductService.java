@@ -37,36 +37,6 @@ public class ProductService {
     private static final String KEY_BEST = "BEST_PRODUCTS";
 
 
-    //임시로 제품 정보 넣기
-    /*public void addProduct() {
-        for (ProductCategory category : ProductCategory.values()) {
-            for (int i = 1; i < 21; i++) {
-                Product product = Product.builder()
-                    .name("product" + i)
-                    .productImage("제품" + i + "파일 경로")
-                    .category(category)
-                    .price(1000L)
-                    .description("제품설명" + i)
-                    .build();
-                productRepository.save(product);
-
-                ProductLikes productLikes = ProductLikes.builder()
-                    .productId(product.getProductId())
-                    .likes(0)
-                    .build();
-                productLikesRepository.save(productLikes);
-            }
-        }
-
-        //베스트 상품 등록을 위해 likes 수 몇개만 변경
-        for (Long i = 1L; i < 13L; i++) {
-            ProductLikes productLikes = productLikesRepository.findById(i)
-                .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
-            productLikes.setLikes(10);
-        }
-    }*/
-
-
     //베스트 상품 N개 업데이트
     public void updateBestProducts() {
 

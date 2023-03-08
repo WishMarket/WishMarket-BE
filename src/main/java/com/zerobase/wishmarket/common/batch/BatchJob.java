@@ -22,37 +22,6 @@ public class BatchJob {
     private final ProductService productService;
     private final FundingService fundingService;
 
-    //서버 처음 구동시, 상품 데이터 넣기
-    /*@Bean
-    public Job JobToInputProduct() {
-        return jobBuilderFactory.get("JobToInputProduct")
-            .start(InputProductStep())
-            .on("FAILED")
-            .end()
-            .from(InputProductStep())
-            .on("*")
-            .end()
-            .end()
-            .build();
-    }
-
-    @Bean
-    public Step InputProductStep() {
-        return stepBuilderFactory.get("InputProductStep")
-            .tasklet((contribution, chunkContext) -> {
-                log.debug("===== 상품 데이터 저장 ====");
-                Optional<Product> product = productRepository.findById(1L);
-                if (product.isPresent()) {  //상품 데이터가 이미 존재한다면 실패
-                    contribution.setExitStatus(ExitStatus.FAILED);
-                }
-
-                productService.addProduct();
-                return RepeatStatus.FINISHED;
-            })
-            .build();
-    }*/
-
-
     //Best 상품 초기화
     @Bean
     public Job JobToUpdateBestProduct() {
