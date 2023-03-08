@@ -295,6 +295,7 @@ public class FundingService {
             .userName(user.getName())
             .comment(form.getComment())
             .isRecommend(form.getIsLike())
+            .fundingId(form.getFundingId()) //리뷰에 펀딩아이디 추가
             .build();
 
         // 좋아요 개수 추가
@@ -411,11 +412,10 @@ public class FundingService {
         List<Funding> fundingList = fundingRepository.findAllByTargetUserAndFundingStatusType(
             friend, FundingStatusType.ING);
 
-
-        for(Funding funding : fundingList){
+        for (Funding funding : fundingList) {
             List<String> participantsNameList = new ArrayList<>();
 
-            for(FundingParticipation participation : funding.getParticipationList()){
+            for (FundingParticipation participation : funding.getParticipationList()) {
                 //참여자 이름은 20명까지만
                 if (participantsNameList.size() <= FUNDING_NAMELIST_SIZE) {
                     participantsNameList.add(participation.getUser().getName());
@@ -456,9 +456,9 @@ public class FundingService {
         List<FundingMyGiftListResponse> fundingMyGiftListResponses = new ArrayList<>();
         for (Funding funding : fundingList) {
 
-            Optional<Review> optionalReview = reviewRepository.findByUserIdAndProductId(
+            Optional<Review> optionalReview = reviewRepository.findByUserIdAndFundingId(
                 user.getUserId(),
-                funding.getProduct().getProductId());
+                funding.getId()); ///fundingId추가
 
             List<String> participationList = funding.getParticipationList().stream()
                 .map(fundingParticipation -> fundingParticipation.getUser().getName())
