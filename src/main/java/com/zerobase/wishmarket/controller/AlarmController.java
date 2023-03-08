@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-@Api("알림 API")
+@Api(tags = {"알림 API"})
 @RequiredArgsConstructor
 @RequestMapping("/api/alarms")
 @RestController

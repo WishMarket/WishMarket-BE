@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api("펀딩 API")
+@Api(tags = {"펀딩 API"})
 @RequiredArgsConstructor
 @RequestMapping("/api/funding")
 @RestController

@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
-@Api("회원 정보 API")
+@Api(tags = {"회원 정보 API"})
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor

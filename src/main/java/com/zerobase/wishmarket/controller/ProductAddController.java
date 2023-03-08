@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-@Api("상품 추가 API - 관리자")
+@Api(tags = {"상품 추가 API - 관리자"})
 @Controller
 @RequiredArgsConstructor
 @Slf4j
