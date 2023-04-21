@@ -521,14 +521,33 @@ public class FundingService {
         //인기유저가 타겟인 펀딩 목록
         List<Funding> influenceFundingList = new ArrayList<>();
 
-        //인기유저 펀딩이 무조건 존재한다고 가정
-        for (UserEntity influenceUser : influenceUserList) {
+        //인기유저 펀딩조회, 11개 까지, 중복없이 가져오기
+        List<Long> fundingIdList = new ArrayList<>(); //중복인지 확인할 리스트
+
+        while(influenceFundingList.size() != 11){
+
+            int ranInfluenceNum = (int) (Math.random() * (influenceUserList.size()));
+            UserEntity influenceUser = influenceUserList.get(ranInfluenceNum);
+
             //인기유저의 진행중인 펀딩 목록 중 무작위 선택
             List<Funding> influenceUserFundingList = fundingRepository.findAllByTargetUserAndFundingStatusType(
                 influenceUser, FundingStatusType.ING);
+
+            if(influenceUserFundingList.size() == 0){
+                continue;
+            }
+
             int ranNum = (int) (Math.random() * (influenceUserFundingList.size()));
 
+            //이미 조회한 펀딩목록이라면 패스
+            if(fundingIdList.contains(influenceUserFundingList.get(ranNum).getId())){
+                continue;
+            }
+
             influenceFundingList.add(influenceUserFundingList.get(ranNum));
+            fundingIdList.add(influenceUserFundingList.get(ranNum).getId());
+
+
         }
 
         for (Funding funding : influenceFundingList) {
@@ -573,16 +592,37 @@ public class FundingService {
         //인기유저가 타겟인 펀딩 목록
         List<Funding> influenceFundingList = new ArrayList<>();
 
-        //인기유저 펀딩이 무조건 존재한다고 가정
-        for (UserEntity influenceUser : influenceUserList) {
+        //인기유저 펀딩조회, 11개 까지, 중복없이 가져오기
+        List<Long> fundingIdList = new ArrayList<>(); //중복인지 확인할 리스트
+
+        while(influenceFundingList.size() != 11){
+
+            int ranInfluenceNum = (int) (Math.random() * (influenceUserList.size()));
+            UserEntity influenceUser = influenceUserList.get(ranInfluenceNum);
 
             //인기유저의 진행중인 펀딩 목록 중 무작위 선택
             List<Funding> influenceUserFundingList = fundingRepository.findAllByTargetUserAndFundingStatusType(
                 influenceUser, FundingStatusType.ING);
+
+            if(influenceUserFundingList.size() == 0){
+                continue;
+            }
+
             int ranNum = (int) (Math.random() * (influenceUserFundingList.size()));
 
+            //이미 조회한 펀딩목록이라면 패스
+            if(fundingIdList.contains(influenceUserFundingList.get(ranNum).getId())){
+                continue;
+            }
+
             influenceFundingList.add(influenceUserFundingList.get(ranNum));
+            fundingIdList.add(influenceUserFundingList.get(ranNum).getId());
+
+
         }
+
+
+
 
         for (Funding funding : influenceFundingList) {
 
